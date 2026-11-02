@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../state/store';
-import { Pin, Trash2, Clock, User, FileText } from './icons';
+import { Pin, Trash2, Clock, User, FileText, Headphones } from './icons';
+import { AudioScrubber } from './AudioScrubber';
 
 const TIMELINE_SLOTS = [
   '22:00 - 22:15',
@@ -20,7 +21,7 @@ export const NotebookBoard: React.FC = () => {
     updateCharacterNotes,
   } = useGameStore();
 
-  const [activeTab, setActiveTab] = useState<'pins' | 'timeline' | 'characters' | 'notes'>('pins');
+  const [activeTab, setActiveTab] = useState<'pins' | 'timeline' | 'characters' | 'notes' | 'audio'>('pins');
   const [selectedCharacter, setSelectedCharacter] = useState<string>('C1');
 
   return (
@@ -73,6 +74,18 @@ export const NotebookBoard: React.FC = () => {
         >
           <FileText className="w-3.5 h-3.5" />
           SCRATCHPAD
+        </button>
+
+        <button
+          onClick={() => setActiveTab('audio')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 border-b-2 font-bold transition-all ${
+            activeTab === 'audio'
+              ? 'border-crt-amber text-crt-amber bg-neutral-800/40'
+              : 'border-transparent text-neutral-400 hover:text-white'
+          }`}
+        >
+          <Headphones className="w-3.5 h-3.5" />
+          OSCILLOSCOPE
         </button>
       </div>
 
@@ -277,6 +290,9 @@ export const NotebookBoard: React.FC = () => {
           />
         </div>
       )}
+
+      {/* TAB CONTENT: FORENSIC AUDIO OSCILLOSCOPE */}
+      {activeTab === 'audio' && <AudioScrubber />}
     </div>
   );
 };

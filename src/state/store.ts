@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ShiftState, UnitType, PinnedClue, DialogueOption, CaseDef } from '../types/game';
+import { ShiftState, UnitType, PinnedClue, DialogueOption, CaseDef, ActiveDilemma, ConsoleMode } from '../types/game';
 import { ALL_CASES } from '../content/cases';
 import { sound } from '../engine/sound';
 
@@ -37,7 +37,19 @@ interface GameStore extends ShiftState {
   
   // Dispatch actions
   dispatchUnit: (unitId: string, location: string, durationGameSeconds?: number) => void;
+  submitVerdict: (suspectId: string, targetId: string, pinnedEvidenceIds: string[]) => void;
+  setScannerFrequency: (freq: number) => void;
+  toggleRoadblock: (checkpointId: string) => void;
+  setConsoleMode: (mode: ConsoleMode) => void;
   
+  // Hazard actions
+  resetCircuitBreaker: () => void;
+  triggerHazard: (type?: 'power_surge' | 'line_bleed' | 'blown_fuse') => void;
+
+  // Moral dilemma actions
+  triggerDilemma: (dilemma: ActiveDilemma) => void;
+  resolveDilemma: (choice: 'A' | 'B') => void;
+
   // Notebook actions
   addPinnedClue: (text: string, speaker: string, callId: string, timestamp: string) => void;
   removePinnedClue: (pinId: string) => void;
@@ -72,6 +84,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   characters: ALL_CASES['case_1'].characters,
   consequences: [],
+  radioFeed: [],
+  pendingRadioEvents: [],
+  reportFilingActive: false,
+  unlockedBadges: [],
+  scannerFrequency: 154.80,
+  scannerMessages: [],
+  activeRoadblocks: [],
+  hazardState: null,
+  activeDilemma: null,
+  consoleMode: 'switchboard',
   shiftCompleted: false,
   isGameOver: false,
   settings: {
@@ -106,11 +128,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
       },
       inGameTimeSeconds: 22 * 3600,
       shiftCompleted: false,
+      reportFilingActive: false,
+      verdictScore: undefined,
+      hazardState: null,
+      activeDilemma: null,
+      consoleMode: 'switchboard',
+      radioFeed: [],
+      pendingRadioEvents: [],
       flags: {},
       displayedText: '',
       typewriterActive: false,
     });
     get().saveGame();
+  },
+
+  setConsoleMode: (mode: ConsoleMode) => {
+    sound.playLineClick();
+    set({ consoleMode: mode });
   },
 
   tick: (deltaSeconds: number) => {
@@ -136,7 +170,48 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // Dynamic queue advancement across any active case
+    // Check pending radio SITREP events
+    let remainingEvents = [...state.pendingRadioEvents];
+    let newRadioFeed = [...state.radioFeed];
+    let radioTriggered = false;
+    let updatedActiveCalls = { ...state.calls };
+    let callsWereUpdated = false;
+
+    const readyEvents = remainingEvents.filter(e => newGameTime >= e.triggerTime);
+    if (readyEvents.length > 0) {
+      remainingEvents = remainingEvents.filter(e => newGameTime < e.triggerTime);
+      for (const ev of readyEvents) {
+        sound.playStaticBurst(0.35);
+        newRadioFeed.push(ev.transmission);
+        radioTriggered = true;
+
+        if (state.activeCallId && updatedActiveCalls[state.activeCallId]) {
+          const currentCall = updatedActiveCalls[state.activeCallId];
+          const hours = Math.floor(newGameTime / 3600);
+          const minutes = Math.floor((newGameTime % 3600) / 60);
+          const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+          updatedActiveCalls[state.activeCallId] = {
+            ...currentCall,
+            history: [
+              ...currentCall.history,
+              {
+                nodeId: `rad_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+                speaker: 'radio',
+                speakerName: `RADIO // ${ev.transmission.unitName.toUpperCase()}`,
+                text: ev.transmission.text,
+                timestamp: timeFormatted,
+                audioCue: 'static',
+              }
+            ]
+          };
+          callsWereUpdated = true;
+        }
+      }
+    }
+
+    // Dynamic queue advancement:
+    // Allow calls to ring when scheduled or when previous call has progressed
     const currentCase = state.getActiveCase();
     const caseCallKeys = Object.keys(currentCase.calls);
     const updatedQueue = [...state.callQueue];
@@ -148,8 +223,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const isStarted = !!state.calls[cId] || updatedQueue.includes(cId);
 
       if (!isStarted && !isDone) {
-        const prevCallDone = i === 0 || state.calls[caseCallKeys[i - 1]]?.status === 'completed';
-        if (prevCallDone) {
+        const prevCall = i === 0 ? null : state.calls[caseCallKeys[i - 1]];
+        // Queue if first call OR if previous call completed OR previous call reached at least 2 exchanges (history length >= 3)
+        const prevProgressed = i === 0 || (prevCall && (prevCall.status === 'completed' || prevCall.history.length >= 3));
+
+        if (prevProgressed) {
           updatedQueue.push(cId);
           queueChanged = true;
           sound.startPhoneRing();
@@ -159,8 +237,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     // Increase agitation for callers on hold
-    const updatedCalls = { ...state.calls };
-    let callsChanged = false;
+    const updatedCalls = callsWereUpdated ? updatedActiveCalls : { ...state.calls };
+    let callsChanged = callsWereUpdated;
     for (const cId in updatedCalls) {
       const call = updatedCalls[cId];
       if (call.status === 'on_hold') {
@@ -172,15 +250,82 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // Check shift completion (when all calls in current case are finished)
+    // Hazard countdown handling
+    let currentHazard = state.hazardState;
+    if (currentHazard && currentHazard.active) {
+      const remaining = currentHazard.timeRemaining - deltaSeconds;
+      if (remaining <= 0) {
+        sound.playStaticBurst(0.7);
+        const hours = Math.floor(newGameTime / 3600);
+        const minutes = Math.floor((newGameTime % 3600) / 60);
+        const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        newRadioFeed.push({
+          id: `haz_fail_${Date.now()}`,
+          unitId: 'SWITCHBOARD',
+          unitName: 'STATION BREAKER',
+          timestamp: timeFormatted,
+          text: 'CIRCUIT BREAKER OVERLOAD: Main bus tripped under unmitigated surge. Standby battery backup engaged.',
+        });
+        radioTriggered = true;
+        currentHazard = null;
+      } else {
+        currentHazard = { ...currentHazard, timeRemaining: remaining };
+      }
+    } else if (!currentHazard && !state.flags['hazard_1_done'] && newGameTime >= 22 * 3600 + 360) {
+      sound.playBreakerTrip();
+      currentHazard = {
+        active: true,
+        type: 'power_surge',
+        title: 'SUBSTATION TRANSFORMER 440V SURGE',
+        description: 'High voltage fault detected on incoming switchboard trunk. Circuit breaker overheating!',
+        timeRemaining: 15,
+        maxTime: 15,
+      };
+      state.flags['hazard_1_done'] = true;
+    }
+
+    // Dynamic Moral Dilemma trigger (around 22:14 in Case 1)
+    let currentDilemma = state.activeDilemma;
+    if (!currentDilemma && !state.flags['dilemma_1_triggered'] && newGameTime >= 22 * 3600 + 840) {
+      state.flags['dilemma_1_triggered'] = true;
+      sound.playDispatchAlarm();
+      const hours = Math.floor(newGameTime / 3600);
+      const minutes = Math.floor((newGameTime % 3600) / 60);
+      const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      currentDilemma = {
+        id: 'dilemma_case1',
+        title: 'TACTICAL DUAL-DISPATCH CONFLICT',
+        urgentBrief: 'Cruiser 108 is currently our only mobile response unit in Sectors 2 & 4. Two critical incidents have escalated simultaneously.',
+        timestamp: timeFormatted,
+        optionA: {
+          id: 'opt_sawmill',
+          title: 'PRIORITIZE SAWMILL STRUCTURE FIRE',
+          sector: 'SECTOR 4 - MILL CREEK',
+          requiredUnit: 'Cruiser 108',
+          description: 'Emergency 911 reports night watchman trapped inside burning office. Flames spreading towards chemical barrels.',
+          consequenceSummary: 'Watchman cut free; recovers arson canister stamped with water board seal. Suspect sedan escapes roadblock.',
+          outcomeLog: 'Cruiser 108: Rescued watchman from smoke! Found green accelerant canister near back loading dock.',
+          flagToSet: 'saved_watchman',
+        },
+        optionB: {
+          id: 'opt_roadblock',
+          title: 'INTERCEPT FLEEING SEDAN AT ROUTE 9 CHECKPOINT',
+          sector: 'SECTOR 2 - ROUTE 9 CHECKPOINT',
+          requiredUnit: 'Cruiser 108',
+          description: 'Black sedan matching Martha Gable\'s report spotted accelerating towards county border. Roadblock in position.',
+          consequenceSummary: 'Suspect vehicle boxed against guardrail; driver flees leaving sluice blueprint in trunk. Sawmill office collapses.',
+          outcomeLog: 'Cruiser 108: Roadblock hit! Driver fled on foot into brush; recovered stolen Blackwood Reservoir sluice blueprint.',
+          flagToSet: 'intercepted_sedan',
+        },
+      };
+    }
+
+    // Check shift completion / deduction filing phase
     const allCallsDone = caseCallKeys.length > 0 && caseCallKeys.every(id => state.calls[id]?.status === 'completed');
-    let shiftFinished: boolean = state.shiftCompleted;
-    if (allCallsDone && !state.shiftCompleted) {
-      shiftFinished = true;
-      const completedList = state.completedCaseIds.includes(state.activeCaseId)
-        ? state.completedCaseIds
-        : [...state.completedCaseIds, state.activeCaseId];
-      set({ completedCaseIds: completedList });
+    let filingActive: boolean = state.reportFilingActive;
+    if (allCallsDone && !state.shiftCompleted && !state.reportFilingActive) {
+      filingActive = true;
+      sound.playPinSound();
     }
 
     set({
@@ -188,7 +333,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeUnits: unitsUpdated ? updatedUnits : state.activeUnits,
       callQueue: queueChanged ? updatedQueue : state.callQueue,
       calls: callsChanged ? updatedCalls : state.calls,
-      shiftCompleted: shiftFinished,
+      pendingRadioEvents: remainingEvents,
+      radioFeed: radioTriggered ? newRadioFeed : state.radioFeed,
+      hazardState: currentHazard,
+      activeDilemma: currentDilemma,
+      reportFilingActive: filingActive,
     });
   },
 
@@ -256,14 +405,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (initialNode.audioCue === 'static') {
       sound.playStaticBurst(0.6);
     }
-    if (initialNode.voiceUrl) {
-      sound.playVoice(initialNode.voiceUrl);
-    }
+    // Play voice audio or speech synthesis for the incoming caller line
+    sound.playVoiceOrSpeak(
+      initialNode.text,
+      initialNode.speaker,
+      initialNode.voiceUrl,
+      initialNode.speakerName
+    );
 
     // Remove from queue if present
     const newQueue = state.callQueue.filter(id => id !== callId);
 
     set({
+      consoleMode: 'switchboard',
       activeCallId: callId,
       callQueue: newQueue,
       calls: {
@@ -273,6 +427,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       displayedText: initialNode.text,
       typewriterActive: state.settings.textSpeed !== 'instant',
     });
+    get().saveGame();
   },
 
   holdCall: (callId: string) => {
@@ -293,6 +448,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       }
     });
+    get().saveGame();
   },
 
   resumeCall: (callId: string) => {
@@ -311,6 +467,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       }
     });
+    get().saveGame();
   },
 
   selectDialogueOption: (option: DialogueOption) => {
@@ -365,11 +522,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
       sound.playLineClick();
     }
 
-    if (nextNode.voiceUrl) {
-      sound.playVoice(nextNode.voiceUrl);
-    } else {
-      sound.stopVoice();
-    }
+    // Two-way radio dialogue: Operator speaks the selected option, then Caller replies
+    const cleanOptionText = option.label
+      .replace(/\[[^\]]*\]/g, '')
+      .replace(/⚠️/g, '')
+      .replace(/^["'>\s]+|["'\s]+$/g, '')
+      .trim();
+
+    sound.playVoiceOrSpeak(
+      cleanOptionText,
+      'operator',
+      undefined,
+      'Operator 7',
+      () => {
+        // When Operator finishes speaking, Caller speaks the next node
+        sound.playVoiceOrSpeak(
+          nextNode.text,
+          nextNode.speaker,
+          nextNode.voiceUrl,
+          nextNode.speakerName
+        );
+      }
+    );
 
     const newHistory = [
       ...activeCall.history,
@@ -409,28 +583,361 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       }
     });
+    get().saveGame();
   },
 
   finishTypewriter: () => set({ typewriterActive: false }),
 
   dispatchUnit: (unitId: string, location: string, durationGameSeconds = 1200) => {
     sound.playDispatchAlarm();
-    set((state) => {
-      const unit = state.activeUnits[unitId];
-      if (!unit || unit.status !== 'available') return state;
+    const state = get();
+    const unit = state.activeUnits[unitId];
+    if (!unit || unit.status !== 'available') return;
 
-      return {
-        activeUnits: {
-          ...state.activeUnits,
-          [unitId]: {
-            ...unit,
-            status: 'dispatched',
-            assignedLocation: location,
-            busyUntil: state.inGameTimeSeconds + durationGameSeconds,
+    // Schedule realistic field radio SITREP feedback
+    const hours = Math.floor(state.inGameTimeSeconds / 3600);
+    const minutes = Math.floor((state.inGameTimeSeconds % 3600) / 60);
+    const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    const locLower = location.toLowerCase();
+    const isBlackwood = locLower.includes('blackwood');
+    const isReservoir = locLower.includes('reservoir');
+    const isElm = locLower.includes('elm');
+
+    // Event 1: Arrival report (+15 game seconds)
+    const arrivalTime = state.inGameTimeSeconds + 15;
+    const arrivalText = `${unit.name} to Central Dispatch: 10-23, arrived on scene at ${location}. Approaching exterior perimeter.`;
+
+    // Event 2: Investigation findings (+38 game seconds)
+    const findingsTime = state.inGameTimeSeconds + 38;
+    const findingsText = isBlackwood
+      ? `${unit.name} to Central: Code 4 at Blackwood Lane! Ground floor is secure, no signs of ransacking. Found a hot CB radio scanner on the kitchen counter tuned to our dispatch channel. Nobody is barricaded inside—this whole call was a diversion!`
+      : isReservoir
+      ? `${unit.name} to Central: 10-33 Emergency at County Reservoir! We have two male suspects in dark jump-suits cutting the chlorine manifold padlock! Suspects fleeing on foot into north treeline, requesting perimeter containment!`
+      : isElm
+      ? `${unit.name} to Central: 114 Elm Street is all clear. Spoke with Mrs. Gable—loose aluminum shutter was flapping against brickwork in high wind. Returning to Sector 4 patrol.`
+      : `${unit.name} to Central: Completed sweep of ${location}. Area is quiet and secure. Resuming patrol.`;
+
+    const newEvents = [
+      ...state.pendingRadioEvents,
+      {
+        triggerTime: arrivalTime,
+        transmission: {
+          id: `radio_${Date.now()}_1`,
+          unitId: unit.id,
+          unitName: unit.name,
+          timestamp: timeFormatted,
+          text: arrivalText,
+          location,
+        }
+      },
+      {
+        triggerTime: findingsTime,
+        transmission: {
+          id: `radio_${Date.now()}_2`,
+          unitId: unit.id,
+          unitName: unit.name,
+          timestamp: timeFormatted,
+          text: findingsText,
+          location,
+        }
+      }
+    ];
+
+    set({
+      pendingRadioEvents: newEvents,
+      activeUnits: {
+        ...state.activeUnits,
+        [unitId]: {
+          ...unit,
+          status: 'dispatched',
+          assignedLocation: location,
+          busyUntil: state.inGameTimeSeconds + durationGameSeconds,
+        }
+      }
+    });
+    get().saveGame();
+  },
+
+  setScannerFrequency: (freq: number) => {
+    sound.playTuningClick();
+    sound.playStaticBurst(0.18);
+    set({ scannerFrequency: Number(freq.toFixed(3)) });
+    get().saveGame();
+  },
+
+  toggleRoadblock: (checkpointId: string) => {
+    sound.playDispatchAlarm();
+    const state = get();
+    const isCurrentlyActive = state.activeRoadblocks.includes(checkpointId);
+    const updated = isCurrentlyActive
+      ? state.activeRoadblocks.filter(id => id !== checkpointId)
+      : [...state.activeRoadblocks, checkpointId];
+
+    const checkpointNames: Record<string, string> = {
+      cp_river_bridge: 'River Bridge Chokepoint (Sector 4 / South Exit)',
+      cp_ridge_road: 'Ridge Road Access (North Reservoir Approach)',
+      cp_route_9: 'Route 9 Mile 40 Overpass (County Border)',
+      cp_west_gate: 'West Industrial Corridor (Railhead Gate)',
+    };
+
+    const name = checkpointNames[checkpointId] || 'County Checkpoint';
+    const hours = Math.floor(state.inGameTimeSeconds / 3600);
+    const minutes = Math.floor((state.inGameTimeSeconds % 3600) / 60);
+    const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    if (!isCurrentlyActive) {
+      // Deploying roadblock
+      const deployText = `Cruiser 108 to Central: Spike strips and road barricades deployed at ${name}. Vehicle checkpoint is locked down.`;
+      const interceptText = `Cruiser 108 to Central: Roadblock hit! Dark suspect vehicle attempted to run the spikes at ${name}! Tires shredded, suspects contained and in custody!`;
+
+      const newEvents = [
+        ...state.pendingRadioEvents,
+        {
+          triggerTime: state.inGameTimeSeconds + 8,
+          transmission: {
+            id: `rb_dep_${Date.now()}`,
+            unitId: 'P2',
+            unitName: 'Cruiser 108',
+            timestamp: timeFormatted,
+            text: deployText,
+            location: name,
+          }
+        },
+        {
+          triggerTime: state.inGameTimeSeconds + 32,
+          transmission: {
+            id: `rb_hit_${Date.now()}`,
+            unitId: 'P2',
+            unitName: 'Cruiser 108',
+            timestamp: timeFormatted,
+            text: interceptText,
+            location: name,
           }
         }
-      };
+      ];
+
+      set({
+        activeRoadblocks: updated,
+        pendingRadioEvents: newEvents,
+        flags: {
+          ...state.flags,
+          ['roadblock_' + checkpointId]: true,
+          suspects_captured: true,
+        }
+      });
+    } else {
+      set({
+        activeRoadblocks: updated,
+      });
+    }
+
+    get().saveGame();
+  },
+
+  resetCircuitBreaker: () => {
+    sound.playBreakerReset();
+    const state = get();
+    const hours = Math.floor(state.inGameTimeSeconds / 3600);
+    const minutes = Math.floor((state.inGameTimeSeconds % 3600) / 60);
+    const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    const newFeed = [
+      ...state.radioFeed,
+      {
+        id: `breaker_rst_${Date.now()}`,
+        unitId: 'CONSOLE',
+        unitName: 'OPERATOR 7',
+        timestamp: timeFormatted,
+        text: 'MANUAL BREAKER RESET: Main station bus voltage stabilized at 120V / 60Hz. Grid interference purged.',
+      },
+    ];
+
+    set({
+      hazardState: null,
+      radioFeed: newFeed,
     });
+  },
+
+  triggerHazard: (type: 'power_surge' | 'line_bleed' | 'blown_fuse' = 'power_surge') => {
+    sound.playBreakerTrip();
+    set({
+      hazardState: {
+        active: true,
+        type,
+        title: type === 'line_bleed' ? 'TELEGRAPHIC CROSS-TALK BLEED' : '440V SUBSTATION TRANSFORMER SURGE',
+        description: type === 'line_bleed'
+          ? 'Trunk line audio crosstalk bleeding into caller frequency. Reset patch relay bus.'
+          : 'High voltage fault detected on incoming lines. Circuit breaker overheating!',
+        timeRemaining: 15,
+        maxTime: 15,
+      },
+    });
+  },
+
+  triggerDilemma: (dilemma: ActiveDilemma) => {
+    sound.playDispatchAlarm();
+    set({ activeDilemma: dilemma });
+  },
+
+  resolveDilemma: (choice: 'A' | 'B') => {
+    const state = get();
+    const dilemma = state.activeDilemma;
+    if (!dilemma) return;
+
+    sound.playDispatchAlarm();
+    const chosen = choice === 'A' ? dilemma.optionA : dilemma.optionB;
+    const hours = Math.floor(state.inGameTimeSeconds / 3600);
+    const minutes = Math.floor((state.inGameTimeSeconds % 3600) / 60);
+    const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    const updatedUnits = { ...state.activeUnits };
+    if (updatedUnits['cruiser_108']) {
+      updatedUnits['cruiser_108'] = {
+        ...updatedUnits['cruiser_108'],
+        status: 'dispatched',
+        assignedLocation: chosen.sector,
+        busyUntil: state.inGameTimeSeconds + 180,
+      };
+    }
+
+    const newTransmission = {
+      id: `rad_dil_${Date.now()}`,
+      unitId: 'cruiser_108',
+      unitName: 'Cruiser 108 (Vance)',
+      timestamp: timeFormatted,
+      text: chosen.outcomeLog,
+      location: chosen.sector,
+    };
+
+    const newPin: PinnedClue = {
+      id: `pin_dil_${Date.now()}`,
+      text: chosen.outcomeLog,
+      sourceSpeaker: 'Cruiser 108',
+      callId: 'tactical_dispatch',
+      timestamp: timeFormatted,
+    };
+
+    const updatedFlags = {
+      ...state.flags,
+      [chosen.flagToSet]: true,
+      dilemma_resolved: choice,
+    };
+
+    set({
+      activeUnits: updatedUnits,
+      activeDilemma: {
+        ...dilemma,
+        resolvedChoice: choice,
+      },
+      flags: updatedFlags,
+      radioFeed: [...state.radioFeed, newTransmission],
+      notebook: {
+        ...state.notebook,
+        pins: [...state.notebook.pins, newPin],
+      },
+    });
+
+    setTimeout(() => {
+      const cur = get().activeDilemma;
+      if (cur && cur.resolvedChoice) {
+        set({ activeDilemma: null });
+      }
+    }, 4500);
+  },
+
+  submitVerdict: (suspectId: string, targetId: string, pinnedEvidenceIds: string[]) => {
+    sound.playPinSound();
+    const state = get();
+    const currentCase = state.getActiveCase();
+    const deduction = currentCase.deduction;
+
+    const suspectCorrect = deduction ? !!deduction.suspectChoices.find(s => s.id === suspectId && s.isCorrect) : true;
+    const targetCorrect = deduction ? !!deduction.targetChoices.find(t => t.id === targetId && t.isCorrect) : true;
+
+    // Check pinned evidence
+    const selectedPins = state.notebook.pins.filter(p => pinnedEvidenceIds.includes(p.id));
+    const pinsText = selectedPins.map(p => p.text.toLowerCase()).join(' ');
+    const evidenceCorrect = deduction && deduction.correctEvidenceKeywords.length > 0
+      ? deduction.correctEvidenceKeywords.some(kw => pinsText.includes(kw.toLowerCase()))
+      : selectedPins.length > 0;
+
+    let score = 0;
+    if (suspectCorrect) score += 40;
+    if (targetCorrect) score += 40;
+    if (evidenceCorrect) score += 20;
+
+    let grade: 'S' | 'A' | 'B' | 'C' | 'F' = 'F';
+    if (score >= 95) grade = 'S';
+    else if (score >= 80) grade = 'A';
+    else if (score >= 60) grade = 'B';
+    else if (score >= 40) grade = 'C';
+
+    const feedback = grade === 'S'
+      ? 'Flawless investigation. You penetrated the diversion and intercepted the true culprits before critical infrastructure fell.'
+      : grade === 'A'
+      ? 'Commendable performance. You correctly identified the primary conspirator and protected the target.'
+      : grade === 'B'
+      ? 'Partial success. While units responded, key contradictions in the callers\' testimonies were overlooked.'
+      : 'Investigation failure. Units were decoyed away, allowing the infiltrators to escape into the night.';
+
+    const hours = Math.floor(state.inGameTimeSeconds / 3600);
+    const minutes = Math.floor((state.inGameTimeSeconds % 3600) / 60);
+    const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+    const completedList = state.completedCaseIds.includes(state.activeCaseId)
+      ? state.completedCaseIds
+      : [...state.completedCaseIds, state.activeCaseId];
+
+    // Commendation & Badge evaluation
+    const currentBadges = [...(state.unlockedBadges || [])];
+    const awardBadge = (bId: string) => {
+      if (!currentBadges.some(b => b.id === bId)) {
+        currentBadges.push({
+          id: bId,
+          unlockedAt: timeFormatted,
+          caseId: state.activeCaseId,
+        });
+      }
+    };
+
+    // 1. Sheriff's Medal of Deduction (Grade S)
+    if (grade === 'S') awardBadge('badge_grade_s');
+
+    // 2. Rapid Dispatch Commendation (Under 10 in-game minutes)
+    const elapsedMinutes = Math.max(1, (state.inGameTimeSeconds - (22 * 3600)) / 60);
+    if (score >= 80 && elapsedMinutes <= 10) awardBadge('badge_swift_response');
+
+    // 3. Acoustics Specialist (4+ pinned clues)
+    if (state.notebook.pins.length >= 4) awardBadge('badge_golden_ear');
+
+    // 4. Iron Discernment (Caught culprit & target)
+    if (targetCorrect && suspectCorrect) awardBadge('badge_decoy_breaker');
+
+    // 5. Multi-line Hold Veteran
+    const hadHold = Object.values(state.calls).some(c => c.status === 'on_hold' || c.holdStartedAt);
+    if (hadHold && score >= 60) awardBadge('badge_switchboard_veteran');
+
+    // 6. Anthology Commendations
+    if (completedList.length >= 3) awardBadge('badge_anthology_veteran');
+    if (completedList.length >= 5) awardBadge('badge_master_archivist');
+
+    set({
+      reportFilingActive: false,
+      shiftCompleted: true,
+      completedCaseIds: completedList,
+      unlockedBadges: currentBadges,
+      verdictScore: {
+        culpritCorrect: suspectCorrect,
+        targetCorrect,
+        evidenceCorrect,
+        totalScore: score,
+        grade,
+        feedback,
+        submittedAt: timeFormatted,
+      },
+    });
+    get().saveGame();
   },
 
   addPinnedClue: (text: string, speaker: string, callId: string, timestamp: string) => {
@@ -451,6 +958,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       };
     });
+    get().saveGame();
   },
 
   removePinnedClue: (pinId: string) => {
@@ -460,6 +968,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         pins: state.notebook.pins.filter((p) => p.id !== pinId),
       }
     }));
+    get().saveGame();
   },
 
   updateFreeNotes: (notes: string) => {
@@ -469,6 +978,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         freeNotes: notes,
       }
     }));
+    get().saveGame();
   },
 
   assignPinToTimeline: (pinId: string, slot: string) => {
@@ -527,6 +1037,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
         notebook: s.notebook,
         characters: s.characters,
         settings: s.settings,
+        shiftCompleted: s.shiftCompleted,
+        reportFilingActive: s.reportFilingActive,
+        verdictScore: s.verdictScore,
+        unlockedBadges: s.unlockedBadges,
+        activeRoadblocks: s.activeRoadblocks,
+        radioFeed: s.radioFeed,
+        pendingRadioEvents: s.pendingRadioEvents,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
     } catch (e) {
@@ -554,6 +1071,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
         notebook: parsed.notebook ?? { pins: [], freeNotes: fallbackCase.initialNotes },
         characters: parsed.characters ?? fallbackCase.characters,
         settings: parsed.settings ?? get().settings,
+        shiftCompleted: parsed.shiftCompleted ?? false,
+        reportFilingActive: parsed.reportFilingActive ?? false,
+        verdictScore: parsed.verdictScore,
+        unlockedBadges: parsed.unlockedBadges ?? [],
+        activeRoadblocks: parsed.activeRoadblocks ?? [],
+        radioFeed: parsed.radioFeed ?? [],
+        pendingRadioEvents: parsed.pendingRadioEvents ?? [],
+        typewriterActive: false,
       });
       return true;
     } catch (e) {
@@ -578,6 +1103,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         freeNotes: currentCase.initialNotes,
       },
       characters: { ...currentCase.characters },
+      hazardState: null,
+      activeDilemma: null,
+      consoleMode: 'switchboard',
       shiftCompleted: false,
       displayedText: '',
       typewriterActive: false,

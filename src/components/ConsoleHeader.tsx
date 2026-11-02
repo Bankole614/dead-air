@@ -1,15 +1,16 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../state/store';
 import { sound } from '../engine/sound';
-import { Shield, HeartPulse, UserCheck, Volume2, VolumeX, Pause, Play, Settings, RotateCcw, FastForward, HelpCircle, FolderArchive } from './icons';
+import { Shield, HeartPulse, UserCheck, Volume2, VolumeX, Pause, Play, Settings, RotateCcw, FastForward, HelpCircle, FolderArchive, Award, Zap } from './icons';
 
 interface ConsoleHeaderProps {
   onOpenSettings: () => void;
   onOpenBriefing: () => void;
   onOpenCaseSelector: () => void;
+  onOpenBadges: () => void;
 }
 
-export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({ onOpenSettings, onOpenBriefing, onOpenCaseSelector }) => {
+export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({ onOpenSettings, onOpenBriefing, onOpenCaseSelector, onOpenBadges }) => {
   const {
     inGameTimeSeconds,
     isPaused,
@@ -18,6 +19,9 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({ onOpenSettings, on
     settings,
     activeCallId,
     calls,
+    unlockedBadges,
+    hazardState,
+    triggerHazard,
     fastForwardToNextCall,
     togglePause,
     setTimeSpeed,
@@ -161,6 +165,34 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({ onOpenSettings, on
         >
           <FolderArchive className="w-3.5 h-3.5" />
           <span className="hidden xl:inline text-[10px] font-bold">CASES</span>
+        </button>
+
+        {/* Badges / Commendations */}
+        <button
+          onClick={onOpenBadges}
+          title="Civil Dispatch Commendations & Service Medals"
+          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-crt-amber hover:text-yellow-300 flex items-center gap-1"
+        >
+          <Award className="w-3.5 h-3.5" />
+          <span className="text-[10px] font-bold">
+            MEDALS ({unlockedBadges?.length || 0})
+          </span>
+        </button>
+
+        {/* Station Breaker Box Status */}
+        <button
+          onClick={() => triggerHazard('power_surge')}
+          title="Station Circuit Breaker Bus (Click to trigger test electrical surge)"
+          className={`p-1.5 bg-neutral-900 border rounded flex items-center gap-1 transition ${
+            hazardState?.active
+              ? 'border-red-500 text-red-400 bg-red-950/60 animate-pulse'
+              : 'border-neutral-800 text-neutral-400 hover:text-amber-300 hover:border-amber-700'
+          }`}
+        >
+          <Zap className={`w-3.5 h-3.5 ${hazardState?.active ? 'text-red-400 animate-bounce' : 'text-amber-500'}`} />
+          <span className="hidden xl:inline text-[10px] font-bold">
+            {hazardState?.active ? 'BREAKER OVERLOAD' : 'BUS 120V'}
+          </span>
         </button>
 
         {/* Help / Briefing */}

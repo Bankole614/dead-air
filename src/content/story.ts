@@ -40,6 +40,26 @@ export const INITIAL_CHARACTERS: Record<string, CharacterCard> = {
     trustScore: 70,
     contradictionsFound: [],
     notes: 'Night patrol officer assigned to Blackwood and River districts.',
+  },
+  C4: {
+    id: 'C4',
+    code: 'C4',
+    knownName: 'Arthur Pence',
+    role: 'Night Watchman, County Reservoir',
+    claimedLocation: 'Pump Station 4, North Reservoir Gate',
+    trustScore: 85,
+    contradictionsFound: [],
+    notes: 'Armed security guard on night duty at the municipal water facility.',
+  },
+  C5: {
+    id: 'C5',
+    code: 'C5',
+    knownName: 'Helen Kowalski',
+    role: 'Neighbor, 410 Blackwood Lane',
+    claimedLocation: '410 Blackwood Lane (Adjacent to Ross)',
+    trustScore: 95,
+    contradictionsFound: [],
+    notes: 'Lives next door to David Ross. Observant neighbor with clear line of sight to his front porch.',
   }
 };
 
@@ -559,6 +579,195 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
         speaker: 'system',
         text: '[SIGNAL TERMINATED // AUTOMATED ENCRYPTED CARRIER TONE DETECTED]',
         audioCue: 'static',
+      }
+    }
+  },
+
+  call_reservoir_guard: {
+    id: 'call_reservoir_guard',
+    callerId: 'C4',
+    callerNumber: 'SEC-LINE-04',
+    callerNameDisplay: 'PENCE, A. // RESERVOIR WATCH',
+    scheduledTime: '22:18',
+    priority: 'high',
+    summary: 'Reservoir security reporting perimeter fence breach and missing padlock on valve station.',
+    initialNode: 'pence_intro',
+    nodes: {
+      pence_intro: {
+        id: 'pence_intro',
+        speaker: 'caller',
+        speakerName: 'Arthur Pence',
+        text: 'Dispatch, this is Pence, night watchman out at the North Reservoir pump station. I need a sheriff cruiser out on the access road right away.',
+        audioCue: 'click',
+        backgroundClues: ['industrial_pump_hum', 'wind_buffeting_fence'],
+        options: [
+          {
+            id: 'opt_pence_status',
+            label: '"What is the situation at the reservoir, Mr. Pence?"',
+            next: 'pence_details',
+          },
+          {
+            id: 'opt_pence_dispatch_check',
+            label: '[DISPATCH] "Are there intruders currently visible inside the perimeter?"',
+            next: 'pence_intruder_seen',
+          }
+        ]
+      },
+      pence_details: {
+        id: 'pence_details',
+        speaker: 'caller',
+        speakerName: 'Arthur Pence',
+        text: 'The heavy chainlink perimeter fence was severed with industrial hydraulic cutters. Heavy mud tire tracks lead straight toward the chemical treatment vault. Whoever did this had a blueprint.',
+        backgroundClues: ['industrial_pump_hum', 'distant_engine_idle'],
+        options: [
+          {
+            id: 'opt_pence_dispatch_104',
+            label: '[DISPATCH] "Understood. Re-routing available patrol units to North Reservoir access road."',
+            next: 'pence_dispatched',
+            effects: [
+              { type: 'dispatch_lock', payload: { unitType: 'police', location: 'County Reservoir' } },
+              { type: 'set_flag', payload: { key: 'reservoir_protected', value: true } }
+            ]
+          },
+          {
+            id: 'opt_pence_hold',
+            label: '"Stay in your guard booth and lock the steel gate. Do not confront them alone."',
+            next: 'pence_hold_tight',
+          }
+        ]
+      },
+      pence_intruder_seen: {
+        id: 'pence_intruder_seen',
+        speaker: 'caller',
+        speakerName: 'Arthur Pence',
+        text: 'I saw flashlights down by the chlorine tanks two minutes ago. They heard my dog bark and scattered into the woods, but they left an acetylene torch behind. They\'re trying to contaminate or drain the county supply!',
+        backgroundClues: ['dog_bark_echo', 'industrial_pump_hum'],
+        options: [
+          {
+            id: 'opt_pence_send_backup',
+            label: '[DISPATCH] "All available units: Priority 1 Code 3 to County Reservoir!"',
+            next: 'pence_dispatched',
+            effects: [
+              { type: 'dispatch_lock', payload: { unitType: 'police', location: 'County Reservoir' } },
+              { type: 'set_flag', payload: { key: 'reservoir_protected', value: true } }
+            ]
+          }
+        ]
+      },
+      pence_dispatched: {
+        id: 'pence_dispatched',
+        speaker: 'caller',
+        speakerName: 'Arthur Pence',
+        text: 'Copy that. I have my shotgun loaded and I\'m holding the main pump house door. Tell the boys to come down Ridge Road with sirens off so they don\'t spook them.',
+        audioCue: 'hangup',
+        next: 'pence_complete',
+      },
+      pence_hold_tight: {
+        id: 'pence_hold_tight',
+        speaker: 'caller',
+        speakerName: 'Arthur Pence',
+        text: 'I\'m barricading the guard shack. But hurry—if they tamper with the treatment pumps, half the county won\'t have drinking water by morning.',
+        audioCue: 'hangup',
+        next: 'pence_complete',
+      },
+      pence_complete: {
+        id: 'pence_complete',
+        speaker: 'system',
+        text: '[LINE 03 DISCONNECTED // RESERVOIR SECURITY LOG COMMITTED]',
+        audioCue: 'click',
+      }
+    }
+  },
+
+  call_blackwood_neighbor: {
+    id: 'call_blackwood_neighbor',
+    callerId: 'C5',
+    callerNumber: '555-0921',
+    callerNameDisplay: 'KOWALSKI, H. (410 BLACKWOOD)',
+    scheduledTime: '22:24',
+    priority: 'medium',
+    summary: 'Neighbor directly next door to David Ross reporting strange activity on Ross\'s front porch.',
+    initialNode: 'kowalski_intro',
+    nodes: {
+      kowalski_intro: {
+        id: 'kowalski_intro',
+        speaker: 'caller',
+        speakerName: 'Helen Kowalski',
+        text: '911? I live at 410 Blackwood Lane, right next door to young David Ross. I\'m calling because there\'s something very fishy going on over there.',
+        audioCue: 'ring',
+        options: [
+          {
+            id: 'opt_kowalski_ask',
+            label: '"Mrs. Kowalski, Mr. Ross just reported an armed intruder inside his house. What do you see?"',
+            next: 'kowalski_reveal',
+          },
+          {
+            id: 'opt_kowalski_quiet',
+            label: '"Are you in a safe room, ma\'am? Do not turn on your exterior lights."',
+            next: 'kowalski_reveal',
+          }
+        ]
+      },
+      kowalski_reveal: {
+        id: 'kowalski_reveal',
+        speaker: 'caller',
+        speakerName: 'Helen Kowalski',
+        text: 'Intruder? Nonsense! David is standing right out on his front porch in his slippers! He\'s smoking a cigarette and talking on a walkie-talkie with a yellow antenna. He even waved at a dark van that drove past five minutes ago!',
+        backgroundClues: ['crickets', 'ticking_clock'],
+        options: [
+          {
+            id: 'opt_kowalski_pin_confirm',
+            label: '"Are you 100% certain it\'s David Ross on the porch, not an intruder?"',
+            next: 'kowalski_confirm',
+          },
+          {
+            id: 'opt_kowalski_closet_check',
+            label: '"He told us he was locked inside a dark closet upstairs trembling in fear."',
+            next: 'kowalski_laugh',
+          }
+        ]
+      },
+      kowalski_confirm: {
+        id: 'kowalski_confirm',
+        speaker: 'caller',
+        speakerName: 'Helen Kowalski',
+        text: 'I\'ve known that boy since he was in diapers. He\'s wearing his green flannel bathrobe. He walked down his front driveway, checked his mailbox, and went back inside laughing. He is NOT in any closet!',
+        audioCue: 'click',
+        options: [
+          {
+            id: 'opt_kowalski_thank',
+            label: '"Thank you, Mrs. Kowalski. Keep your doors locked. Do not approach the house."',
+            next: 'kowalski_conclude',
+          }
+        ]
+      },
+      kowalski_laugh: {
+        id: 'kowalski_laugh',
+        speaker: 'caller',
+        speakerName: 'Helen Kowalski',
+        text: 'Well, then he must have a closet with a screen door on his front porch! He just turned off his porch light and walked around the side of the house toward the driveway.',
+        audioCue: 'click',
+        options: [
+          {
+            id: 'opt_kowalski_conclude_2',
+            label: '"Stay away from the windows, Mrs. Kowalski. A squad car is en route."',
+            next: 'kowalski_conclude',
+          }
+        ]
+      },
+      kowalski_conclude: {
+        id: 'kowalski_conclude',
+        speaker: 'caller',
+        speakerName: 'Helen Kowalski',
+        text: 'I knew that boy was trouble. If you send the police, tell them to watch out for my hydrangeas on the property line.',
+        audioCue: 'hangup',
+        next: 'kowalski_complete',
+      },
+      kowalski_complete: {
+        id: 'kowalski_complete',
+        speaker: 'system',
+        text: '[WITNESS TESTIMONY RECORDED // EVIDENCE COMMITTED TO NOTEBOOK]',
+        audioCue: 'click',
       }
     }
   }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGameStore } from '../state/store';
 import { PhoneCall, PhoneForwarded, AlertTriangle, Radio } from './icons';
 
@@ -13,6 +13,8 @@ export const CallQueue: React.FC = () => {
     getActiveCase,
   } = useGameStore();
 
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+
   const currentCase = getActiveCase();
   const activeCall = activeCallId ? calls[activeCallId] : null;
   const activeCallDef = activeCallId ? currentCase.calls[activeCallId] : null;
@@ -23,18 +25,53 @@ export const CallQueue: React.FC = () => {
   );
 
   return (
-    <div className="bg-crt-panel border-b border-crt-panel-border p-3">
-      <div className="flex items-center justify-between mb-2">
+    <div className="bg-crt-panel border-b border-crt-panel-border p-2.5 sm:p-3 select-none">
+      <div className="flex items-center justify-between mb-1.5">
         <span className="text-[11px] font-bold text-neutral-400 tracking-wider flex items-center gap-1.5">
           <Radio className="w-3.5 h-3.5 text-crt-amber" />
           TELEPHONY TRUNK / LINES MONITOR
         </span>
-        <span className="text-[10px] text-neutral-500 font-mono">
-          CHANNELS: 3 | CARRIER: SECURE INTERNAL
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-neutral-500 font-mono hidden sm:inline">
+            CHANNELS: 3 | CARRIER: SECURE INTERNAL
+          </span>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="text-[10px] text-neutral-400 hover:text-white px-2 py-0.5 rounded bg-neutral-800 transition"
+          >
+            {isCollapsed ? '▲ EXPAND TRUNKS' : '▼ COMPACT'}
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+      {isCollapsed ? (
+        <div className="flex items-center justify-between text-xs font-mono py-1 px-2.5 bg-neutral-900/80 rounded border border-neutral-800 text-neutral-300">
+          <div className="flex items-center gap-4 flex-wrap text-[11px]">
+            <span className="flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${activeCallId ? 'bg-emerald-400 animate-pulse' : 'bg-neutral-600'}`} />
+              <span className="font-bold text-neutral-400">L1:</span> {activeCallDef ? activeCallDef.callerNameDisplay : 'STANDBY'}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${callQueue.length > 0 ? 'bg-red-500 animate-ping' : 'bg-neutral-600'}`} />
+              <span className="font-bold text-neutral-400">L2:</span> {callQueue.length > 0 ? `${callQueue.length} RINGING` : 'IDLE'}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${onHoldCallIds.length > 0 ? 'bg-amber-400 animate-pulse' : 'bg-neutral-600'}`} />
+              <span className="font-bold text-neutral-400">L3:</span> {onHoldCallIds.length > 0 ? `${onHoldCallIds.length} ON HOLD` : 'IDLE'}
+            </span>
+          </div>
+
+          {callQueue.length > 0 && !activeCallId && (
+            <button
+              onClick={() => answerCall(callQueue[0])}
+              className="px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white font-bold rounded text-[11px] animate-pulse transition"
+            >
+              PICK UP [SPACE]
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {/* LINE 1 / ACTIVE LINE */}
         <div className={`p-2.5 rounded border transition-all ${
           activeCallId 
@@ -194,6 +231,7 @@ export const CallQueue: React.FC = () => {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 };

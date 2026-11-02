@@ -80,6 +80,19 @@ export const CASE_4: CaseDef = {
     fatalContradiction:
       'The unidentified caller claims to be standing outside at the east gate, but the call carries the same two-tone microfilm timer chime heard on Clara’s line. Clara establishes that the timer is deep inside the sealed lower corridor and cannot be heard from the street. The caller also knows the West Cage has two deadbolts, a restricted security detail not given to the public. Pinning "two-tone chime" and "two deadbolts" establishes that the caller is inside the archive and has privileged access. The keyholder record narrows that access to Mara: the Chief Archivist is in hospital, while Mara’s departure was never verified.',
   },
+  deduction: {
+    suspectChoices: [
+      { id: 'mara_voss', label: 'Mara Voss (Deputy Archivist pretending to be outsider at East Gate)', isCorrect: true },
+      { id: 'elias_reed', label: 'Elias Reed (Night watchman trapped in West Cage)', isCorrect: false },
+      { id: 'clara_bell', label: 'Clara Bell (Night switchboard clerk)', isCorrect: false },
+    ],
+    targetChoices: [
+      { id: 'ledger_theft', label: 'City Records Annex Sub-Basement (Red Ledger Arson & West Cage Trapping)', isCorrect: true },
+      { id: 'east_gate', label: 'East Gate Loading Ramp (Reported Toxic Spill)', isCorrect: false },
+      { id: 'hospital', label: 'St. Anne’s Hospital Archive Records', isCorrect: false },
+    ],
+    correctEvidenceKeywords: ['chime', 'two-tone', 'deadbolt', 'deadbolts', 'corridor', 'solvent', 'ledger'],
+  },
 
   calls: {
     call_archive_alarm: {

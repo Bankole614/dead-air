@@ -24,6 +24,21 @@ export const CASE_1: CaseDef = {
     truth: 'David Ross was acting as a lookout accomplice, faking a burglary at 412 Blackwood Lane to divert Unit 104 away from the municipal water reservoir.',
     culprit: 'David Ross (Accomplice) & Unknown Infiltrators',
     fatalContradiction: 'Ross claimed to be locked in a dark windowless interior closet, yet accurately described a blue sedan with a hot ticking engine parked across the street.',
+  },
+  deduction: {
+    suspectChoices: [
+      { id: 'ross', label: 'David Ross (Accomplice / Lookout at Blackwood Lane)', isCorrect: true },
+      { id: 'gable', label: 'Martha Gable (Elderly resident at 114 Elm Street)', isCorrect: false },
+      { id: 'pence', label: 'Arthur Pence (Night watchman at Reservoir)', isCorrect: false },
+      { id: 'miller', label: 'Officer Miller (Patrol Unit 104)', isCorrect: false },
+    ],
+    targetChoices: [
+      { id: 'reservoir', label: 'County Municipal Water Reservoir (Sabotage / Valve Breach)', isCorrect: true },
+      { id: 'blackwood', label: '412 Blackwood Lane (Real Home Burglary)', isCorrect: false },
+      { id: 'elm', label: '114 Elm Street (Alleyway Robbery)', isCorrect: false },
+      { id: 'prank', label: 'Harmless Teenager Prank Call', isCorrect: false },
+    ],
+    correctEvidenceKeywords: ['closet', 'sedan', 'ticking', 'porch', 'walkie', 'fence', 'cutters', 'wind'],
   }
 };
 

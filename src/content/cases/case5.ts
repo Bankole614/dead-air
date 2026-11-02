@@ -85,6 +85,19 @@ export const CASE_5: CaseDef = {
     fatalContradiction:
       'The anonymous caller claims to be outside at the north gate, listening to WNDR 98.6 on a car radio. Paul has already established that the transmitter exciter was physically isolated at 23:41, so no WNDR signal is reaching outside radios. The caller’s line also carries the same eight-second Cart C-6 station-ident loop and tape-splice click that Paul says are routed only to the nearfield monitor in Studio A, not to the transmitter. The caller therefore cannot be outside listening on a car radio: they are inside Studio A. Malcolm has the keys to that room, his departure was never witnessed, and Ruth later confirms that he locked her in Booth B and started the archive fire.',
   },
+  deduction: {
+    suspectChoices: [
+      { id: 'malcolm_vale', label: 'Malcolm Vale (Station Manager pretending to be taxi driver at North Gate)', isCorrect: true },
+      { id: 'paul_harker', label: 'Paul Harker (Late-night technical operator in Studio A)', isCorrect: false },
+      { id: 'ruth_adeyemi', label: 'Ruth Adeyemi (Presenter locked inside Production Booth B)', isCorrect: false },
+    ],
+    targetChoices: [
+      { id: 'tape_library', label: 'WNDR Studio Building (Tape Library Arson & Bribery Tape Theft)', isCorrect: true },
+      { id: 'transmitter_annex', label: 'Remote Transmitter Annex (Reported Chemical Hazard)', isCorrect: false },
+      { id: 'north_gate', label: 'North Gate Taxi Stand (Hit and Run)', isCorrect: false },
+    ],
+    correctEvidenceKeywords: ['cart', 'splice', 'loop', 'exciter', 'isolated', 'booth', 'tape'],
+  },
 
   calls: {
     call_studio_alarm: {

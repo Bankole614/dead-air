@@ -26,9 +26,15 @@ export const LiveTranscript: React.FC = () => {
   // Typewriter text state for the latest line
   const [typedChars, setTypedChars] = useState<number>(0);
   const [selectedText, setSelectedText] = useState<string>('');
+  const [isOptionsCollapsed, setIsOptionsCollapsed] = useState<boolean>(false);
 
   const latestHistory = activeCall?.history[activeCall.history.length - 1];
   const currentNode = activeCallDef && activeCall ? activeCallDef.nodes[activeCall.currentNodeId] : null;
+
+  // Reset collapse state when dialogue node changes
+  useEffect(() => {
+    setIsOptionsCollapsed(false);
+  }, [currentNode?.id]);
 
   // Typewriter effect
   useEffect(() => {
@@ -59,12 +65,19 @@ export const LiveTranscript: React.FC = () => {
     return () => clearInterval(interval);
   }, [latestHistory?.nodeId, typewriterActive, settings.textSpeed]);
 
-  // Auto scroll to bottom
-  useEffect(() => {
+  // Auto scroll to bottom whenever history, typewriter, or response options change
+  const scrollToBottom = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [activeCall?.history.length, typedChars]);
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+    // Ensure scroll position remains pinned at the bottom after options panel expands/renders
+    const timer = setTimeout(scrollToBottom, 60);
+    return () => clearTimeout(timer);
+  }, [activeCall?.history.length, typedChars, typewriterActive, isOptionsCollapsed, currentNode?.id]);
 
   // Listen to text selection in the transcript
   const handleMouseUp = () => {
@@ -125,9 +138,9 @@ export const LiveTranscript: React.FC = () => {
   const isCallFinished = activeCall.status === 'completed';
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0a0d12] border-r border-crt-panel-border overflow-hidden select-text">
+    <div className="flex-1 min-h-0 flex flex-col bg-[#0a0d12] border-r border-crt-panel-border overflow-hidden select-text">
       {/* Transcript Header */}
-      <div className="px-4 py-2 border-b border-neutral-800 bg-neutral-900/60 flex items-center justify-between text-xs select-none">
+      <div className="px-4 py-2 border-b border-neutral-800 bg-neutral-900/60 flex items-center justify-between text-xs select-none shrink-0">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
           <span className="font-bold text-neutral-300 font-mono">
@@ -150,11 +163,11 @@ export const LiveTranscript: React.FC = () => {
         )}
       </div>
 
-      {/* Transcript Scrolling Log */}
+      {/* Transcript Scrolling Log - Fits height to content, expands up to max-h */}
       <div
         ref={scrollRef}
         onMouseUp={handleMouseUp}
-        className="flex-1 p-4 overflow-y-auto space-y-4 font-mono text-sm leading-relaxed"
+        className="p-4 sm:p-5 overflow-y-auto space-y-3 font-mono text-sm sm:text-base leading-relaxed max-h-[48vh] shrink-0"
       >
         {activeCall.history.map((entry, index) => {
           const isLatest = index === activeCall.history.length - 1;
@@ -164,6 +177,7 @@ export const LiveTranscript: React.FC = () => {
 
           const isOperator = entry.speaker === 'operator';
           const isSystem = entry.speaker === 'system';
+          const isRadio = entry.speaker === 'radio';
 
           return (
             <div
@@ -173,16 +187,27 @@ export const LiveTranscript: React.FC = () => {
                   ? 'border-blue-900/40 bg-blue-950/20 text-blue-200'
                   : isSystem
                   ? 'border-neutral-800 bg-black/60 text-neutral-400 text-xs italic'
+                  : isRadio
+                  ? 'border-yellow-600/70 bg-yellow-950/25 text-yellow-100 shadow-md border-l-4 border-l-yellow-400'
+                  : isLatest && !typewriterActive
+                  ? 'border-crt-amber/80 bg-neutral-900/70 text-neutral-100 shadow-md border-l-4 border-l-crt-amber'
                   : 'border-crt-panel-border bg-neutral-900/40 text-neutral-200'
               }`}
             >
               <div className="flex items-center justify-between text-[11px] text-neutral-500 mb-1 select-none">
-                <span className={`font-bold flex items-center gap-1.5 ${isOperator ? 'text-blue-400' : isSystem ? 'text-neutral-400' : 'text-crt-amber glow-amber'}`}>
+                <span className={`font-bold flex items-center gap-1.5 ${
+                  isOperator ? 'text-blue-400' : isSystem ? 'text-neutral-400' : isRadio ? 'text-yellow-400 glow-amber' : 'text-crt-amber glow-amber'
+                }`}>
+                  {isRadio && <Radio className="w-3.5 h-3.5 animate-pulse text-yellow-400" />}
                   <span>{entry.speakerName?.toUpperCase() || entry.speaker.toUpperCase()}</span>
-                  {entry.voiceUrl && (
-                    <span title="Voice line audio" className="inline-flex items-center">
-                      <Volume2 className="w-3 h-3 text-emerald-400" />
-                    </span>
+                  {!isSystem && (
+                    <button
+                      onClick={() => sound.playVoiceOrSpeak(entry.text, entry.speaker, entry.voiceUrl, entry.speakerName)}
+                      title="Replay spoken voice line"
+                      className="inline-flex items-center hover:scale-110 transition p-0.5"
+                    >
+                      <Volume2 className={`w-3.5 h-3.5 ${entry.voiceUrl ? 'text-emerald-400' : 'text-neutral-400 hover:text-crt-amber'}`} />
+                    </button>
                   )}
                 </span>
                 <div className="flex items-center gap-2">
@@ -260,51 +285,70 @@ export const LiveTranscript: React.FC = () => {
         )}
       </div>
 
-      {/* Response Options Panel */}
+      {/* Response Options Panel - Sits immediately below transcript with no gap */}
       {currentNode?.options && currentNode.options.length > 0 && !typewriterActive && (
-        <div className="p-3 border-t border-crt-panel-border bg-neutral-900/80 select-none">
-          <div className="text-[11px] font-bold text-crt-amber mb-2 flex items-center justify-between">
-            <span>OPERATOR DISPATCH / DIALOGUE RESPONSE:</span>
-            {settings.assistMode && (
-              <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> ASSIST ACTIVE
-              </span>
-            )}
+        <div
+          className={`p-3.5 sm:p-4 border-t border-crt-panel-border bg-[#0d1117] select-none flex flex-col ${
+            isOptionsCollapsed ? 'max-h-12' : 'max-h-[50vh]'
+          } transition-all duration-200 shadow-2xl z-10`}
+        >
+          <div className="text-xs sm:text-sm font-bold text-crt-amber mb-2.5 flex items-center justify-between shrink-0 font-mono tracking-wider">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-crt-amber animate-pulse"></span>
+              <span>OPERATOR DISPATCH / DIALOGUE RESPONSE:</span>
+            </div>
+
+            <div className="flex items-center gap-2 font-mono">
+              {settings.assistMode && (
+                <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> ASSIST ACTIVE
+                </span>
+              )}
+              <button
+                onClick={() => setIsOptionsCollapsed(!isOptionsCollapsed)}
+                className="text-xs text-neutral-400 hover:text-white px-2.5 py-1 rounded bg-neutral-800 hover:bg-neutral-700 transition"
+                title="Toggle choices panel to view full transcript behind it"
+              >
+                {isOptionsCollapsed ? '▲ EXPAND CHOICES' : '▼ MINIMIZE'}
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-1.5">
-            {currentNode.options.map((option) => {
-              const unlocked = isOptionUnlocked(option);
+          {!isOptionsCollapsed && (
+            <div className="space-y-2.5 overflow-y-auto pr-1.5 flex-1 min-h-0">
+              {currentNode.options.map((option) => {
+                const unlocked = isOptionUnlocked(option);
 
-              return (
-                <button
-                  key={option.id}
-                  disabled={!unlocked}
-                  onClick={() => selectDialogueOption(option)}
-                  className={`w-full text-left p-2.5 rounded text-xs font-mono transition-all flex items-start gap-2 border ${
-                    unlocked
-                      ? option.label.includes('[CHALLENGE]')
-                        ? 'border-amber-600/80 bg-amber-950/40 hover:bg-amber-900/50 text-amber-200'
-                        : option.label.includes('[DISPATCH]')
-                        ? 'border-blue-700/60 bg-blue-950/30 hover:bg-blue-900/40 text-blue-200'
-                        : 'border-neutral-800 bg-neutral-800/60 hover:bg-neutral-700/60 text-neutral-200 hover:text-white'
-                      : 'border-neutral-900 bg-black/40 text-neutral-600 cursor-not-allowed'
-                  }`}
-                >
-                  <span className="font-bold text-neutral-400">&gt;</span>
-                  <div className="flex-1">
-                    <div>{option.label}</div>
-                    {!unlocked && option.requiresPin && (
-                      <div className="text-[10px] text-red-400/80 mt-1 flex items-center gap-1 font-sans">
-                        <Lock className="w-2.5 h-2.5" />
-                        Requires investigation evidence: pin clues regarding {option.requiresPin.join(' + ')} to notebook
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                return (
+                  <button
+                    key={option.id}
+                    disabled={!unlocked}
+                    onClick={() => selectDialogueOption(option)}
+                    className={`w-full text-left p-3.5 sm:p-4 rounded-md text-sm sm:text-base font-mono transition-all flex items-start gap-3 border shadow-sm ${
+                      unlocked
+                        ? option.label.includes('[CHALLENGE]')
+                          ? 'border-amber-600/80 bg-amber-950/40 hover:bg-amber-900/60 text-amber-200 hover:border-amber-500'
+                          : option.label.includes('[DISPATCH]')
+                          ? 'border-blue-700/70 bg-blue-950/40 hover:bg-blue-900/50 text-blue-200 hover:border-blue-500'
+                          : 'border-neutral-700/80 bg-neutral-800/70 hover:bg-neutral-700/80 text-neutral-200 hover:text-white hover:border-neutral-500'
+                        : 'border-neutral-900 bg-black/50 text-neutral-600 cursor-not-allowed'
+                    }`}
+                  >
+                    <span className={`font-bold mt-0.5 text-base sm:text-lg leading-none ${unlocked ? 'text-crt-amber' : 'text-neutral-700'}`}>&gt;</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="leading-snug font-medium text-sm sm:text-base">{option.label}</div>
+                      {!unlocked && option.requiresPin && (
+                        <div className="text-xs text-red-400/90 mt-1.5 flex items-center gap-1.5 font-sans bg-red-950/30 p-1.5 rounded border border-red-900/30">
+                          <Lock className="w-3 h-3 shrink-0 text-red-400" />
+                          <span>Requires investigation evidence: pin clues regarding <strong>{option.requiresPin.join(' + ')}</strong> to notebook</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>

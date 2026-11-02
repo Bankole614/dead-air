@@ -54,6 +54,19 @@ export const CASE_3: CaseDef = {
     culprit: 'The Infiltrator ("Chief Engineer Vance")',
     fatalContradiction: 'Vance claimed to be in the soundproof 4th-floor control room, but in the background of his call, howling open-air wind and the ground-floor lobby clock chime could be heard.',
   },
+  deduction: {
+    suspectChoices: [
+      { id: 'vance_imposter', label: 'The Infiltrator ("Chief Engineer Vance" / Antenna Roof Hostile)', isCorrect: true },
+      { id: 'vault_tech', label: 'The Hiding Technician (Sub-level 2 Cable Vault Tapper)', isCorrect: false },
+      { id: 'system_operator', label: 'County Broadcast Network Automated Carrier', isCorrect: false },
+    ],
+    targetChoices: [
+      { id: 'broadcast_hijack', label: 'County Emergency Broadcast Array & Microwave Tower (Midnight Hijack)', isCorrect: true },
+      { id: 'vault_theft', label: 'Sub-level Cable Vault Copper Theft', isCorrect: false },
+      { id: 'lobby_vandalism', label: 'Ground Floor Lobby Break-in', isCorrect: false },
+    ],
+    correctEvidenceKeywords: ['soundproof', 'wind', 'roof', 'clock', 'chiming', 'howling', 'vault'],
+  },
   calls: {
     call_taps: {
       id: 'call_taps',

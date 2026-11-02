@@ -93,6 +93,32 @@ export interface CharacterCard {
   notes: string;
 }
 
+export interface RadioTransmission {
+  id: string;
+  unitId: string;
+  unitName: string;
+  timestamp: string;
+  text: string;
+  location?: string;
+  clues?: string[];
+}
+
+export interface CaseDeductionConfig {
+  suspectChoices: Array<{ id: string; label: string; isCorrect: boolean }>;
+  targetChoices: Array<{ id: string; label: string; isCorrect: boolean }>;
+  correctEvidenceKeywords: string[];
+}
+
+export interface VerdictScore {
+  culpritCorrect: boolean;
+  targetCorrect: boolean;
+  evidenceCorrect: boolean;
+  totalScore: number;
+  grade: 'S' | 'A' | 'B' | 'C' | 'F';
+  feedback: string;
+  submittedAt: string;
+}
+
 export interface CaseDef {
   id: string;
   number: number;
@@ -107,12 +133,45 @@ export interface CaseDef {
   calls: Record<string, CallDef>;
   initialCallQueue: string[];
   initialNotes: string;
+  deduction?: CaseDeductionConfig;
   answerKey: {
     truth: string;
     culprit: string;
     fatalContradiction: string;
   };
 }
+
+export interface WorkstationHazard {
+  active: boolean;
+  type: 'power_surge' | 'line_bleed' | 'blown_fuse';
+  title: string;
+  description: string;
+  timeRemaining: number;
+  maxTime: number;
+}
+
+export interface DilemmaChoice {
+  id: string;
+  title: string;
+  description: string;
+  sector: string;
+  requiredUnit: string;
+  outcomeLog: string;
+  consequenceSummary: string;
+  flagToSet: string;
+}
+
+export interface ActiveDilemma {
+  id: string;
+  title: string;
+  urgentBrief: string;
+  timestamp: string;
+  optionA: DilemmaChoice;
+  optionB: DilemmaChoice;
+  resolvedChoice?: 'A' | 'B';
+}
+
+export type ConsoleMode = 'switchboard' | 'map' | 'evidence' | 'scanner';
 
 export interface ShiftState {
   activeCaseId: string;
@@ -130,6 +189,27 @@ export interface ShiftState {
     freeNotes: string;
   };
   characters: Record<string, CharacterCard>;
+  radioFeed: RadioTransmission[];
+  pendingRadioEvents: Array<{
+    triggerTime: number;
+    transmission: RadioTransmission;
+  }>;
+  reportFilingActive: boolean;
+  verdictScore?: VerdictScore;
+  unlockedBadges: Array<{ id: string; unlockedAt: string; caseId: string }>;
+  scannerFrequency: number; // e.g. 154.80
+  scannerMessages: Array<{
+    id: string;
+    freq: number;
+    channelName: string;
+    timestamp: string;
+    speaker: string;
+    text: string;
+  }>;
+  activeRoadblocks: string[];
+  hazardState: WorkstationHazard | null;
+  activeDilemma: ActiveDilemma | null;
+  consoleMode: ConsoleMode;
   consequences: Array<{
     id: string;
     triggerTimeSeconds: number;

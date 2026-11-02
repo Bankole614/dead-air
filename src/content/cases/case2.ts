@@ -54,6 +54,19 @@ export const CASE_2: CaseDef = {
     culprit: 'The Imposter ("Trooper Vance")',
     fatalContradiction: 'Vance claimed his cruiser battery was dead with no emergency lights, but Sarah Jenkins could clearly see the spinning red beacon on his cruiser parked behind the tanker.',
   },
+  deduction: {
+    suspectChoices: [
+      { id: 'fake_trooper', label: 'The Imposter ("Trooper Vance" / Hijacker)', isCorrect: true },
+      { id: 'jenkins', label: 'Sarah Jenkins (Stranded motorist on Route 9)', isCorrect: false },
+      { id: 'thorne', label: 'Hank Thorne (Commercial tanker driver)', isCorrect: false },
+    ],
+    targetChoices: [
+      { id: 'tanker_heist', label: 'Route 9 Mile 40 (Chemical Transport Tanker Hijack)', isCorrect: true },
+      { id: 'south_valley', label: 'South Valley Pass (Reported Multi-Car Pileup)', isCorrect: false },
+      { id: 'quarry', label: 'Quarry Drainage Culvert (Fuel Leak)', isCorrect: false },
+    ],
+    correctEvidenceKeywords: ['beacon', 'light', 'cruiser', 'battery', 'culvert', 'ambush'],
+  },
   calls: {
     call_jenkins: {
       id: 'call_jenkins',
