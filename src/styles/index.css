@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #07090d;
+    color: #d1d5db;
+    font-family: 'Share Tech Mono', monospace;
+    overflow: hidden;
+  }
+}
+
+/* CRT Screen Effect */
+.crt-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.crt-overlay::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 40;
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
+
+.crt-vignette {
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
+.scanline-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  opacity: 0.7;
+  pointer-events: none;
+  animation: scanline 7s linear infinite;
+  z-index: 45;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Phosphor glow utilities */
+.glow-amber {
+  text-shadow: 0 0 6px rgba(245, 158, 11, 0.65), 0 0 14px rgba(245, 158, 11, 0.3);
+}
+
+.glow-green {
+  text-shadow: 0 0 6px rgba(34, 197, 94, 0.65), 0 0 14px rgba(34, 197, 94, 0.3);
+}
+
+.glow-red {
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.65), 0 0 14px rgba(239, 68, 68, 0.3);
+}
+
+.glow-cyan {
+  text-shadow: 0 0 6px rgba(6, 182, 212, 0.65), 0 0 14px rgba(6, 182, 212, 0.3);
+}
+
+/* Custom retro scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090c10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1f2937;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
+
