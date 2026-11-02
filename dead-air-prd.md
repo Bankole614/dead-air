@@ -1,399 +1,180 @@
-# Dead Air: Product Requirements Document
+# Dead Air: Product Requirements Document (PRD)
 
-**Version:** 0.1 (Draft)
-**Owner:** AY
-**Platform:** Web (desktop-first, mobile-friendly)
-**Stack:** TypeScript, React, Vite, Howler.js (audio), Zustand (state)
-**Genre:** Narrative thriller / investigation / resource management
-
----
-
-## 1. Overview
-
-**Dead Air** is a browser-based thriller where the player works the night shift at an emergency helpline. They never see anything. They only hear and read what callers say. Over one night (10 PM to 6 AM), they take calls, dispatch limited resources, keep a notebook, and slowly realize that one caller is connected to something far bigger than a routine emergency.
-
-The core fantasy is **powerlessness with responsibility**: you can't act directly, you can only decide who to believe.
-
-### 1.1 One-line pitch
-*You can't see anything, you can't leave your desk, and someone on the line is lying to you.*
-
-### 1.2 Why this game
-- Suspense comes from limited information, not graphics.
-- Cheap to build solo: mostly state, text, audio, and UI.
-- Naturally replayable through branching outcomes.
-- Plays to the builder's strengths: frontend engineering and video/sound/pacing instincts.
+**Version:** 1.0 (Production Specification)  
+**Status:** Implemented & Verified  
+**Platform:** Web (Desktop-first, Adaptive Laptop & Tablet Responsive)  
+**Stack:** TypeScript, React 18, Vite, Web Audio API, Zustand, Tailwind CSS  
+**Genre:** Narrative Audio Thriller / 1994 Retro CRT Dispatch Simulator / Deduction Game  
 
 ---
 
-## 2. Goals and Non-Goals
+## 1. Executive Summary
 
-### 2.1 Goals
-1. Deliver a gripping 45 to 60 minute single-night experience.
-2. Make players *think*: take notes, cross-reference, and catch contradictions.
-3. Create real consequences. Every dispatch decision matters and some are irreversible.
-4. Support at least 3 distinct endings driven by player choices and deductions.
-5. Ship a playable vertical slice (one 10-minute "hour") before building the full night.
+**Dead Air** is an atmospheric browser-based investigative thriller where the player operates the night shift switchboard at an aging rural emergency dispatch center in 1994 (**Operator 7**). The player cannot see outside their console: they interact strictly through telephone trunk wires, intercepted radio frequencies, a vector CRT county map, forensic audio analysis, and physical dispatch decisions.
 
-### 2.2 Non-Goals (v1)
-- No 3D, animation-heavy visuals, or voice acting beyond a small number of key lines.
-- No multiplayer.
-- No procedurally generated stories. Content is hand-authored.
-- No native mobile apps.
-- No monetization system in v1.
+Over the course of their shift, routine calls unravel into coordinated criminal sabotage, conflicting testimonies, electrical grid surges, and high-stakes moral dilemmas.
 
----
+### 1.1 Core Fantasy
+**Powerlessness with absolute responsibility:** You cannot leave your terminal, you cannot physically intervene, and someone on the line is deliberately feeding you decoys.
 
-## 3. Target Audience
-
-| Segment | Description | What they want |
-|---|---|---|
-| Primary | Fans of *Her Story*, *Papers, Please*, *Return of the Obra Dinn*, *Orwell* | Deduction, moral weight, and story that rewards attention |
-| Secondary | Thriller and true-crime audiences | Atmosphere, twists, and a good "I knew it!" moment |
-| Tertiary | Casual browser-game players | A short, intense session with a shareable ending |
-
-**Session length:** 45 to 60 minutes for one full night. Autosave allows pause and resume.
+### 1.2 Core Gameplay Pillars
+1. **Auditory & Textual Forensic Deduction:** Information is partial and subjective. Background acoustic artifacts (train horns, diesel engine rumble, rain on tin) reveal truths callers try to hide.
+2. **Tactical Resource Scarcity:** Limited squad cruisers, ambulances, and fire units create punishing triage decisions and mutual exclusivity.
+3. **Tactical Command Workstation (F1–F4):** A tactile 1994 CRT console mode switcher dividing the desk into focused operational screens without clutter.
+4. **Mechanical Immersion & Environmental Hazards:** Circuit breaker overloads, analog radio squelches, mechanical rotary tuning, and CRT phosphor styling.
 
 ---
 
-## 4. Core Game Loop
+## 2. Workstation Terminal Architecture (Console Modes F1–F4)
+
+To prevent cognitive overload, the workstation is organized into four dedicated hardware terminal screens, accessible via top console buttons or physical keyboard shortcuts (`[F1]`–`[F4]` or keys `[1]`–`[4]`):
 
 ```
-Incoming call -> Listen/Read -> Question the caller -> Take notes
-      -> Decide: Dispatch / Hold / Escalate / Dismiss -> Consequence (immediate or delayed)
-      -> Next call (clock advances)
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│ [● OPERATOR 7]  SHIFT: 22:04  [⚡ BUS 120V]  [MEDALS (3)]  [MANUAL]  [SETTINGS] │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│ [F1] SWITCHBOARD    [F2] VECTOR MAP & DISPATCH   [F3] EVIDENCE   [F4] SCANNER   │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Macro loop (per shift):** 8 hours of in-game time compressed into about 50 real minutes. The pace accelerates as the night progresses, and the final hour (5 to 6 AM) is where the central twist resolves.
+### 2.1 Mode `[F1]` — Switchboard & Live Wire
+- **Focused Call Conversation:** Full-width telephone wire console prioritizing readability.
+- **Dynamic Content-Fit Layout:** The transcript height automatically hugs the conversation length. When a call starts with 1 line, dialogue options sit directly beneath it without scrolling. As exchanges grow, it smoothly expands and enables internal scrolling (`max-h-[48vh]`).
+- **Compact Telephony Trunk Monitor:** Displays Line 01 (Operator), Line 02 (Incoming), and Line 03 (On-Hold). Features a `[▼ COMPACT]` toggle collapsing the 3 bulky line cards into a 30px status bar (`L1: ACTIVE | L2: IDLE | L3: IDLE`).
+- **Gated Dialogue Challenges:** Operator responses that require investigative evidence (e.g., `[CHALLENGE CONTRADICTION]`) remain locked until required clues are pinned in the notebook.
+- **Voice Playback & Speech Synthesis:** Dedicated `[Volume2]` triggers to replay character-acted lines or speech synthesis with specialized pitch/cadence.
+
+### 2.2 Mode `[F2]` — Tactical Vector CRT Map & Dispatch CAD
+- **1994 USGS Vector Map:** Interactive vector SVG map of Blackwood County (Sectors 1 through 6) with pulsing patrol radar blips and incident markers.
+- **Deployable Spike Strip Roadblocks:** Clickable tactical chokepoints across **River Bridge (Sector 1)**, **Ridge Road Pass (Sector 3)**, and **Route 9 Border (Sector 2)**. Deploying roadblocks triggers simulated cruiser radio transmissions and catches fleeing suspects.
+- **Computer-Aided Dispatch (CAD) Sidebar:** 
+  - 2x2 grid of patrol unit cards (Cruiser 108, Rescue 3, Engine 12, Welfare Unit) with real-time status badges, assigned locations, and cooldown timers.
+  - Manual address dispatch input form.
+  - Full-height, scrollable **Live Patrol Radio SITREP Feed** streaming unit reports with one-click **`[PIN]`** evidence buttons.
+
+### 2.3 Mode `[F3]` — Evidence Dossiers & Forensics
+- **Evidence Pins Board:** Repository of all captured clues, speaker tags, timestamps, and operator notes.
+- **Timeline Chronology:** Drag-and-drop 15-minute deduction slots (22:00–23:00) for cross-referencing caller alibis.
+- **Persons of Interest:** Dossier cards for suspects and callers (Martha Gable, Subject 3, Clara Vance, Ruth Miller) with contradiction logs.
+- **Operator Scratchpad:** Typewriter-style freeform shift notes.
+- **Forensic Audio Oscilloscope & Scrubber:** 
+  - Animated green phosphor vector CRT oscilloscope.
+  - Audio playhead scrubber with variable playback speeds (0.75x, 1.0x, 1.25x).
+  - Bandpass filtering: **FLAT**, **LOW-CUT** (treble boost for muffled whisper clarity), and **HIGH-CUT** (bass boost for rumbling engine notes).
+  - Automatic acoustic signature detection with clue pinning.
+
+### 2.4 Mode `[F4]` — Rotary Radio Scanner & Decrypted Wire
+- **Hardware Receiver Deck:** 
+  - Carrier signal lock meter (`■■■■■■ LOCK`).
+  - Digital green LED frequency readout (`MHz`).
+  - Analog rotary fine-tuning slider with step adjustment buttons (`-5.0`, `-0.05`, `+0.05`, `+5.0`).
+  - Squelch white-noise static simulation when searching between carriers.
+- **Frequency Presets:**
+  - `154.80 MHz`: County Sheriff Tactical Trunk (patrol reports, roadblocks).
+  - `27.185 MHz`: CB Trucker Channel 19 (unlicensed walkie-talkies and conspirator chatter).
+  - `162.55 MHz`: NOAA Civil Defense Wire (storm advisories, barometric pressure).
+  - `462.57 MHz`: Private Microwave Repeater (encrypted telemetry, cryptic transmissions).
+- **Decrypted Audio Stream:** Full-height transmission log for the active frequency with character callsigns, timestamps, and interactive **`[LISTEN 🔊]`** voice synthesis playback.
 
 ---
 
-## 5. Setting and Narrative
+## 3. Advanced Gameplay Mechanics
 
-### 5.1 Setting
-A small-city regional emergency and crisis line. Fluorescent lights, a cold coffee machine, a dying radio, and a city outside the window the player never sees. The player is **Operator 7**, a new hire covering a colleague's shift.
+### 3.1 Workstation Hazard Events & Mechanical Circuit Breaker
+- **440V Substation Overload:** Atmospheric lightning and switchboard draw trigger electrical faults during shift operations.
+- **Warning Alert Banner:** Flashing amber/red emergency warning banner displaying voltage overload countdown (15s).
+- **Physical Trip-Reset:** Press **`[R]`** or click the header Breaker switch to reset the bus. Plays procedural mechanical relay `CLUNK` audio and purges line static.
+- **Blackout Consequence:** Neglected surges blow the main breaker, dropping active telephone calls to hold and activating backup generator delay.
 
-### 5.2 Story structure
-The story is built from an **Answer Key**, a private document the player never sees, that defines:
-- What actually happened that night.
-- Who is involved and why.
-- The true timeline, minute by minute.
-- Which calls are connected, which are noise, and which are lies.
+### 3.2 High-Stakes Moral Divergences & Branching Dilemmas
+- **Split-Dispatch Conflicts:** In critical narrative beats when multiple emergencies erupt and only one unit is in range, an emergency tactical modal triggers.
+- **Mutually Exclusive Choices:**
+  - *Option Alpha (Sawmill Structure Fire):* Dispatch unit to rescue trapped watchman and recover an accelerant canister; suspect vehicle slips through roadblock.
+  - *Option Bravo (Route 9 Roadblock Intercept):* Box the fleeing suspect vehicle and recover stolen hydro blueprints; sawmill office collapses.
+- **Consequence Engine:** Choices set narrative flags, generate live radio transmissions, log unique physical clues to the notebook, and influence case endings.
 
-> **Design rule:** Write the truth first. Every clue in the game must be traceable to a line in the Answer Key.
+### 3.3 Dynamic Emergency Alert Beacons
+- **Cross-Screen Awareness:** If the operator is investigating evidence on `[F3]` and a 911 call rings into the queue, the `[F1: SWITCHBOARD]` tab pulses red with `[1 INCOMING CALL ⚡]`.
+- **Keyboard Shortcuts:** Pressing `Space` instantly switches to the switchboard and picks up the ringing line.
 
-### 5.3 Cast (target: 6 core callers, plus 4 to 6 filler calls)
-
-| ID | Role | Surface story | Hidden truth | Tell (how a sharp player catches them) |
-|---|---|---|---|---|
-| C1 | Frightened caller | Hears someone in their house | Is the intruder's accomplice, stalling | Mentions a detail only a person outside could know |
-| C2 | Calm witness | Reports a car accident | Saw something worse and is hiding it | Changes the street name between calls |
-| C3 | Returning caller | Calls every night with a "prank" | Is giving warnings, not pranking | Knows things before they happen |
-| C4 | Colleague (radio) | Dispatcher on another channel | Is compromised | Timestamp mismatch in logs |
-| C5 | Distressed relative | Looking for a missing person | Is the cause of the disappearance | Over-explains, details too rehearsed |
-| C6 | Anonymous caller | Gives a cryptic tip | Is the actual victim, unable to speak freely | Yes/no answers, background audio |
-
-(Final cast and twist to be locked in the Answer Key. See Section 12.)
-
-### 5.4 Endings (minimum 3)
-1. **Dawn (Good):** Player identifies the real threat, saves the key victim, and exposes the compromised colleague.
-2. **Static (Partial):** Some lives saved, but the central conspiracy stays hidden. The player is left with unanswered questions.
-3. **Dead Air (Bad):** Player trusts the wrong caller, resources are misallocated, and the final call ends in silence.
-4. *(Stretch)* **Hidden Ending:** Unlocked by catching the "impossible" caller's secret.
+### 3.4 Civil Dispatch Commendations & Service Medals (Badges)
+A persistent achievement and performance grading system rewarding deduction mastery and speed:
+- **Sheriff's Medal of Deduction:** Attain Grade S on any incident case.
+- **Rapid Dispatch Commendation:** Solve a case under 10 in-game minutes with Grade A or S.
+- **Acoustics Specialist Medal:** Identify and pin 4+ acoustic background signatures.
+- **Iron Discernment:** Correctly identify both the primary culprit and diversion target.
+- **Switchboard Veteran:** Successfully triage multiple incoming lines under hold pressure.
+- **Master Archivist:** Complete 5 full case files in the anthology.
 
 ---
 
-## 6. Gameplay Systems
+## 4. Case Anthology Structure
 
-### 6.1 Calls
-- Calls arrive on a schedule with some randomized timing for tension.
-- Each call has: caller ID (may be blocked or spoofed), timestamp, location claim, duration, and a **dialogue tree**.
-- The player can: **answer**, **put on hold**, **let it ring out**, or **transfer**.
-- A call left on hold gets increasingly agitated (state change, shown in the UI).
+The game supports an anthology of hand-authored cases (`src/content/cases.ts`):
 
-### 6.2 Questioning
-- Player chooses from a short list of prompts per node (3 to 5 options): clarifying questions, challenging a detail, requesting a repeat, or reassuring.
-- Some options unlock only after the player has noted a specific clue (notebook-gated dialogue).
+| Case ID | Title | Incident Code | Time Window | Difficulty | Synopsis |
+|---|---|---|---|---|---|
+| `case_1` | *Dead Air at Blackwood Creek* | 10-99 (SUSPICIOUS / INTRUSION) | 22:00 - 23:00 | STANDARD | A noise complaint at 114 Elm St reveals a multi-call decoy operation targeting the municipal water supply. |
+| `case_2` | *Substation Blackout* | 10-44 (GRID FAILURE) | 22:00 - 23:00 | HARD | Cascading power outages across Sector 5 mask an armed heist at the county transmission array. |
+| `case_3` | *The Watcher on Route 9* | 10-88 (PROWLER / HAZARD) | 22:00 - 23:30 | HARD | Stranded motorists along a foggy highway report a phantom police cruiser signaling vehicles off the road. |
+| `case_4` | *The Whispering Dam* | 10-50 (INFRASTRUCTURE FAILURE) | 22:00 - 23:00 | CRITICAL | Sluice gates open remotely; operators race against time to evacuate downstream residents and find the transmitter. |
+| `case_5` | *Night Shift Final Protocol* | 10-00 (CIVIL CRISIS) | 22:00 - 00:00 | CRITICAL | All trunk lines flood simultaneously as the central switchboard itself is surrounded. |
 
-### 6.3 Dispatch and Resources
-- Limited units: **Police (3), Medical (2), Fire (1), Welfare Check (2)**.
-- Each dispatch locks a unit for a time window. Unavailable units mean hard choices.
-- Dispatching to a false report can leave a real emergency uncovered.
-
-### 6.4 Notebook (the signature mechanic)
-- A free-form notebook plus structured pins.
-- Player can **pin** any line from a transcript to a character card or timeline.
-- The game **never** marks what's important. The player decides.
-- Contradictions are *not* auto-detected. The player must spot them. (Optional "accessibility assist" mode can highlight potential conflicts.)
-- Notebook state is saved and also used by the game to unlock gated dialogue and to compute the ending.
-
-### 6.5 Timeline Board
-- A visual board with time slots from 10 PM to 6 AM.
-- Player drags pinned items onto it to build their theory.
-- Used at the **Final Call** to commit to an accusation.
-
-### 6.6 Trust Meter (hidden)
-- Each caller has a hidden trust score the game uses to shape their behavior. It is *not* shown to the player.
-- Trust rises and falls based on whether the player's dispatches are validated or contradicted by later events.
-
-### 6.7 Delayed Consequences
-- Many dispatches show their outcome **only later** in the night, via follow-up calls, radio chatter, or a morning report.
-- The player never gets a clean "you were right" screen mid-shift.
-
-### 6.8 The Recurring Caller
-- One caller (C3) rings back at fixed intervals with information that "shouldn't be possible."
-- This is the thread that gradually reframes the entire night.
-
-### 6.9 Shift Clock and Pacing
-
-| In-game time | Real time | Beat |
-|---|---|---|
-| 10 PM to 12 AM | 0 to 12 min | Onboarding, routine calls, plant first clues |
-| 12 AM to 2 AM | 12 to 25 min | First conflicts and the first impossible detail |
-| 2 AM to 4 AM | 25 to 38 min | Pressure rises, resources run thin, lies start to unravel |
-| 4 AM to 5 AM | 38 to 46 min | Twist reveal, compromised colleague, all lines lit |
-| 5 AM to 6 AM | 46 to 55 min | Final Call and accusation, then the ending |
+### 4.1 Incident Dossier Filing & Verdict Scoring
+At the conclusion of a case, the operator files an official **Incident Deduction Report**:
+- **Primary Suspect:** Selection from identified persons of interest.
+- **True Target:** Selection from potential infrastructure targets.
+- **Corroborating Evidence:** Selection of pinned clues demonstrating contradiction or motive.
+- **Scoring & Performance Grades:**
+  - `S` (95–100): Flawless investigation; penetrated decoy and saved infrastructure.
+  - `A` (80–94): Commendable performance; identified culprit and protected target.
+  - `B` (60–79): Partial success; units responded but key contradictions were missed.
+  - `C` / `F` (<60): Investigation failure; units diverted, culprits escaped.
 
 ---
 
-## 7. User Experience and Interface
+## 5. Audio Architecture (Procedural Synthesis & Voice Engine)
 
-### 7.1 Layout (desktop)
+Implemented in `src/engine/sound.ts` with zero external audio library dependencies:
 
-```
-+------------------------------------------------------------+
-|  CLOCK 02:47  |  UNITS: P P P  M M  F  W W  |  LINES: 1 2 3 |
-+----------------------+-------------------------------------+
-|   LIVE TRANSCRIPT    |          NOTEBOOK / BOARD           |
-|   (typed + audio)    |   - pinned lines                    |
-|                      |   - character cards                 |
-|   [Response options] |   - timeline                        |
-+----------------------+-------------------------------------+
-|   DISPATCH PANEL     |   CALL QUEUE / LOG                  |
-+------------------------------------------------------------+
-```
-
-### 7.2 Visual style
-- Dark console aesthetic: amber and green phosphor, scanlines, subtle noise.
-- Minimal motion. Light flicker and typing cadence do the work.
-- High contrast and large type for readability.
-
-### 7.3 Audio design (half the game)
-- **Ambient bed:** room tone, HVAC hum, distant traffic, and a ticking clock.
-- **Caller audio:** low-fidelity filtered voice lines for key moments (TTS or recorded for v1 key lines, text for the rest).
-- **Background-detail audio:** a distant train, a dog, a TV, a door. These are clues.
-- **Silence is a mechanic.** Dropped lines, dead air, and breathing carry tension.
-- Audio is optional with full text fallback and captions.
-
-### 7.4 Mobile
-- Responsive stack: transcript on top, tabs for Notebook, Board, and Dispatch.
-- Touch-friendly pin and drag interactions.
-
-### 7.5 Accessibility
-- Full captions for all audio, including descriptions of key background sounds.
-- Adjustable text size, high-contrast mode, and reduced motion.
-- Keyboard navigable.
-- Optional contradiction-highlight assist.
-- Content warning screen at start (distress, violence, emergency scenarios).
+1. **Web Audio API Procedural Synthesis:**
+   - **Fluorescent Room Tone & HVAC Hum:** Dual oscillators (60Hz + 118Hz) through a low-pass filter (160Hz).
+   - **DTMF Telephony Ringer:** Dual sine frequencies (440Hz + 480Hz) pulsed with standard 3.5s American cadence.
+   - **Line Clicks & Receiver Lift:** Frequency sweep (350Hz -> 60Hz) with exponential gain drop.
+   - **Mechanical Keyboard Typing:** Random jittered square-wave clicks (1200–1500Hz).
+   - **Analog Rotary Dial Clicks:** Triangle wave pulses (600Hz -> 80Hz).
+   - **RF Static Bursts:** Procedural white-noise buffer passed through a 1100Hz bandpass filter.
+   - **Motorola Radio Carrier Chirp:** Two-tone sine pulse (880Hz -> 1240Hz).
+   - **Circuit Breaker Trip & Reset:** Sawtooth surge pop + dual metallic mechanical square/triangle thuds.
+2. **Speech Synthesis & Radio Voice Pipeline:**
+   - Character pitch and cadence scaling based on caller identity (e.g. Martha Gable: pitch 1.15; Conspirators: pitch 0.72; Operator: steady 0.98).
+   - Radio filter: Speech lines are bracketed with mic-key static bursts and roger beeps.
+   - Voice audio playback rate scaling (0.5x to 2.0x) tied to forensic audio scrubber.
 
 ---
 
-## 8. Functional Requirements
+## 6. Technical Stack & State Model
 
-### 8.1 Must Have (MVP / Vertical Slice)
-| ID | Requirement |
-|---|---|
-| F1 | Call queue with answer, hold, and ignore actions |
-| F2 | Branching dialogue engine reading from JSON content |
-| F3 | Live transcript rendering with typewriter pacing |
-| F4 | Notebook with line pinning and free text |
-| F5 | Unit dispatch with cooldown windows |
-| F6 | In-game clock and scripted event scheduler |
-| F7 | Ambient audio and per-call audio cues |
-| F8 | Autosave and resume (localStorage) |
-| F9 | One complete 10-minute "hour" with 3 callers |
-
-### 8.2 Should Have (Full v1)
-| ID | Requirement |
-|---|---|
-| F10 | Timeline board with drag-and-drop |
-| F11 | Delayed-consequence engine (outcome queue) |
-| F12 | Hidden trust model |
-| F13 | Final Call and accusation flow |
-| F14 | 3 endings plus end-of-night report |
-| F15 | Accessibility settings |
-| F16 | Settings: volume, text speed, captions |
-
-### 8.3 Could Have (Post-v1)
-- Hidden ending and New Game+ with a changed Answer Key.
-- Shareable end-of-night summary card.
-- Additional nights or DLC-style cases.
-- Voice-acted key calls.
-- Analytics-driven "what most players got wrong" screen.
+- **Language:** TypeScript 5.6 (strict mode enabled).
+- **UI Framework:** React 18 with Vite.
+- **State Management:** Zustand 5 with single-source serializable snapshot store.
+- **Persistence:** LocalStorage schema (`dead_air_save_v1`) serializing game clock, units, calls, notebook pins, character dossier notes, active roadblocks, hazard states, badges, and radio feeds.
+- **Styling:** Tailwind CSS with custom CRT shaders (`crt-overlay`, phosphor scanline sweep animations).
 
 ---
 
-## 9. Technical Architecture
+## 7. Responsive & Accessibility Standards
 
-### 9.1 Stack
-- **Frontend:** React and TypeScript, bundled with Vite.
-- **State:** Zustand (or Redux Toolkit) with a serializable store, so saving is trivial.
-- **Audio:** Howler.js for layered ambient and one-shot cues.
-- **Styling:** Tailwind or CSS Modules, with a CRT-style shader layer in CSS.
-- **Persistence:** localStorage in v1 (IndexedDB if saves grow).
-- **Hosting:** Static deploy (Vercel, Netlify, or the existing VPS).
-- **Backend:** None in v1. Optional later for anonymous analytics and shared endings.
-
-### 9.2 Architecture overview
-
-```
-/content          -> JSON: calls, dialogue nodes, events, endings
-/engine
-   scheduler.ts   -> game clock, event triggers
-   dialogue.ts    -> node traversal, gating by notebook state
-   dispatch.ts    -> units, cooldowns, outcomes
-   consequences.ts-> delayed outcome queue
-   trust.ts       -> hidden trust model
-   endings.ts     -> ending resolver
-/state            -> store, selectors, save/load
-/ui               -> components (Console, Transcript, Notebook, Board, Dispatch)
-/audio            -> sound manager, cue map
-```
-
-Principle: **content is data, engine is code.** Writers (you, and Claude as a drafting partner) edit JSON without touching engine logic.
-
-### 9.3 Data model (simplified)
-
-```ts
-type Call = {
-  id: string;
-  callerId: string;
-  scheduledAt: string;        // in-game time "02:15"
-  callerIdDisplay: string;    // may be spoofed
-  entryNode: string;
-  priority: 'low' | 'medium' | 'high';
-};
-
-type DialogueNode = {
-  id: string;
-  speaker: 'caller' | 'operator' | 'system';
-  text: string;
-  audioCue?: string;
-  background?: string[];      // clue tags, e.g., ["train", "dog"]
-  options?: Option[];
-  next?: string;
-};
-
-type Option = {
-  label: string;
-  next: string;
-  requiresPin?: string[];     // notebook-gated
-  trustDelta?: number;
-  effects?: Effect[];
-};
-
-type Effect =
-  | { type: 'dispatch'; unit: UnitType; location: string }
-  | { type: 'queueConsequence'; id: string; delayMin: number }
-  | { type: 'setFlag'; key: string; value: boolean };
-
-type Consequence = {
-  id: string;
-  triggerAt: string;          // computed from delay
-  condition: string;          // flag expression
-  outcomeNode: string;
-};
-```
-
-### 9.4 Save data
-- Serializable snapshot: clock, flags, trust values, notebook pins, dispatch state, consequence queue, and current node.
-- Versioned schema with a migration function.
-
-### 9.5 Performance
-- Initial load under 3 seconds on a mid-range connection (lazy-load audio per hour).
-- Audio streamed or preloaded per segment. Target total under 40 MB for v1.
-
-### 9.6 Analytics (optional)
-- Anonymous event logging: endings reached, completion time, and drop-off points. Opt-in only.
-
----
-
-## 10. Content Pipeline
-
-1. **Answer Key** (1 to 2 pages, private): truth, timeline, motives.
-2. **Clue map:** for each fact, list how a player can discover it.
-3. **Call sheets:** per caller, a script outline with their lie and their slip.
-4. **Draft with AI assistance:** feed Claude the Answer Key plus a call sheet, and ask for transcripts where the caller hides X and slips on Y. Edit for voice.
-5. **Consistency pass:** a spreadsheet of every clue, timestamp, and name, checked against the Answer Key.
-6. **Implement in JSON.**
-7. **Playtest and revise.**
-
-> **Rule:** AI drafts, you decide. Clue consistency is the author's responsibility.
-
----
-
-## 11. Scope and Milestones
-
-| Milestone | Deliverable | Target |
-|---|---|---|
-| **M0: Design lock** | Answer Key, cast, endings outline | Week 1 |
-| **M1: Engine prototype** | Dialogue traversal, call queue, clock, transcript UI | Weeks 2 to 3 |
-| **M2: Vertical slice** | One "hour": 3 callers, notebook, dispatch, ambient audio | Weeks 4 to 5 |
-| **M3: Slice playtest** | 5 to 10 external testers, feedback round | Week 6 |
-| **M4: Full night build** | All hours, delayed consequences, board, trust model | Weeks 7 to 11 |
-| **M5: Endings and polish** | Final Call, endings, accessibility, audio pass | Weeks 12 to 13 |
-| **M6: Beta and launch** | Bug fixes, content warnings, deploy, itch.io/web release | Weeks 14 to 15 |
-
-(Adjust to your available hours per week. This assumes part-time solo work.)
-
----
-
-## 12. Open Questions
-1. What is the central twist? (Compromised colleague, staged crime, or something else.)
-2. Text-only, TTS, or real voice for key lines?
-3. Single linear night with branches, or branching state that changes the night itself?
-4. Tone: grounded realism, or slightly surreal and paranoid?
-5. Is there a persistent meta-layer (e.g., a "case file" carried across replays)?
-
----
-
-## 13. Success Metrics
-
-| Metric | Target |
-|---|---|
-| Slice completion rate (testers who finish the first hour) | 70% or more |
-| Players who say "I want to know what happens next" | 80% or more of testers |
-| Average notebook usage (pins per session) | 15 or more |
-| Full-night completion rate | 40% or more |
-| Players reaching more than one ending | 25% or more |
-| Qualitative: "I caught a lie" moments reported | Majority of testers |
-
----
-
-## 14. Risks and Mitigations
-
-| Risk | Impact | Mitigation |
-|---|---|---|
-| Writing workload balloons | High | Cap at 6 core callers; interlock stories rather than expand them |
-| Clues contradict each other accidentally | High | Answer Key plus clue consistency spreadsheet |
-| Too hard or too vague, players feel lost | Medium | Playtest early, optional assist mode, gentle in-world hints |
-| Too much reading, pacing drags | Medium | Short lines, audio cues, timed pressure, dispatch decisions every few minutes |
-| Audio quality or licensing | Medium | Use royalty-free or self-recorded sound; keep a source log |
-| Sensitive subject matter | Medium | Content warning, avoid graphic detail, no real helpline branding |
-| Scope creep (branching explosion) | High | Use flags and state, not unique branches per choice; merge paths often |
-
----
-
-## 15. Appendix: Vertical Slice Spec (First Hour)
-
-**Goal:** Prove the core loop is gripping in 10 minutes.
-
-- **Time window:** 10:00 PM to 11:00 PM (compressed).
-- **Calls:** 3 (one routine, one ambiguous, one that plants the first "impossible" detail).
-- **Units:** Police (2), Medical (1).
-- **Systems live:** call queue, dialogue, notebook, dispatch, clock, ambient audio.
-- **Ends with:** a callback from C3 that references something the player hasn't told anyone.
-- **Pass criteria:** testers voluntarily ask for the next hour.
-
----
-
-*End of document.*
+- **Adaptive Dual-Scrolling System:**
+  - Desktop displays (`1080p+`): Fixed CRT workstation frame (`h-screen overflow-hidden`) with independent internal scrollable panels.
+  - Laptops and small screens (`< 1024px` width or short heights): Seamless vertical container scrolling (`overflow-y-auto`) ensuring no panel, map, or button is cut off.
+- **Content-Fit Layouts:** Main transcript area hugs content height dynamically, allowing dialogue choices to sit directly beneath initial caller messages without requiring scroll.
+- **Accessibility Assist Mode:** Optional toggle to highlight logical contradictions and acoustic clues in dialogue options.
+- **Full Keyboard Navigation:**
+  - `Space`: Answer call / Talk / Advance typewriter.
+  - `F1` / `1`: Switchboard & Wire screen.
+  - `F2` / `2`: Vector Map & Dispatch screen.
+  - `F3` / `3`: Evidence & Dossier screen.
+  - `F4` / `4`: Radio Scanner screen.
+  - `R`: Trip-reset circuit breaker during power surge.
+  - `P`: Pause shift clock.
