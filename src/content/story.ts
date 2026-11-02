@@ -56,6 +56,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
     nodes: {
       gable_intro: {
         id: 'gable_intro',
+        voiceUrl: '/audio/voices/case1/gable_intro.mp3',
         speaker: 'caller',
         speakerName: 'Martha Gable',
         text: 'Hello? Emergency? I... I hate to be a nuisance at this hour, but there is someone scraping along the brickwork behind my bedroom.',
@@ -81,6 +82,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       gable_address: {
         id: 'gable_address',
+        voiceUrl: '/audio/voices/case1/gable_address.mp3',
         speaker: 'caller',
         speakerName: 'Martha Gable',
         text: '114 Elm Street, second floor. No, I\'m inside with my deadbolts fastened. It just sounds like metal dragging on gravel. It stopped for a second, then started again.',
@@ -104,6 +106,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       gable_details: {
         id: 'gable_details',
+        voiceUrl: '/audio/voices/case1/gable_details.mp3',
         speaker: 'caller',
         speakerName: 'Martha Gable',
         text: 'Yes, locks are on. I peered through the blinds, but the streetlamp on Elm has been flickering out all week. It\'s pitch black down there. Wait... I heard a recycling bin tumble over.',
@@ -127,6 +130,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       gable_impatient: {
         id: 'gable_impatient',
+        voiceUrl: '/audio/voices/case1/gable_impatient.mp3',
         speaker: 'caller',
         speakerName: 'Martha Gable',
         text: 'I know what the line is for, young man! My late husband was in precinct 3! You don\'t have to be curt with an old woman alone in the dark.',
@@ -140,6 +144,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       gable_dispatched: {
         id: 'gable_dispatched',
+        voiceUrl: '/audio/voices/case1/gable_dispatched.mp3',
         speaker: 'caller',
         speakerName: 'Martha Gable',
         text: 'Thank you, operator. You\'re very kind. I\'ll leave the porch light flicked on for them. Goodnight.',
@@ -148,6 +153,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       gable_reassured: {
         id: 'gable_reassured',
+        voiceUrl: '/audio/voices/case1/gable_reassured.mp3',
         speaker: 'caller',
         speakerName: 'Martha Gable',
         text: 'Alright... maybe you\'re right. Old ears play tricks in the drafts. Thank you for answering, dear. Goodnight.',
@@ -175,6 +181,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
     nodes: {
       ross_intro: {
         id: 'ross_intro',
+        voiceUrl: '/audio/voices/case1/ross_intro.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: '(Whispering, heavy ragged breathing) Oh God... please... don\'t make me talk loud. There\'s someone downstairs. They just shattered the glass in the back patio door.',
@@ -204,6 +211,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_location: {
         id: 'ross_location',
+        voiceUrl: '/audio/voices/case1/ross_location.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: 'I\'m upstairs... in the master bedroom walk-in closet. I pulled the louvered door shut. It\'s completely black in here, no windows, just coats. I can hear floorboards groaning downstairs.',
@@ -223,6 +231,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_voices: {
         id: 'ross_voices',
+        voiceUrl: '/audio/voices/case1/ross_voices.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: 'No voices! Just boots. Heavy steps. I\'m curled up in the master bedroom interior closet under some coats. It\'s pitch black.',
@@ -236,6 +245,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_slip: {
         id: 'ross_slip',
+        voiceUrl: '/audio/voices/case1/ross_slip.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         // KEY CLUE / CONTRADICTION: He is supposedly in a windowless interior closet in the dark, yet he describes the car outside and its hot ticking engine!
@@ -267,6 +277,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_defenseless: {
         id: 'ross_defenseless',
+        voiceUrl: '/audio/voices/case1/ross_defenseless.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: 'No weapons, no gun, nothing! Just my cell phone. Please, tell me a squad car is en route! How long will they take?',
@@ -289,6 +300,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_caught: {
         id: 'ross_caught',
+        voiceUrl: '/audio/voices/case1/ross_caught.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: '(Dead silence for four seconds)... I... What did you say? I meant... I saw it before I ran upstairs! When I was locking the front door! Why are you interrogating me while my house is being broken into?!',
@@ -317,6 +329,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_stall: {
         id: 'ross_stall',
+        voiceUrl: '/audio/voices/case1/ross_stall.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: 'No, just me. My wife is out of town. Just... please hurry. I think they are coming up the stairs. Send everything you have!',
@@ -339,6 +352,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_hold_agitated: {
         id: 'ross_hold_agitated',
+        voiceUrl: '/audio/voices/case1/ross_hold_agitated.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: 'Hold?! Are you insane?! Do not put me on hold! Operator! Operator!!',
@@ -356,6 +370,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_panic_hangup: {
         id: 'ross_panic_hangup',
+        voiceUrl: '/audio/voices/case1/ross_panic_hangup.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: '(Whispering frantically into a two-way radio away from the receiver) "Abbr— ditch it! The desk caught the sedan call, wrap it up now—" (Sharp click)',
@@ -364,6 +379,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_dispatched_early: {
         id: 'ross_dispatched_early',
+        voiceUrl: '/audio/voices/case1/ross_dispatched_early.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: 'Thank you... thank God. Please tell them to hurry. I won\'t make a sound.',
@@ -372,6 +388,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       ross_dispatched_late: {
         id: 'ross_dispatched_late',
+        voiceUrl: '/audio/voices/case1/ross_dispatched_late.mp3',
         speaker: 'caller',
         speakerName: 'David Ross',
         text: 'Okay. I hear sirens far away. I\'m staying down.',
@@ -405,6 +422,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
     nodes: {
       c3_intro: {
         id: 'c3_intro',
+        voiceUrl: '/audio/voices/case1/c3_intro.mp3',
         speaker: 'caller',
         speakerName: 'The Static Voice',
         text: 'Good evening, Operator 7. Welcome to the graveyard shift. The tea on your console is getting cold.',
@@ -429,6 +447,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       c3_identity: {
         id: 'c3_identity',
+        voiceUrl: '/audio/voices/case1/c3_identity.mp3',
         speaker: 'caller',
         speakerName: 'The Static Voice',
         text: 'You can check your binder under "Frequent Pranks." They told you to write me off as code 4. But you already know tonight isn\'t code 4, don\'t you?',
@@ -448,6 +467,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       c3_trace_mockery: {
         id: 'c3_trace_mockery',
+        voiceUrl: '/audio/voices/case1/c3_trace_mockery.mp3',
         speaker: 'caller',
         speakerName: 'The Static Voice',
         text: '(A quiet, mirthless chuckle) County Telecom rerouted their trunk line through junction 12 six minutes ago. The signal isn\'t coming from outside the facility, Operator 7.',
@@ -462,6 +482,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       c3_observation: {
         id: 'c3_observation',
+        voiceUrl: '/audio/voices/case1/c3_observation.mp3',
         speaker: 'caller',
         speakerName: 'The Static Voice',
         text: 'Because your predecessor, Operator 4, drank black coffee. You prefer chamomile. And you spent the first eighteen minutes fidgeting with the headset volume.',
@@ -476,6 +497,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       c3_ross_insight: {
         id: 'c3_ross_insight',
+        voiceUrl: '/audio/voices/case1/c3_ross_insight.mp3',
         speaker: 'caller',
         speakerName: 'The Static Voice',
         text: 'Blackwood Lane wasn\'t a robbery. It was a decoy to pull Unit 104 out of the River District. And if you checked the log, Unit 104\'s transponder took twelve extra minutes to "respond".',
@@ -490,6 +512,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       c3_the_reveal: {
         id: 'c3_the_reveal',
+        voiceUrl: '/audio/voices/case1/c3_the_reveal.mp3',
         speaker: 'caller',
         speakerName: 'The Static Voice',
         text: 'The break-in at 412 Blackwood wasn\'t meant to steal jewelry. It was meant to pull Unit 104 away from the municipal reservoir. Look at your dispatch log at 23:00 when the radio chatter starts.',
@@ -504,6 +527,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       c3_the_warning: {
         id: 'c3_the_warning',
+        voiceUrl: '/audio/voices/case1/c3_the_warning.mp3',
         speaker: 'caller',
         speakerName: 'The Static Voice',
         text: 'I am the one who worked your console before they took her away. Keep your notebook open, 7. At 23:15, a woman will call crying about her missing brother. Do NOT dispatch Medical to the bridge. Listen to the background of her call.',
@@ -523,6 +547,7 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
       },
       c3_concluding_line: {
         id: 'c3_concluding_line',
+        voiceUrl: '/audio/voices/case1/c3_concluding_line.mp3',
         speaker: 'caller',
         speakerName: 'The Static Voice',
         text: 'You don\'t have to believe me. Just listen. The dead air always tells the truth before they do. See you at midnight.',

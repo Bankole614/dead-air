@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../state/store';
 import { DialogueOption } from '../types/game';
 import { sound } from '../engine/sound';
-import { Pin, Headphones, Lock, CheckCircle2, Radio, FastForward } from './icons';
+import { Pin, Headphones, Lock, CheckCircle2, Radio, FastForward, Volume2 } from './icons';
 
 export const LiveTranscript: React.FC = () => {
   const {
@@ -177,8 +177,13 @@ export const LiveTranscript: React.FC = () => {
               }`}
             >
               <div className="flex items-center justify-between text-[11px] text-neutral-500 mb-1 select-none">
-                <span className={`font-bold ${isOperator ? 'text-blue-400' : isSystem ? 'text-neutral-400' : 'text-crt-amber glow-amber'}`}>
-                  {entry.speakerName?.toUpperCase() || entry.speaker.toUpperCase()}
+                <span className={`font-bold flex items-center gap-1.5 ${isOperator ? 'text-blue-400' : isSystem ? 'text-neutral-400' : 'text-crt-amber glow-amber'}`}>
+                  <span>{entry.speakerName?.toUpperCase() || entry.speaker.toUpperCase()}</span>
+                  {entry.voiceUrl && (
+                    <span title="Voice line audio" className="inline-flex items-center">
+                      <Volume2 className="w-3 h-3 text-emerald-400" />
+                    </span>
+                  )}
                 </span>
                 <div className="flex items-center gap-2">
                   <span>{entry.timestamp}</span>

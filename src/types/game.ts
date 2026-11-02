@@ -32,6 +32,7 @@ export interface DialogueNode {
   speakerName?: string;
   text: string;
   audioCue?: 'ring' | 'click' | 'static' | 'hangup' | 'breath' | 'train' | 'door_knock' | 'siren' | 'rain';
+  voiceUrl?: string; // audio file path, e.g. "/audio/voices/case1/gable_intro.mp3"
   backgroundClues?: string[]; // tags like ["distant_train", "dog_bark", "creaking_floor"]
   options?: DialogueOption[];
   next?: string; // auto-advance if no options
@@ -61,6 +62,7 @@ export interface ActiveCall {
     text: string;
     timestamp: string;
     audioCue?: string;
+    voiceUrl?: string;
     backgroundClues?: string[];
   }>;
   holdStartedAt?: number; // game time seconds

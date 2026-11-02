@@ -245,6 +245,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           text: initialNode.text,
           timestamp: timeFormatted,
           audioCue: initialNode.audioCue,
+          voiceUrl: initialNode.voiceUrl,
           backgroundClues: initialNode.backgroundClues,
         }
       ],
@@ -254,6 +255,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (initialNode.audioCue === 'static') {
       sound.playStaticBurst(0.6);
+    }
+    if (initialNode.voiceUrl) {
+      sound.playVoice(initialNode.voiceUrl);
     }
 
     // Remove from queue if present
@@ -272,6 +276,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   holdCall: (callId: string) => {
+    sound.stopVoice();
     sound.playLineClick();
     const state = get();
     const call = state.calls[callId];
@@ -360,6 +365,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       sound.playLineClick();
     }
 
+    if (nextNode.voiceUrl) {
+      sound.playVoice(nextNode.voiceUrl);
+    } else {
+      sound.stopVoice();
+    }
+
     const newHistory = [
       ...activeCall.history,
       {
@@ -376,6 +387,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         text: nextNode.text,
         timestamp: timeFormatted,
         audioCue: nextNode.audioCue,
+        voiceUrl: nextNode.voiceUrl,
         backgroundClues: nextNode.backgroundClues,
       }
     ];

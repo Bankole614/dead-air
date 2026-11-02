@@ -186,6 +186,7 @@ export const CASE_3: CaseDef = {
       nodes: {
         vance_intro: {
           id: 'vance_intro',
+        voiceUrl: '/audio/voices/case3/vance_intro.mp3',
           speaker: 'caller',
           speakerName: 'Chief Engineer Vance',
           text: 'Good evening, 911 dispatch. Arthur Vance here. We had a minor circuit trip in the fourth-floor soundproof control studio. I need you to transmit the master carrier override code to unlock the broadcast relays.',
@@ -219,6 +220,7 @@ export const CASE_3: CaseDef = {
         },
         vance_claim_soundproof: {
           id: 'vance_claim_soundproof',
+        voiceUrl: '/audio/voices/case3/vance_claim_soundproof.mp3',
           speaker: 'caller',
           speakerName: 'Chief Engineer Vance',
           text: 'I told you, fourth-floor master control. Dead quiet in here, double acoustic insulation. We have six minutes before the midnight countdown. Transmit the code immediately.',
@@ -246,6 +248,7 @@ export const CASE_3: CaseDef = {
         },
         vance_caught: {
           id: 'vance_caught',
+        voiceUrl: '/audio/voices/case3/vance_caught.mp3',
           speaker: 'caller',
           speakerName: 'Chief Engineer Vance',
           text: '(Mask drops, shouting over howling wind) "Sniper on the water tower! They know we\'re on the roof! Drop the transmitter equipment—move!" (Rapid gunfire, sharp metallic clatter, static)',
@@ -254,6 +257,7 @@ export const CASE_3: CaseDef = {
         },
         vance_hijack_success: {
           id: 'vance_hijack_success',
+        voiceUrl: '/audio/voices/case3/vance_hijack_success.mp3',
           speaker: 'caller',
           speakerName: 'Chief Engineer Vance',
           text: 'Code accepted. Thank you for your cooperation, Operator 7. (Cold laughter) Happy New Year.',

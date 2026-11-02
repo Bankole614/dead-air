@@ -67,6 +67,7 @@ export const CASE_2: CaseDef = {
       nodes: {
         jenkins_intro: {
           id: 'jenkins_intro',
+        voiceUrl: '/audio/voices/case2/jenkins_intro.mp3',
           speaker: 'caller',
           speakerName: 'Sarah Jenkins',
           text: 'Dispatch?! Thank God! I spun out on Route 9 right past the quarry cut. My tires are buried in a snowdrift. There\'s a massive industrial tanker truck jackknifed sideways across the whole highway!',
@@ -87,6 +88,7 @@ export const CASE_2: CaseDef = {
         },
         jenkins_tanker_status: {
           id: 'jenkins_tanker_status',
+        voiceUrl: '/audio/voices/case2/jenkins_tanker_status.mp3',
           speaker: 'caller',
           speakerName: 'Sarah Jenkins',
           text: 'I have a bruised shoulder, but I can walk. No smoke, but the tanker\'s lights are completely blacked out. Wait—there\'s a state trooper cruiser pulled up right behind the trailer, its roof emergency beacon is flashing bright red into the snow.',
@@ -110,6 +112,7 @@ export const CASE_2: CaseDef = {
         },
         jenkins_cruiser_seen: {
           id: 'jenkins_cruiser_seen',
+        voiceUrl: '/audio/voices/case2/jenkins_cruiser_seen.mp3',
           speaker: 'caller',
           speakerName: 'Sarah Jenkins',
           text: 'No! Nobody came to me. The trooper cruiser has its roof emergency lights spinning red, but two men in dark parkas are prying open the tanker\'s rear valves! That doesn\'t look like standard police procedure!',
@@ -125,6 +128,7 @@ export const CASE_2: CaseDef = {
         },
         jenkins_hold_tight: {
           id: 'jenkins_hold_tight',
+        voiceUrl: '/audio/voices/case2/jenkins_hold_tight.mp3',
           speaker: 'caller',
           speakerName: 'Sarah Jenkins',
           text: 'Okay... I\'m ducking down below the dashboard. Please hurry. The blizzard is getting worse.',
@@ -152,6 +156,7 @@ export const CASE_2: CaseDef = {
       nodes: {
         trooper_intro: {
           id: 'trooper_intro',
+        voiceUrl: '/audio/voices/case2/trooper_intro.mp3',
           speaker: 'caller',
           speakerName: 'Trooper Vance (Radio)',
           text: 'Operator 7, this is Trooper Vance on frequency 4. Disregard any motorist chatter about Mile 40. I am physically at the quarry cut right now. The road is clear. A salt truck already salted the grade.',
@@ -172,6 +177,7 @@ export const CASE_2: CaseDef = {
         },
         trooper_deny_tanker: {
           id: 'trooper_deny_tanker',
+        voiceUrl: '/audio/voices/case2/trooper_deny_tanker.mp3',
           speaker: 'caller',
           speakerName: 'Trooper Vance (Radio)',
           text: 'Negative, negative. Just empty asphalt and drifting snow. We have a confirmed multi-vehicle pileup down in South Valley on County Road 12. Divert all available cruisers and hazmat to South Valley immediately.',
@@ -185,6 +191,7 @@ export const CASE_2: CaseDef = {
         },
         trooper_cruiser_excuse: {
           id: 'trooper_cruiser_excuse',
+        voiceUrl: '/audio/voices/case2/trooper_cruiser_excuse.mp3',
           speaker: 'caller',
           speakerName: 'Trooper Vance (Radio)',
           text: 'My squad car\'s alternator blew out in the cold. My battery is 100% dead. I have zero emergency lights running. That\'s why I\'m using a hand-crank auxiliary patch. Send everything south to Road 12.',
@@ -211,6 +218,7 @@ export const CASE_2: CaseDef = {
         },
         trooper_exposed: {
           id: 'trooper_exposed',
+        voiceUrl: '/audio/voices/case2/trooper_exposed.mp3',
           speaker: 'caller',
           speakerName: 'Trooper Vance (Radio)',
           text: '(Radio squelch cuts)... Who told you that?! (Muffled curses off-mic: "Cut the transfer valve! The board is onto us!")',
@@ -238,6 +246,7 @@ export const CASE_2: CaseDef = {
         },
         trooper_diverted_bad: {
           id: 'trooper_diverted_bad',
+        voiceUrl: '/audio/voices/case2/trooper_diverted_bad.mp3',
           speaker: 'caller',
           speakerName: 'Trooper Vance (Radio)',
           text: 'Copy that, 7. Out.',
@@ -265,6 +274,7 @@ export const CASE_2: CaseDef = {
       nodes: {
         driver_intro: {
           id: 'driver_intro',
+        voiceUrl: '/audio/voices/case2/driver_intro.mp3',
           speaker: 'caller',
           speakerName: 'Hank Thorne',
           text: '(Shivering violently, teeth chattering) Helpline... I\'m the driver of tanker 88. Three guys in an old police cruiser forced me off the road into the snow. They took my uniform and keys! They\'re siphoning 10,000 gallons of industrial solvent!',
@@ -288,6 +298,7 @@ export const CASE_2: CaseDef = {
         },
         driver_safe: {
           id: 'driver_safe',
+        voiceUrl: '/audio/voices/case2/driver_safe.mp3',
           speaker: 'caller',
           speakerName: 'Hank Thorne',
           text: 'Thank God... I see police headlights piercing through the blizzard right now. You caught them in time!',

@@ -7,6 +7,7 @@ class SoundEngine {
   private ambientGain: GainNode | null = null;
   private isAmbientPlaying: boolean = false;
   private ringInterval: number | null = null;
+  private currentVoiceAudio: HTMLAudioElement | null = null;
 
   constructor() {
     // AudioContext will be initialized on first user interaction
@@ -27,10 +28,40 @@ class SoundEngine {
     if (this.ambientGain) {
       this.ambientGain.gain.value = muted ? 0 : 0.05;
     }
+    if (muted) {
+      this.stopVoice();
+    }
   }
 
   public getMuted() {
     return this.isMuted;
+  }
+
+  public stopVoice() {
+    if (this.currentVoiceAudio) {
+      this.currentVoiceAudio.pause();
+      this.currentVoiceAudio.currentTime = 0;
+      this.currentVoiceAudio = null;
+    }
+  }
+
+  // Play voice acting line through 1994 telephone audio filter
+  public playVoice(url: string) {
+    if (this.isMuted || !url) return;
+    this.initCtx();
+    this.stopVoice();
+
+    try {
+      const audio = new Audio(url);
+      this.currentVoiceAudio = audio;
+      audio.volume = 0.95;
+
+      audio.play().catch((e) => {
+        console.warn('Voice playback was prevented by browser autoplay policy:', e);
+      });
+    } catch (e) {
+      console.warn('Failed to play voice file:', e);
+    }
   }
 
   // Atmospheric HVAC and room hum

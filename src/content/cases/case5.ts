@@ -100,6 +100,7 @@ export const CASE_5: CaseDef = {
       nodes: {
         node_intro: {
           id: 'node_intro',
+        voiceUrl: '/audio/voices/case5/studio_harker_intro.mp3',
           speaker: 'caller',
           speakerName: 'Paul Harker',
           text:
@@ -240,6 +241,7 @@ export const CASE_5: CaseDef = {
       nodes: {
         node_intro: {
           id: 'node_intro',
+        voiceUrl: '/audio/voices/case5/north_gate_valle_intro.mp3',
           speaker: 'caller',
           speakerName: 'Unknown Caller',
           text:
@@ -334,6 +336,7 @@ export const CASE_5: CaseDef = {
         },
         node_caught: {
           id: 'node_caught',
+        voiceUrl: '/audio/voices/case5/north_gate_valle_caught.mp3',
           speaker: 'caller',
           speakerName: 'Malcolm Vale',
           text:
@@ -365,6 +368,7 @@ export const CASE_5: CaseDef = {
       nodes: {
         node_intro: {
           id: 'node_intro',
+        voiceUrl: '/audio/voices/case5/booth_ruth_intro.mp3',
           speaker: 'caller',
           speakerName: 'Ruth Adeyemi',
           text:

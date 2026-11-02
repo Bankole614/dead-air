@@ -95,6 +95,7 @@ export const CASE_4: CaseDef = {
       nodes: {
         node_intro: {
           id: 'node_intro',
+        voiceUrl: '/audio/voices/case4/archive_clara_intro.mp3',
           speaker: 'caller',
           speakerName: 'Clara Bell',
           text:
@@ -235,6 +236,7 @@ export const CASE_4: CaseDef = {
       nodes: {
         node_intro: {
           id: 'node_intro',
+        voiceUrl: '/audio/voices/case4/east_gate_mara_intro.mp3',
           speaker: 'caller',
           speakerName: 'Unknown Caller',
           text:
@@ -329,6 +331,7 @@ export const CASE_4: CaseDef = {
         },
         node_caught: {
           id: 'node_caught',
+        voiceUrl: '/audio/voices/case4/east_gate_mara_caught.mp3',
           speaker: 'caller',
           speakerName: 'Mara Voss',
           text:
@@ -360,6 +363,7 @@ export const CASE_4: CaseDef = {
       nodes: {
         node_intro: {
           id: 'node_intro',
+        voiceUrl: '/audio/voices/case4/west_cage_elias_intro.mp3',
           speaker: 'caller',
           speakerName: 'Elias Reed',
           text:
