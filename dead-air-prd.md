@@ -114,11 +114,14 @@ The game supports an anthology of hand-authored cases (`src/content/cases.ts`):
 
 | Case ID | Title | Incident Code | Time Window | Difficulty | Synopsis |
 |---|---|---|---|---|---|
-| `case_1` | *Dead Air at Blackwood Creek* | 10-99 (SUSPICIOUS / INTRUSION) | 22:00 - 23:00 | STANDARD | A noise complaint at 114 Elm St reveals a multi-call decoy operation targeting the municipal water supply. |
-| `case_2` | *Substation Blackout* | 10-44 (GRID FAILURE) | 22:00 - 23:00 | HARD | Cascading power outages across Sector 5 mask an armed heist at the county transmission array. |
-| `case_3` | *The Watcher on Route 9* | 10-88 (PROWLER / HAZARD) | 22:00 - 23:30 | HARD | Stranded motorists along a foggy highway report a phantom police cruiser signaling vehicles off the road. |
-| `case_4` | *The Whispering Dam* | 10-50 (INFRASTRUCTURE FAILURE) | 22:00 - 23:00 | CRITICAL | Sluice gates open remotely; operators race against time to evacuate downstream residents and find the transmitter. |
-| `case_5` | *Night Shift Final Protocol* | 10-00 (CIVIL CRISIS) | 22:00 - 00:00 | CRITICAL | All trunk lines flood simultaneously as the central switchboard itself is surrounded. |
+| `case_1` | *The Reservoir Decoy* | INC-1994-1014 | 22:00 - 23:00 | STANDARD | A noise complaint at 114 Elm St reveals a multi-call decoy operation targeting the municipal water supply. |
+| `case_2` | *Blackout at Mile 40* | INC-1994-1102 | 23:30 - 00:30 | HARD | A blizzard on Route 9 masks a chemical tanker hijack and an imposter claiming to be a state trooper. |
+| `case_3` | *The Midnight Frequency* | INC-1994-1231 | 23:45 - 00:15 | CRITICAL | A hostage taps receiver codes from a sub-basement vault while an infiltrator on the roof demands broadcast override codes. |
+| `case_4` | *The West Cage* | INC-1994-1102 | 22:14 - 22:31 | HARD | Smoke fills the City Records Annex; a shared two-tone microfilm timer chime exposes the insider who locked the watchman in the West Cage. |
+| `case_5` | *The Last Broadcast* | INC-1994-1106 | 23:48 - 23:59 | HARD | WNDR 98.6 is off-air, yet a caller claiming to be outside in a cab carries Studio A's local Cart C-6 cue monitor loop on the line. |
+| `case_6` | *The Last Call at Bellweather* | INC-1994-1148 | 22:00 - 23:00 | CRITICAL | Confirmation bias, phonemic mishearing ("Get Don out!" vs "Get down!"), and a 154.80 MHz radio echo chamber turn a steam valve rupture into a phantom double shooting. |
+| `case_7` | *The Clock That Wasn't There* | INC-1994-0132 | 22:00 - 23:00 | CRITICAL | Selective listening (a missing defective double-chime grandfather clock), a WKBW TV source-monitoring error, and simultaneous calls on 18 vs. 80 Mercer St expose a judge's staged arson alibi. |
+| `case_8` | *Echo Chamber at Petrol 9* | INC-1994-1019 | 22:00 - 23:00 | CRITICAL | False witness confidence and post-broadcast circular reporting frame a night attendant who actually stayed in the manifold trench to shut off the main fuel valve after a rail-culvert gas rupture. |
 
 ### 4.1 Incident Dossier Filing & Verdict Scoring
 At the conclusion of a case, the operator files an official **Incident Deduction Report**:

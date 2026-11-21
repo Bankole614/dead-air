@@ -36,8 +36,8 @@ export const EndingReport: React.FC<EndingReportProps> = ({ onOpenCaseSelector, 
     : 'text-red-400';
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 font-mono select-none">
-      <div className="max-w-2xl w-full bg-crt-panel border-2 border-crt-amber rounded-lg shadow-2xl p-6 text-neutral-200">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 font-mono select-none overflow-y-auto">
+      <div className="max-w-3xl w-full bg-crt-panel border-2 border-crt-amber rounded-lg shadow-2xl p-6 text-neutral-200 my-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-neutral-800 pb-3 mb-4">
           <div className="flex items-center gap-3">
@@ -47,7 +47,7 @@ export const EndingReport: React.FC<EndingReportProps> = ({ onOpenCaseSelector, 
                 INCIDENT RESOLVED // CASE 0{currentCase.number}: {currentCase.title}
               </h2>
               <div className="text-xs text-neutral-400">
-                {currentCase.incidentCode} // OFFICIAL DISPATCH AFTER-ACTION REPORT
+                {currentCase.incidentCode} // OFFICIAL DISPATCH & COGNITIVE PSYCHOLOGY DEBRIEF
               </div>
             </div>
           </div>
@@ -64,19 +64,26 @@ export const EndingReport: React.FC<EndingReportProps> = ({ onOpenCaseSelector, 
           {/* Verdict Score Breakdown */}
           {verdictScore && (
             <div className="p-3 bg-neutral-900/80 rounded border border-neutral-800 space-y-2">
-              <div className="font-bold text-xs text-crt-amber flex items-center justify-between">
+              <div className="font-bold text-xs text-crt-amber flex flex-wrap items-center justify-between gap-2">
                 <span>INVESTIGATION CLASSIFICATION SCORE: {verdictScore.totalScore}/100</span>
-                <span className="text-neutral-400 font-normal">TIME: {verdictScore.submittedAt}</span>
+                <span className="text-neutral-400 font-normal">
+                  STATED CONFIDENCE: <strong className="text-crt-amber">{verdictScore.confidenceLevel ?? 75}%</strong>{' '}
+                  {verdictScore.calibrationDelta ? (
+                    <span className={verdictScore.calibrationDelta > 0 ? 'text-emerald-400' : 'text-red-400'}>
+                      ({verdictScore.calibrationDelta > 0 ? `+${verdictScore.calibrationDelta}` : verdictScore.calibrationDelta} CALIBRATION)
+                    </span>
+                  ) : null}
+                </span>
               </div>
               <p className="text-[11px] text-neutral-300 italic">
                 "{verdictScore.feedback}"
               </p>
               <div className="grid grid-cols-3 gap-2 pt-1 text-[10px] border-t border-neutral-800 font-mono">
                 <div className={verdictScore.culpritCorrect ? 'text-emerald-400' : 'text-red-400'}>
-                  CULPRIT: {verdictScore.culpritCorrect ? '✓ IDENTIFIED (+40)' : '✗ MISSED (+0)'}
+                  CULPRIT / CAUSE: {verdictScore.culpritCorrect ? '✓ IDENTIFIED (+40)' : '✗ MISSED (+0)'}
                 </div>
                 <div className={verdictScore.targetCorrect ? 'text-emerald-400' : 'text-red-400'}>
-                  TARGET: {verdictScore.targetCorrect ? '✓ IDENTIFIED (+40)' : '✗ MISSED (+0)'}
+                  TRUE EVENT: {verdictScore.targetCorrect ? '✓ IDENTIFIED (+40)' : '✗ MISSED (+0)'}
                 </div>
                 <div className={verdictScore.evidenceCorrect ? 'text-emerald-400' : 'text-amber-400'}>
                   EVIDENCE: {verdictScore.evidenceCorrect ? '✓ CORROBORATED (+20)' : '⚠ WEAK PIN (+0)'}
@@ -85,8 +92,47 @@ export const EndingReport: React.FC<EndingReportProps> = ({ onOpenCaseSelector, 
             </div>
           )}
 
+          {/* Investigative Performance & Psychological Profile */}
+          {verdictScore?.psychologicalProfile && verdictScore.psychologicalProfile.length > 0 && (
+            <div className="bg-neutral-950/80 p-3.5 rounded border border-neutral-800 space-y-2">
+              <div className="flex items-center justify-between border-b border-neutral-800 pb-1.5">
+                <span className="font-bold text-xs text-crt-amber tracking-wider">
+                  INVESTIGATIVE PSYCHOLOGY & COGNITIVE BIAS EVALUATION
+                </span>
+                <span className="text-[10px] text-neutral-500">5 EPISTEMIC PILLARS</span>
+              </div>
+              <div className="space-y-1.5">
+                {verdictScore.psychologicalProfile.map((m) => (
+                  <div
+                    key={m.label}
+                    className="p-2 rounded bg-neutral-900/70 border border-neutral-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-neutral-200 text-[11px]">{m.label}</span>
+                        <span className="text-[10px] text-neutral-500">({m.concept})</span>
+                      </div>
+                      <div className="text-[11px] text-neutral-400">{m.detail}</div>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold border shrink-0 self-start sm:self-center ${
+                        m.assessment === 'EXCELLENT' || m.assessment === 'CALIBRATED'
+                          ? 'border-emerald-700 bg-emerald-950/50 text-emerald-300'
+                          : m.assessment === 'GOOD' || m.assessment === 'CAUTIOUS'
+                          ? 'border-blue-700 bg-blue-950/50 text-blue-300'
+                          : 'border-red-700 bg-red-950/50 text-red-300'
+                      }`}
+                    >
+                      {m.assessment}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Key Findings from Answer Key */}
-          <div className="bg-black/50 p-4 rounded border border-neutral-800 space-y-3">
+          <div className="bg-black/50 p-4 rounded border border-neutral-800 space-y-2.5">
             <div className="font-bold text-neutral-200 text-sm flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-400" />
               <span>THE UNCOVERED TRUTH:</span>
@@ -98,11 +144,11 @@ export const EndingReport: React.FC<EndingReportProps> = ({ onOpenCaseSelector, 
 
             <div className="pt-2 border-t border-neutral-800/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
               <div>
-                <span className="text-neutral-500 font-bold">PRIMARY CULPRIT:</span>{' '}
+                <span className="text-neutral-500 font-bold">RESPONSIBLE PARTY / CAUSE:</span>{' '}
                 <span className="text-red-400 font-bold">{currentCase.answerKey.culprit}</span>
               </div>
               <div>
-                <span className="text-neutral-500 font-bold">CRITICAL CONTRADICTION:</span>{' '}
+                <span className="text-neutral-500 font-bold">CRITICAL FORENSIC PROOF:</span>{' '}
                 <span className="text-crt-amber font-bold">{currentCase.answerKey.fatalContradiction}</span>
               </div>
             </div>
@@ -110,23 +156,23 @@ export const EndingReport: React.FC<EndingReportProps> = ({ onOpenCaseSelector, 
 
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className="p-3 bg-neutral-900 rounded border border-neutral-800 text-center">
+            <div className="p-2.5 bg-neutral-900 rounded border border-neutral-800 text-center">
               <div className="text-[10px] text-neutral-500">CLUES LOGGED</div>
-              <div className="text-xl font-bold text-crt-amber">{totalPins}</div>
+              <div className="text-lg font-bold text-crt-amber">{totalPins}</div>
             </div>
-            <div className="p-3 bg-neutral-900 rounded border border-neutral-800 text-center">
+            <div className="p-2.5 bg-neutral-900 rounded border border-neutral-800 text-center">
               <div className="text-[10px] text-neutral-500">DISPATCH RATING</div>
-              <div className={`text-xl font-bold ${gradeColor}`}>{grade === 'S' ? 'PERFECT' : grade === 'A' ? 'COMMENDED' : grade === 'B' ? 'PASS' : 'SUBPAR'}</div>
+              <div className={`text-lg font-bold ${gradeColor}`}>{grade === 'S' ? 'PERFECT' : grade === 'A' ? 'COMMENDED' : grade === 'B' ? 'PASS' : 'SUBPAR'}</div>
             </div>
-            <div className="p-3 bg-neutral-900 rounded border border-neutral-800 text-center col-span-2 sm:col-span-1">
+            <div className="p-2.5 bg-neutral-900 rounded border border-neutral-800 text-center col-span-2 sm:col-span-1">
               <div className="text-[10px] text-neutral-500">HONORS EARNED</div>
-              <div className="text-xl font-bold text-crt-amber">{unlockedBadges?.length || 0} / {BADGE_CATALOG.length}</div>
+              <div className="text-lg font-bold text-crt-amber">{unlockedBadges?.length || 0} / {BADGE_CATALOG.length}</div>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 flex flex-wrap justify-between items-center gap-3 border-t border-neutral-800 pt-3">
+        <div className="mt-5 flex flex-wrap justify-between items-center gap-3 border-t border-neutral-800 pt-3">
           <div className="flex items-center gap-2">
             <button
               onClick={resetGame}

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useGameStore } from '../state/store';
 import { sound } from '../engine/sound';
-import { Shield, HeartPulse, UserCheck, Volume2, VolumeX, Pause, Play, Settings, RotateCcw, FastForward, HelpCircle, FolderArchive, Award, Zap } from './icons';
+import { Volume2, VolumeX, Pause, Play, Settings, RotateCcw, FastForward, HelpCircle, FolderArchive, Award } from './icons';
 
 interface ConsoleHeaderProps {
   onOpenSettings: () => void;
@@ -10,21 +10,21 @@ interface ConsoleHeaderProps {
   onOpenBadges: () => void;
 }
 
-export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({ onOpenSettings, onOpenBriefing, onOpenCaseSelector, onOpenBadges }) => {
+export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
+  onOpenSettings,
+  onOpenBriefing,
+  onOpenCaseSelector,
+  onOpenBadges,
+}) => {
   const {
     inGameTimeSeconds,
     isPaused,
-    timeSpeed,
-    activeUnits,
     settings,
     activeCallId,
     calls,
     unlockedBadges,
-    hazardState,
-    triggerHazard,
     fastForwardToNextCall,
     togglePause,
-    setTimeSpeed,
     updateSettings,
     resetGame,
     getActiveCase,
@@ -35,19 +35,8 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({ onOpenSettings, on
 
   const hours = Math.floor(inGameTimeSeconds / 3600);
   const minutes = Math.floor((inGameTimeSeconds % 3600) / 60);
-  const seconds = Math.floor(inGameTimeSeconds % 60);
-  const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
-  const availablePolice = Object.values(activeUnits).filter(u => u.type === 'police' && u.status === 'available').length;
-  const totalPolice = Object.values(activeUnits).filter(u => u.type === 'police').length;
-
-  const availableMedical = Object.values(activeUnits).filter(u => u.type === 'medical' && u.status === 'available').length;
-  const totalMedical = Object.values(activeUnits).filter(u => u.type === 'medical').length;
-
-  const availableWelfare = Object.values(activeUnits).filter(u => u.type === 'welfare' && u.status === 'available').length;
-  const totalWelfare = Object.values(activeUnits).filter(u => u.type === 'welfare').length;
-
-  // Start ambient audio on user click
   const toggleSound = () => {
     const nextState = !settings.soundEnabled;
     updateSettings({ soundEnabled: nextState });
@@ -57,181 +46,108 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({ onOpenSettings, on
   };
 
   useEffect(() => {
-    // Ambient sound trigger when sound is enabled
     if (settings.soundEnabled) {
       sound.startAmbientHum();
     }
   }, [settings.soundEnabled]);
 
   return (
-    <header className="bg-crt-panel border-b border-crt-panel-border px-4 py-2 flex flex-wrap items-center justify-between gap-4 text-xs select-none">
-      {/* Brand & Terminal Station */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500"></span>
+    <header className="bg-crt-panel border-b border-crt-panel-border px-4 py-2 flex items-center justify-between gap-3 text-xs select-none">
+      {/* Left: Brand & Active Case Selector */}
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span className="font-bold text-crt-amber tracking-wider glow-amber text-sm font-mono">
-            DEAD AIR // OPERATOR 7
+            DEAD AIR
           </span>
         </div>
+
         <button
           onClick={onOpenCaseSelector}
-          className="text-neutral-400 hover:text-crt-amber border-l border-neutral-800 pl-3 hidden sm:flex items-center gap-1.5 transition font-bold"
-          title="Click to browse case archives"
+          className="px-2.5 py-1 rounded bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-crt-amber text-neutral-200 hover:text-crt-amber flex items-center gap-1.5 transition font-bold truncate"
+          title="Switch Incident Case File"
         >
-          <FolderArchive className="w-3.5 h-3.5 text-crt-amber" />
-          <span>CASE 0{currentCase.number}: {currentCase.title}</span>
+          <FolderArchive className="w-3.5 h-3.5 text-crt-amber shrink-0" />
+          <span className="truncate">CASE 0{currentCase.number}: {currentCase.title}</span>
+          <span className="text-[10px] text-neutral-500 font-normal hidden sm:inline">[SWITCH]</span>
         </button>
       </div>
 
-      {/* Resource Badges */}
-      <div className="flex items-center gap-3 font-mono">
-        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded border transition-colors ${
-          availablePolice > 0 ? 'border-blue-900 bg-blue-950/40 text-blue-400' : 'border-red-900 bg-red-950/40 text-red-400'
-        }`}>
-          <Shield className="w-3.5 h-3.5" />
-          <span>POLICE:</span>
-          <span className="font-bold">{availablePolice}/{totalPolice}</span>
-        </div>
-
-        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded border transition-colors ${
-          availableMedical > 0 ? 'border-emerald-900 bg-emerald-950/40 text-emerald-400' : 'border-red-900 bg-red-950/40 text-red-400'
-        }`}>
-          <HeartPulse className="w-3.5 h-3.5" />
-          <span>MEDIC:</span>
-          <span className="font-bold">{availableMedical}/{totalMedical}</span>
-        </div>
-
-        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded border transition-colors ${
-          availableWelfare > 0 ? 'border-amber-900 bg-amber-950/40 text-amber-400' : 'border-red-900 bg-red-950/40 text-red-400'
-        }`}>
-          <UserCheck className="w-3.5 h-3.5" />
-          <span>WELFARE:</span>
-          <span className="font-bold">{availableWelfare}/{totalWelfare}</span>
-        </div>
-      </div>
-
-      {/* Clock & Controls */}
-      <div className="flex items-center gap-3">
-        <div className="bg-black/60 px-3 py-1 rounded border border-neutral-800 text-crt-amber font-mono font-bold tracking-widest text-sm shadow-inner">
-          {timeFormatted}
-        </div>
-
-        {/* Speed / Pause */}
-        <div className="flex items-center bg-neutral-900 rounded border border-neutral-800 p-0.5">
+      {/* Center: Clean Shift Clock & Next Call Action */}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center bg-black/60 rounded border border-neutral-800 px-2.5 py-1 gap-2">
+          <span className="text-[10px] text-neutral-500 hidden sm:inline">SHIFT</span>
+          <span className="text-crt-amber font-mono font-bold tracking-widest text-sm">
+            {timeFormatted}
+          </span>
           <button
             onClick={togglePause}
-            title={isPaused ? "Resume Shift" : "Pause Shift"}
-            className="p-1 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded"
+            title={isPaused ? 'Resume Shift [P]' : 'Pause Shift [P]'}
+            className="text-neutral-400 hover:text-white transition"
           >
             {isPaused ? <Play className="w-3.5 h-3.5 text-crt-amber" /> : <Pause className="w-3.5 h-3.5" />}
           </button>
-          <button
-            onClick={() => setTimeSpeed(1)}
-            className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${timeSpeed === 1 ? 'bg-neutral-700 text-crt-amber font-bold' : 'text-neutral-400 hover:text-white'}`}
-          >
-            1x
-          </button>
-          <button
-            onClick={() => setTimeSpeed(3)}
-            className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${timeSpeed === 3 ? 'bg-neutral-700 text-crt-amber font-bold' : 'text-neutral-400 hover:text-white'}`}
-          >
-            3x
-          </button>
-          <button
-            onClick={() => setTimeSpeed(5)}
-            className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${timeSpeed === 5 ? 'bg-neutral-700 text-crt-amber font-bold' : 'text-neutral-400 hover:text-white'}`}
-          >
-            5x
-          </button>
         </div>
 
-        {/* Fast forward to next call button */}
         {isCurrentCallDone && (
           <button
             onClick={fastForwardToNextCall}
-            className="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-black font-bold rounded text-[11px] flex items-center gap-1.5 shadow transition animate-pulse"
-            title="Fast-forward clock to the next emergency transmission"
+            className="px-2.5 py-1 bg-crt-amber hover:bg-yellow-400 text-black font-bold rounded text-[11px] flex items-center gap-1 shadow transition"
+            title="Advance to next incoming call [SPACE]"
           >
-            <FastForward className="w-3 h-3" />
-            <span>NEXT CALL</span>
+            <FastForward className="w-3 h-3 fill-current" />
+            <span className="hidden md:inline">NEXT CALL</span>
           </button>
         )}
+      </div>
 
-        {/* Case Dossier Selector */}
-        <button
-          onClick={onOpenCaseSelector}
-          title="Select Incident Case Dossier"
-          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-crt-amber hover:text-yellow-300 flex items-center gap-1"
-        >
-          <FolderArchive className="w-3.5 h-3.5" />
-          <span className="hidden xl:inline text-[10px] font-bold">CASES</span>
-        </button>
-
-        {/* Badges / Commendations */}
+      {/* Right: Quiet Utility Icons */}
+      <div className="flex items-center gap-1.5 shrink-0">
         <button
           onClick={onOpenBadges}
-          title="Civil Dispatch Commendations & Service Medals"
-          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-crt-amber hover:text-yellow-300 flex items-center gap-1"
+          title="Service Medals & Commendations"
+          className="px-2 py-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-neutral-300 hover:text-crt-amber flex items-center gap-1 transition"
         >
-          <Award className="w-3.5 h-3.5" />
-          <span className="text-[10px] font-bold">
-            MEDALS ({unlockedBadges?.length || 0})
-          </span>
+          <Award className="w-3.5 h-3.5 text-crt-amber" />
+          <span className="text-[10px] font-bold">{unlockedBadges?.length || 0}</span>
         </button>
 
-        {/* Station Breaker Box Status */}
-        <button
-          onClick={() => triggerHazard('power_surge')}
-          title="Station Circuit Breaker Bus (Click to trigger test electrical surge)"
-          className={`p-1.5 bg-neutral-900 border rounded flex items-center gap-1 transition ${
-            hazardState?.active
-              ? 'border-red-500 text-red-400 bg-red-950/60 animate-pulse'
-              : 'border-neutral-800 text-neutral-400 hover:text-amber-300 hover:border-amber-700'
-          }`}
-        >
-          <Zap className={`w-3.5 h-3.5 ${hazardState?.active ? 'text-red-400 animate-bounce' : 'text-amber-500'}`} />
-          <span className="hidden xl:inline text-[10px] font-bold">
-            {hazardState?.active ? 'BREAKER OVERLOAD' : 'BUS 120V'}
-          </span>
-        </button>
-
-        {/* Help / Briefing */}
         <button
           onClick={onOpenBriefing}
-          title="Operator Directives & Rules"
-          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-crt-amber hover:text-yellow-300 flex items-center gap-1"
+          title="Operator Guide & Rules"
+          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-neutral-300 hover:text-crt-amber transition"
         >
           <HelpCircle className="w-3.5 h-3.5" />
-          <span className="hidden xl:inline text-[10px] font-bold">MANUAL</span>
         </button>
 
-        {/* Sound toggle */}
         <button
           onClick={toggleSound}
-          title={settings.soundEnabled ? "Mute Atmospheric Sound" : "Enable Sound"}
-          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-neutral-300 hover:text-white"
+          title={settings.soundEnabled ? 'Mute Audio' : 'Unmute Audio'}
+          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-neutral-300 hover:text-white transition"
         >
-          {settings.soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-crt-green" /> : <VolumeX className="w-3.5 h-3.5 text-neutral-500" />}
+          {settings.soundEnabled ? (
+            <Volume2 className="w-3.5 h-3.5 text-emerald-400" />
+          ) : (
+            <VolumeX className="w-3.5 h-3.5 text-neutral-500" />
+          )}
         </button>
 
-        {/* Settings */}
         <button
           onClick={onOpenSettings}
-          title="Terminal Settings"
-          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-neutral-300 hover:text-white"
+          title="Settings"
+          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-neutral-300 hover:text-white transition"
         >
           <Settings className="w-3.5 h-3.5" />
         </button>
 
-        {/* Restart */}
         <button
           onClick={() => {
-            if (confirm("Reset current shift progress back to 22:00?")) {
+            if (confirm('Reset current case progress back to the start of the shift?')) {
               resetGame();
             }
           }}
-          title="Reset Shift"
-          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-neutral-500 hover:text-red-400"
+          title="Restart Case"
+          className="p-1.5 bg-neutral-900 border border-neutral-800 rounded hover:bg-neutral-800 text-neutral-500 hover:text-red-400 transition"
         >
           <RotateCcw className="w-3.5 h-3.5" />
         </button>

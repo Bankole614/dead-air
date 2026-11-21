@@ -57,30 +57,30 @@ export const OperatorBriefing: React.FC<OperatorBriefingProps> = ({ onClose }) =
             <div className="p-3 bg-black/40 rounded border border-neutral-800 space-y-1">
               <div className="font-bold text-crt-amber flex items-center gap-1.5">
                 <Headphones className="w-3.5 h-3.5" />
-                2. LISTEN TO BACKGROUND CLUES
+                2. A/B AUDIO COMPARATOR & SELECTIVE LISTENING
               </div>
               <p className="text-neutral-400 text-[11px]">
-                Background acoustics appear in brackets: <span className="text-crt-amber">[engine ticking]</span>, <span className="text-crt-amber">[cat hiss]</span>, <span className="text-crt-amber">[wind]</span>. Callers can lie, but ambient sounds don't.
+                Open <span className="text-crt-amber font-bold">[F3] A/B OSCILLOSCOPE</span> to compare two recordings side-by-side. Expose <span className="text-emerald-300">phonemic mishearings</span>, <span className="text-emerald-300">silent clocks</span>, and <span className="text-red-300">shared TV/radio broadcasts</span>.
               </p>
             </div>
 
             <div className="p-3 bg-black/40 rounded border border-neutral-800 space-y-1">
               <div className="font-bold text-yellow-400 flex items-center gap-1.5">
                 <Pin className="w-3.5 h-3.5" />
-                3. PIN CLUES TO CATCH LIES
+                3. PROVENANCE & CIRCULAR REPORTING
               </div>
               <p className="text-neutral-400 text-[11px]">
-                Click the <span className="text-crt-amber font-bold">📌 PIN</span> icon next to any transcript statement to save it. Pinning conflicting statements unlocks <span className="text-amber-300 font-bold">[CHALLENGE]</span> responses to break callers' stories!
+                Stamp every pinned clue as <span className="text-emerald-400 font-bold">FIRSTHAND</span>, <span className="text-red-400 font-bold">HEARSAY ECHO</span>, or <span className="text-amber-300 font-bold">INTERPRETATION</span>. Two callers repeating the same radio broadcast are an echo chamber, not independent confirmation!
               </p>
             </div>
 
             <div className="p-3 bg-black/40 rounded border border-neutral-800 space-y-1">
               <div className="font-bold text-blue-400 flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5" />
-                4. DISPATCH WITH CAUTION
+                4. CHALLENGE BIAS & CALIBRATE CONFIDENCE
               </div>
               <p className="text-neutral-400 text-[11px]">
-                You have limited units: 2 Police, 1 Medic, 1 Welfare. Once dispatched, they are locked on location for 20 minutes. Don't waste them on decoys.
+                Don't let supervisor memos or leading questions trap you in <span className="text-crt-amber font-bold">Confirmation Bias</span>. Test your working hypothesis in <span className="text-crt-amber font-bold">[F3] CHALLENGE THEORY</span> and calibrate your confidence (<span className="text-white">50% / 75% / 95%</span>) when filing Form 911-B.
               </p>
             </div>
           </div>

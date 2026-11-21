@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ShiftState, UnitType, PinnedClue, DialogueOption, CaseDef, ActiveDilemma, ConsoleMode } from '../types/game';
+import { ShiftState, UnitType, PinnedClue, DialogueOption, CaseDef, ActiveDilemma, ConsoleMode, ProvenanceType, ConfidenceLevel, PsychologicalMetric } from '../types/game';
 import { ALL_CASES } from '../content/cases';
 import { sound } from '../engine/sound';
 
@@ -37,7 +37,7 @@ interface GameStore extends ShiftState {
   
   // Dispatch actions
   dispatchUnit: (unitId: string, location: string, durationGameSeconds?: number) => void;
-  submitVerdict: (suspectId: string, targetId: string, pinnedEvidenceIds: string[]) => void;
+  submitVerdict: (suspectId: string, targetId: string, pinnedEvidenceIds: string[], confidenceLevel?: ConfidenceLevel) => void;
   setScannerFrequency: (freq: number) => void;
   toggleRoadblock: (checkpointId: string) => void;
   setConsoleMode: (mode: ConsoleMode) => void;
@@ -50,13 +50,18 @@ interface GameStore extends ShiftState {
   triggerDilemma: (dilemma: ActiveDilemma) => void;
   resolveDilemma: (choice: 'A' | 'B') => void;
 
-  // Notebook actions
-  addPinnedClue: (text: string, speaker: string, callId: string, timestamp: string) => void;
+  // Notebook & Epistemic Psychology actions
+  addPinnedClue: (text: string, speaker: string, callId: string, timestamp: string, ambientSourceId?: string, provenance?: ProvenanceType) => void;
   removePinnedClue: (pinId: string) => void;
   updateFreeNotes: (notes: string) => void;
   assignPinToTimeline: (pinId: string, slot: string) => void;
   assignPinToCharacter: (pinId: string, charId: string) => void;
+  assignPinProvenance: (pinId: string, provenance: ProvenanceType) => void;
   updateCharacterNotes: (charId: string, notes: string) => void;
+  setWorkingTheorySuspect: (suspectId: string) => void;
+  toggleChallengeCounterPin: (pinId: string) => void;
+  updateQuickScratchpad: (field: 'address' | 'entrance' | 'suspectDir' | 'keySound' | 'verification', value: string) => void;
+  recordABComparisonDiscovery: (findingText: string, ambientSourceId?: string) => void;
 
   // Settings
   updateSettings: (newSettings: Partial<GameSettings>) => void;
@@ -81,6 +86,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
   notebook: {
     pins: [],
     freeNotes: ALL_CASES['case_1'].initialNotes,
+  },
+  workingTheory: {
+    suspectId: '',
+    challenged: false,
+    counterPinIds: [],
+  },
+  quickScratchpad: {
+    address: '',
+    entrance: '',
+    suspectDir: '',
+    keySound: '',
+    verification: '',
   },
   characters: ALL_CASES['case_1'].characters,
   consequences: [],
@@ -125,6 +142,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       notebook: {
         pins: [],
         freeNotes: targetCase.initialNotes,
+      },
+      workingTheory: {
+        suspectId: '',
+        challenged: false,
+        counterPinIds: [],
+      },
+      quickScratchpad: {
+        address: '',
+        entrance: '',
+        suspectDir: '',
+        keySound: '',
+        verification: '',
       },
       inGameTimeSeconds: 22 * 3600,
       shiftCompleted: false,
@@ -284,9 +313,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
       state.flags['hazard_1_done'] = true;
     }
 
-    // Dynamic Moral Dilemma trigger (around 22:14 in Case 1)
+    // Dynamic Moral Dilemma trigger (around 22:14 in Case 1 only)
     let currentDilemma = state.activeDilemma;
-    if (!currentDilemma && !state.flags['dilemma_1_triggered'] && newGameTime >= 22 * 3600 + 840) {
+    if (state.activeCaseId === 'case_1' && !currentDilemma && !state.flags['dilemma_1_triggered'] && newGameTime >= 22 * 3600 + 840) {
       state.flags['dilemma_1_triggered'] = true;
       sound.playDispatchAlarm();
       const hours = Math.floor(newGameTime / 3600);
@@ -396,6 +425,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
           audioCue: initialNode.audioCue,
           voiceUrl: initialNode.voiceUrl,
           backgroundClues: initialNode.backgroundClues,
+          ambientSourceId: initialNode.ambientSourceId,
+          forensicReveal: initialNode.forensicReveal,
         }
       ],
       agitationLevel: 0,
@@ -491,6 +522,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     let updatedUnits = { ...state.activeUnits };
     let updatedFlags = { ...state.flags };
 
+    if (option.biasType === 'leading_question') {
+      updatedFlags['leading_questions_count'] = ((updatedFlags['leading_questions_count'] as number) || 0) + 1;
+    } else if (option.biasType === 'challenge_theory') {
+      updatedFlags['challenged_bias_in_dialogue'] = true;
+    }
+
     if (option.effects) {
       for (const effect of option.effects) {
         if (effect.type === 'dispatch_lock') {
@@ -563,6 +600,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         audioCue: nextNode.audioCue,
         voiceUrl: nextNode.voiceUrl,
         backgroundClues: nextNode.backgroundClues,
+        ambientSourceId: nextNode.ambientSourceId,
+        forensicReveal: nextNode.forensicReveal,
       }
     ];
 
@@ -603,6 +642,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const isBlackwood = locLower.includes('blackwood');
     const isReservoir = locLower.includes('reservoir');
     const isElm = locLower.includes('elm');
+    const isBellweather = locLower.includes('bellweather') || locLower.includes('44 mercer');
+    const isMercer18 = locLower.includes('18 mercer') || locLower.includes('80 mercer') || locLower.includes('sterling');
+    const isPetrol9 = locLower.includes('petrol') || locLower.includes('route 9') || locLower.includes('culvert');
+    const isWndr = locLower.includes('wndr') || locLower.includes('studio') || locLower.includes('baldy');
+    const isAnnex = locLower.includes('annex') || locLower.includes('cage') || locLower.includes('west');
 
     // Event 1: Arrival report (+15 game seconds)
     const arrivalTime = state.inGameTimeSeconds + 15;
@@ -610,7 +654,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Event 2: Investigation findings (+38 game seconds)
     const findingsTime = state.inGameTimeSeconds + 38;
-    const findingsText = isBlackwood
+    const findingsText = isBellweather
+      ? `${unit.name} to Central: On scene at Bellweather Apartments (44 Mercer Way)! No gunshots fired—confirming a 300-PSI cast-iron steam manifold ruptured in the adjacent machine workshop! Caretaker Donovan Vance is unarmed and assisting with boiler shutoff. Rear alley tire tracks belong to Valley Bakery Delivery Van #4!`
+      : isMercer18
+      ? `${unit.name} to Central: Inspected 18 Mercer Street! The Western Entrance deadbolt is locked from the INSIDE with Judge Sterling's brass key in the interior cylinder! Study grandfather clock strike hammer is mechanically jammed, and we found an arson delay candle inside the probate vault! Judge Sterling was spotted two blocks away at the diner payphone!`
+      : isPetrol9
+      ? `${unit.name} to Central: At Route 9 Petrol Depot! Confirming ONLY ONE blast occurred in the drainage culvert beneath the Conrail tracks from a cracked natural gas main! Night attendant Cole Mercer's white coupe is still parked under the canopy—he remained in the manifold trench to shut off the main fuel valve and saved the storage tanks!`
+      : isWndr
+      ? `${unit.name} to Central: Breached WNDR South Loading Door! Station Manager Malcolm Vale intercepted in Studio A with Cart C-6 looping on the local cue monitor! Presenter Ruth Adeyemi rescued from Production Booth B!`
+      : isAnnex
+      ? `${unit.name} to Central: Entered City Records Annex lower west corridor! Rescued watchman Elias Reed from behind the West Cage's two deadbolts and intercepted Deputy Archivist Mara Voss with the red relief-fund ledger!`
+      : isBlackwood
       ? `${unit.name} to Central: Code 4 at Blackwood Lane! Ground floor is secure, no signs of ransacking. Found a hot CB radio scanner on the kitchen counter tuned to our dispatch channel. Nobody is barricaded inside—this whole call was a diversion!`
       : isReservoir
       ? `${unit.name} to Central: 10-33 Emergency at County Reservoir! We have two male suspects in dark jump-suits cutting the chlorine manifold padlock! Suspects fleeing on foot into north treeline, requesting perimeter containment!`
@@ -646,6 +700,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     set({
       pendingRadioEvents: newEvents,
+      flags: {
+        ...state.flags,
+        ...(state.notebook.pins.length < 2 ? { premature_dispatch: true } : {}),
+      },
       activeUnits: {
         ...state.activeUnits,
         [unitId]: {
@@ -792,9 +850,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
     const updatedUnits = { ...state.activeUnits };
-    if (updatedUnits['cruiser_108']) {
-      updatedUnits['cruiser_108'] = {
-        ...updatedUnits['cruiser_108'],
+    const targetUnitKey = Object.keys(updatedUnits).find(
+      (k) => k === 'P2' || updatedUnits[k].name.toLowerCase().includes('108') || updatedUnits[k].type === 'police'
+    );
+    if (targetUnitKey && updatedUnits[targetUnitKey]) {
+      updatedUnits[targetUnitKey] = {
+        ...updatedUnits[targetUnitKey],
         status: 'dispatched',
         assignedLocation: chosen.sector,
         busyUntil: state.inGameTimeSeconds + 180,
@@ -846,7 +907,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }, 4500);
   },
 
-  submitVerdict: (suspectId: string, targetId: string, pinnedEvidenceIds: string[]) => {
+  submitVerdict: (suspectId: string, targetId: string, pinnedEvidenceIds: string[], confidenceLevel: ConfidenceLevel = 75) => {
     sound.playPinSound();
     const state = get();
     const currentCase = state.getActiveCase();
@@ -862,10 +923,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ? deduction.correctEvidenceKeywords.some(kw => pinsText.includes(kw.toLowerCase()))
       : selectedPins.length > 0;
 
-    let score = 0;
-    if (suspectCorrect) score += 40;
-    if (targetCorrect) score += 40;
-    if (evidenceCorrect) score += 20;
+    let baseScore = 0;
+    if (suspectCorrect) baseScore += 40;
+    if (targetCorrect) baseScore += 40;
+    if (evidenceCorrect) baseScore += 20;
+
+    // Confidence Calibration calculation:
+    // High confidence (95%) when right gives +5 calibration bonus; when wrong gives -15 overconfidence penalty.
+    // Cautious confidence (50%) when wrong softens penalty (+10 epistemic humility); when right gives 0 delta.
+    let calibrationDelta = 0;
+    if (baseScore >= 80) {
+      if (confidenceLevel === 95) calibrationDelta = 5;
+      else if (confidenceLevel === 50) calibrationDelta = -5;
+    } else {
+      if (confidenceLevel === 95) calibrationDelta = -15;
+      else if (confidenceLevel === 50) calibrationDelta = 10;
+    }
+
+    const score = Math.max(0, Math.min(100, baseScore + calibrationDelta));
 
     let grade: 'S' | 'A' | 'B' | 'C' | 'F' = 'F';
     if (score >= 95) grade = 'S';
@@ -873,13 +948,90 @@ export const useGameStore = create<GameStore>((set, get) => ({
     else if (score >= 60) grade = 'B';
     else if (score >= 40) grade = 'C';
 
+    // Psychological Debrief Metrics
+    const classifiedProvenanceCount = state.notebook.pins.filter(p => !!p.provenance).length;
+    const echoClassifiedCount = state.notebook.pins.filter(p => p.provenance === 'hearsay_echo').length;
+    const abComparisonDone = !!state.flags['ab_comparison_performed'];
+    const leadingQuestions = (state.flags['leading_questions_count'] as number) || 0;
+    const theoryChallenged = !!(
+      (state.workingTheory && state.workingTheory.challenged && state.workingTheory.counterPinIds.length > 0) ||
+      state.flags['challenged_bias_in_dialogue']
+    );
+    const prematureDispatch = !!state.flags['premature_dispatch'];
+    const usedQuickScratchpad = !!(
+      state.quickScratchpad &&
+      (state.quickScratchpad.address || state.quickScratchpad.entrance || state.quickScratchpad.keySound)
+    );
+
+    const psychologicalProfile: PsychologicalMetric[] = [
+      {
+        label: 'Confirmation Bias Resistance',
+        concept: '1. Confirmation Bias (Nickerson, 1998)',
+        assessment: theoryChallenged && suspectCorrect ? 'EXCELLENT' : suspectCorrect ? 'GOOD' : 'DETECTED',
+        positive: suspectCorrect,
+        detail: theoryChallenged
+          ? 'Actively tested initial hypothesis against contradictory evidence before filing.'
+          : suspectCorrect
+          ? 'Avoided the primed suspect trap, though without logging formal counter-evidence.'
+          : 'Fell into institutional confirmation bias by committing to the primed suspect.',
+      },
+      {
+        label: 'Independent Source Identification',
+        concept: '2 & 4. Source Monitoring & Circular Reporting',
+        assessment: abComparisonDone || echoClassifiedCount > 0 ? 'EXCELLENT' : evidenceCorrect ? 'GOOD' : 'POOR',
+        positive: abComparisonDone || echoClassifiedCount > 0 || evidenceCorrect,
+        detail: abComparisonDone
+          ? 'Cross-referenced recordings on Dual-Deck A/B Comparator to expose shared broadcast/acoustic provenance.'
+          : echoClassifiedCount > 0
+          ? 'Correctly flagged secondary witnesses repeating radio/TV broadcasts as Hearsay Echoes.'
+          : 'Did not audit whether corroborating callers were repeating a single broadcast source.',
+      },
+      {
+        label: 'Witness Questioning & Reliability',
+        concept: '1 & 5. Witness Contamination & Selective Listening',
+        assessment: leadingQuestions === 0 && classifiedProvenanceCount >= 2 ? 'EXCELLENT' : leadingQuestions === 0 ? 'GOOD' : 'POOR',
+        positive: leadingQuestions === 0,
+        detail: leadingQuestions > 0
+          ? `Contaminated witness memory with ${leadingQuestions} leading question(s) during live interrogation.`
+          : 'Maintained neutral questioning without implanting suspect names into frightened callers.',
+      },
+      {
+        label: 'Working Memory & Triage Discipline',
+        concept: '3. Cognitive Load Management (Baddeley)',
+        assessment: !prematureDispatch && (usedQuickScratchpad || state.notebook.pins.length >= 3) ? 'EXCELLENT' : !prematureDispatch ? 'GOOD' : 'DETECTED',
+        positive: !prematureDispatch,
+        detail: prematureDispatch
+          ? 'Premature unit dispatch detected before establishing baseline timeline and provenance.'
+          : usedQuickScratchpad
+          ? 'Externalized working memory via Quick-Log Dispatch Pad during multi-line pressure.'
+          : 'Verified evidence pins prior to committing field units.',
+      },
+      {
+        label: 'Epistemic Confidence Calibration',
+        concept: '2. Overconfidence vs. Epistemic Calibration',
+        assessment: baseScore >= 80 && confidenceLevel >= 75
+          ? 'CALIBRATED'
+          : baseScore < 80 && confidenceLevel === 95
+          ? 'OVERCONFIDENT'
+          : baseScore < 80 && confidenceLevel === 50
+          ? 'CAUTIOUS'
+          : 'CALIBRATED',
+        positive: !(baseScore < 80 && confidenceLevel === 95),
+        detail: baseScore < 80 && confidenceLevel === 95
+          ? 'Committed 95% (Code-3 Certainty) to an unsupported conclusion (-15 calibration penalty).'
+          : baseScore < 80 && confidenceLevel === 50
+          ? 'Recorded 50% tentative uncertainty on an incomplete theory (+10 epistemic humility).'
+          : `Stated ${confidenceLevel}% certainty aligned accurately with empirical evidence strength.`,
+      },
+    ];
+
     const feedback = grade === 'S'
-      ? 'Flawless investigation. You penetrated the diversion and intercepted the true culprits before critical infrastructure fell.'
+      ? 'Flawless investigation. You separated direct observation from circular hearsay, resisted confirmation bias, and uncovered the objective truth.'
       : grade === 'A'
-      ? 'Commendable performance. You correctly identified the primary conspirator and protected the target.'
+      ? 'Commendable performance. You identified the true dynamics of the incident and calibrated your conclusions effectively.'
       : grade === 'B'
-      ? 'Partial success. While units responded, key contradictions in the callers\' testimonies were overlooked.'
-      : 'Investigation failure. Units were decoyed away, allowing the infiltrators to escape into the night.';
+      ? 'Partial success. While key elements were uncovered, cognitive traps or unverified witness assumptions clouded the dossier.'
+      : 'Investigation compromised by psychological pitfalls. Premature assumptions or circular reporting led units away from the truth.';
 
     const hours = Math.floor(state.inGameTimeSeconds / 3600);
     const minutes = Math.floor((state.inGameTimeSeconds % 3600) / 60);
@@ -922,6 +1074,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (completedList.length >= 3) awardBadge('badge_anthology_veteran');
     if (completedList.length >= 5) awardBadge('badge_master_archivist');
 
+    // 7. Nickerson Medal of Objectivity (Challenged theory & classified provenance)
+    if (theoryChallenged && echoClassifiedCount > 0 && suspectCorrect) {
+      awardBadge('badge_epistemic_skeptic');
+    }
+
+    // 8. Tektronix Dual-Tape Analyst (Used A/B comparator)
+    if (abComparisonDone) {
+      awardBadge('badge_forensic_comparator');
+    }
+
     set({
       reportFilingActive: false,
       shiftCompleted: true,
@@ -935,20 +1097,31 @@ export const useGameStore = create<GameStore>((set, get) => ({
         grade,
         feedback,
         submittedAt: timeFormatted,
+        confidenceLevel,
+        calibrationDelta,
+        psychologicalProfile,
       },
     });
     get().saveGame();
   },
 
-  addPinnedClue: (text: string, speaker: string, callId: string, timestamp: string) => {
+  addPinnedClue: (text: string, speaker: string, callId: string, timestamp: string, ambientSourceId?: string, provenance?: ProvenanceType) => {
     sound.playPinSound();
     set((state) => {
+      const cleanText = text.trim();
+      // Prevent duplicate pins of the exact same text
+      if (state.notebook.pins.some((p) => p.text.toLowerCase() === cleanText.toLowerCase())) {
+        return state;
+      }
+
       const newPin: PinnedClue = {
         id: `pin_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-        text: text.trim(),
+        text: cleanText,
         sourceSpeaker: speaker,
         callId,
         timestamp,
+        ambientSourceId,
+        provenance,
       };
 
       return {
@@ -997,6 +1170,80 @@ export const useGameStore = create<GameStore>((set, get) => ({
         pins: state.notebook.pins.map((p) => p.id === pinId ? { ...p, characterId: charId } : p),
       }
     }));
+    get().saveGame();
+  },
+
+  assignPinProvenance: (pinId: string, provenance: ProvenanceType) => {
+    sound.playKeypress();
+    set((state) => ({
+      notebook: {
+        ...state.notebook,
+        pins: state.notebook.pins.map((p) => p.id === pinId ? { ...p, provenance } : p),
+      }
+    }));
+    get().saveGame();
+  },
+
+  setWorkingTheorySuspect: (suspectId: string) => {
+    sound.playKeypress();
+    set((state) => ({
+      workingTheory: {
+        suspectId,
+        challenged: state.workingTheory?.challenged || false,
+        counterPinIds: state.workingTheory?.counterPinIds || [],
+      }
+    }));
+    get().saveGame();
+  },
+
+  toggleChallengeCounterPin: (pinId: string) => {
+    sound.playPinSound();
+    set((state) => {
+      const current = state.workingTheory || { suspectId: '', challenged: false, counterPinIds: [] };
+      const exists = current.counterPinIds.includes(pinId);
+      const updatedIds = exists
+        ? current.counterPinIds.filter(id => id !== pinId)
+        : [...current.counterPinIds, pinId];
+      return {
+        workingTheory: {
+          ...current,
+          challenged: updatedIds.length > 0,
+          counterPinIds: updatedIds,
+        }
+      };
+    });
+    get().saveGame();
+  },
+
+  updateQuickScratchpad: (field, value) => {
+    set((state) => ({
+      quickScratchpad: {
+        ...(state.quickScratchpad || { address: '', entrance: '', suspectDir: '', keySound: '', verification: '' }),
+        [field]: value,
+      }
+    }));
+    get().saveGame();
+  },
+
+  recordABComparisonDiscovery: (findingText: string, ambientSourceId?: string) => {
+    const state = get();
+    const hours = Math.floor(state.inGameTimeSeconds / 3600);
+    const minutes = Math.floor((state.inGameTimeSeconds % 3600) / 60);
+    const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    set({
+      flags: {
+        ...state.flags,
+        ab_comparison_performed: true,
+      }
+    });
+    state.addPinnedClue(
+      findingText,
+      'Tektronix A/B Comparator',
+      'forensic_ab',
+      timeFormatted,
+      ambientSourceId,
+      'firsthand'
+    );
   },
 
   updateCharacterNotes: (charId: string, notes: string) => {

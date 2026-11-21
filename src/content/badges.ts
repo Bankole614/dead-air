@@ -59,10 +59,26 @@ export const BADGE_CATALOG: BadgeDef[] = [
   {
     id: 'badge_master_archivist',
     title: 'County Star of Honor',
-    subtitle: 'All 5 Cases Completed',
-    description: 'Mastered all 5 emergency transmission cases in the Dead Air archive. Highest civilian commendation.',
+    subtitle: '5+ Cases Completed',
+    description: 'Mastered at least 5 emergency transmission cases in the Dead Air archive. Highest civilian commendation.',
     category: 'tenure',
     iconName: 'Star',
+  },
+  {
+    id: 'badge_epistemic_skeptic',
+    title: 'Nickerson Medal of Objectivity',
+    subtitle: 'Challenged Confirmation Bias & Echo Chambers',
+    description: 'Actively challenged a working hypothesis with counter-evidence and properly classified circular hearsay.',
+    category: 'investigation',
+    iconName: 'Shield',
+  },
+  {
+    id: 'badge_forensic_comparator',
+    title: 'Tektronix Dual-Tape Analyst',
+    subtitle: 'A/B Cross-Recording Discovery',
+    description: 'Used the Dual-Deck A/B Audio Comparator to expose a source-monitoring error or acoustic timeline defect.',
+    category: 'investigation',
+    iconName: 'Headphones',
   },
 ];
 

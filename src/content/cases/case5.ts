@@ -120,6 +120,8 @@ export const CASE_5: CaseDef = {
             'Paul Harker, WNDR engineering. There is smoke coming through the tape-library door and the corridor alarm has started. Ruth Adeyemi was in Booth B a few minutes ago. I cannot raise her now. The transmitter exciter tripped at twenty-three forty-one; I pulled the isolator after the fault. We are off-air. (A short station ident repeats behind him, followed by a dry tape-splice click.) That is Cart C-6 stuck in CUE. It is looping through the little nearfield monitor in Studio A. It is not going out over the transmitter.',
           audioCue: 'breath',
           backgroundClues: ['smoke_alarm', 'cart_c6_ident_loop', 'tape_splice_click', 'studio_ventilation'],
+          ambientSourceId: 'wndr_cart_c6_cue_loop',
+          forensicReveal: 'STUDIO A NEARFIELD MONITOR SIGNATURE: Cart C-6\'s 8-second ident and dry tape-splice click are playing exclusively through the local Studio A cue speaker while the WNDR 98.6 transmitter exciter is off-air.',
           options: [
             {
               id: 'opt_fire_location',
@@ -261,6 +263,8 @@ export const CASE_5: CaseDef = {
             'This is Cab Twelve, I am at the north gate of WNDR. There is smoke by the aerial hut. I have the radio on 98.6 and your station ident keeps coming round every few seconds. Send the engine up the north antenna road. Do not use the south loading door; it is chained shut. There is nobody left in the main building, so keep your people out of there. (The same eight-second ident and dry splice click repeat behind the caller.)',
           audioCue: 'static',
           backgroundClues: ['cart_c6_ident_loop', 'tape_splice_click', 'studio_ventilation'],
+          ambientSourceId: 'wndr_cart_c6_cue_loop',
+          forensicReveal: 'A/B SOURCE-MONITORING PROOF: The North Gate caller\'s line carries the exact same local Studio A Cart C-6 cue monitor loop and splice click heard on Paul Harker\'s line, proving the caller is inside Studio A and not listening on a car radio.',
           options: [
             {
               id: 'opt_caller_position',

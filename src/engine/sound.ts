@@ -120,7 +120,19 @@ class SoundEngine {
       } else {
         // Caller character voices
         const name = (speakerName || '').toLowerCase();
-        if (name.includes('gable') || name.includes('martha') || name.includes('clara') || name.includes('ruth') || name.includes('mara')) {
+        if (
+          name.includes('gable') ||
+          name.includes('martha') ||
+          name.includes('clara') ||
+          name.includes('ruth') ||
+          name.includes('mara') ||
+          name.includes('sarah') ||
+          name.includes('jenkins') ||
+          name.includes('evelyn') ||
+          name.includes('shaw') ||
+          name.includes('cora') ||
+          name.includes('brenda')
+        ) {
           utterance.pitch = 1.15;
           utterance.rate = 0.93;
           const femaleVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Zira') || v.name.includes('Jenny') || v.name.includes('Female') || v.name.includes('Samantha')));

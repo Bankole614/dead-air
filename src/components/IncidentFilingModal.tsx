@@ -1,6 +1,25 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../state/store';
-import { ShieldAlert, User, MapPin, Pin, ArrowRight } from './icons';
+import { ConfidenceLevel } from '../types/game';
+import { ShieldAlert, User, MapPin, Pin, ArrowRight, CheckCircle2 } from './icons';
+
+const CONFIDENCE_OPTIONS: Array<{ level: ConfidenceLevel; title: string; subtitle: string }> = [
+  {
+    level: 50,
+    title: '50% // TENTATIVE WORKING HYPOTHESIS',
+    subtitle: 'Evidence is partial or ambiguous. Protects against overconfidence penalties if theory is wrong (+10 epistemic humility).',
+  },
+  {
+    level: 75,
+    title: '75% // PROBABLE CAUSE ESTABLISHED',
+    subtitle: 'Standard dispatch confidence backed by corroborated witness or timeline pins.',
+  },
+  {
+    level: 95,
+    title: '95% // CODE-3 CERTAINTY (BEYOND DOUBT)',
+    subtitle: 'Verified via independent firsthand sources or A/B audio forensics (+5 calibration bonus if right; -15 penalty if wrong).',
+  },
+];
 
 export const IncidentFilingModal: React.FC = () => {
   const {
@@ -20,6 +39,7 @@ export const IncidentFilingModal: React.FC = () => {
     deduction?.targetChoices[0]?.id || ''
   );
   const [selectedPinIds, setSelectedPinIds] = useState<string[]>([]);
+  const [confidenceLevel, setConfidenceLevel] = useState<ConfidenceLevel>(75);
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   const togglePin = (pinId: string) => {
@@ -27,7 +47,6 @@ export const IncidentFilingModal: React.FC = () => {
       setSelectedPinIds(selectedPinIds.filter(id => id !== pinId));
     } else {
       if (selectedPinIds.length >= 2) {
-        // limit to 2 main evidence pins
         setSelectedPinIds([selectedPinIds[1], pinId]);
       } else {
         setSelectedPinIds([...selectedPinIds, pinId]);
@@ -42,7 +61,7 @@ export const IncidentFilingModal: React.FC = () => {
       return;
     }
 
-    submitVerdict(selectedSuspect, selectedTarget, selectedPinIds);
+    submitVerdict(selectedSuspect, selectedTarget, selectedPinIds, confidenceLevel);
   };
 
   return (
@@ -54,7 +73,7 @@ export const IncidentFilingModal: React.FC = () => {
             <ShieldAlert className="w-8 h-8 text-crt-amber glow-amber shrink-0" />
             <div>
               <h2 className="text-base font-bold text-crt-amber glow-amber tracking-wider">
-                FORM 911-B // INCIDENT CLASSIFICATION DOCKET
+                FORM 911-B // INCIDENT CLASSIFICATION & CONFIDENCE DOCKET
               </h2>
               <div className="text-xs text-neutral-400">
                 CASE 0{currentCase.number}: {currentCase.title} // SUBMIT DEDUCTION FOR VERIFICATION
@@ -68,15 +87,15 @@ export const IncidentFilingModal: React.FC = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 text-xs">
-          {/* Section 1: Primary Culprit */}
+        <form onSubmit={handleSubmit} className="space-y-5 text-xs">
+          {/* Section 1: Primary Culprit / Cause */}
           <div className="bg-neutral-900/70 p-4 rounded border border-neutral-800 space-y-2">
             <div className="flex items-center gap-2 font-bold text-neutral-200 text-xs">
               <User className="w-4 h-4 text-crt-amber" />
-              <span>STEP 1: IDENTIFY PRIMARY CONSPIRATOR / ACCOMPLICE</span>
+              <span>STEP 1: IDENTIFY RESPONSIBLE PARTY OR TRUE CAUSE</span>
             </div>
             <p className="text-[11px] text-neutral-400">
-              Select the person whose statements and actions served as the false decoy or coordinator:
+              Distinguish what can actually be established from confirmation bias, primed suspects, and witness panic:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
@@ -103,14 +122,14 @@ export const IncidentFilingModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 2: Target of the Incident */}
+          {/* Section 2: Target / True Event Reconstruction */}
           <div className="bg-neutral-900/70 p-4 rounded border border-neutral-800 space-y-2">
             <div className="flex items-center gap-2 font-bold text-neutral-200 text-xs">
               <MapPin className="w-4 h-4 text-crt-amber" />
-              <span>STEP 2: IDENTIFY THE TRUE TARGET OF THE INFILTRATION</span>
+              <span>STEP 2: IDENTIFY THE TRUE INCIDENT / TARGET</span>
             </div>
             <p className="text-[11px] text-neutral-400">
-              Where was the real crime or sabotage taking place while police were diverted?
+              What actually occurred once hearsay echoes and false diversions are stripped away?
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
@@ -142,20 +161,17 @@ export const IncidentFilingModal: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 font-bold text-neutral-200 text-xs">
                 <Pin className="w-4 h-4 text-crt-amber" />
-                <span>STEP 3: ATTACH KEY NOTEBOOK EVIDENCE ({selectedPinIds.length}/2 SELECTED)</span>
+                <span>STEP 3: ATTACH KEY CORROBORATING EVIDENCE ({selectedPinIds.length}/2 SELECTED)</span>
               </div>
               <span className="text-[10px] text-neutral-500">SELECT 1–2 CRITICAL CLUES</span>
             </div>
-            <p className="text-[11px] text-neutral-400">
-              Select the pinned testimony that proves the suspect lied about their physical position or acoustic surroundings:
-            </p>
 
             {notebook.pins.length === 0 ? (
               <div className="p-3 bg-black/50 border border-neutral-800 rounded text-neutral-500 text-center italic text-xs">
                 No clues were pinned to the notebook during transmissions. (Investigation penalty applied)
               </div>
             ) : (
-              <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1">
+              <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
                 {notebook.pins.map((pin) => {
                   const isSelected = selectedPinIds.includes(pin.id);
                   return (
@@ -175,7 +191,7 @@ export const IncidentFilingModal: React.FC = () => {
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="truncate text-[11px] text-neutral-400">
-                          [{pin.sourceSpeaker}] @ {pin.timestamp}
+                          [{pin.sourceSpeaker}] @ {pin.timestamp} {pin.provenance ? `// ${pin.provenance.toUpperCase()}` : ''}
                         </div>
                         <div className="text-xs">{pin.text}</div>
                       </div>
@@ -184,6 +200,37 @@ export const IncidentFilingModal: React.FC = () => {
                 })}
               </div>
             )}
+          </div>
+
+          {/* Section 4: Epistemic Confidence Calibration */}
+          <div className="bg-neutral-900/70 p-4 rounded border border-neutral-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-neutral-200 text-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>STEP 4: RECORD EPISTEMIC CONFIDENCE CALIBRATION</span>
+              </div>
+              <span className="text-[10px] text-crt-amber font-bold">CERTAINTY: {confidenceLevel}%</span>
+            </div>
+            <p className="text-[11px] text-neutral-400">
+              Distinguish what you know from what you merely suspect. High confidence on an unverified theory carries an overconfidence penalty:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+              {CONFIDENCE_OPTIONS.map((opt) => (
+                <button
+                  type="button"
+                  key={opt.level}
+                  onClick={() => setConfidenceLevel(opt.level)}
+                  className={`p-2.5 rounded border text-left transition ${
+                    confidenceLevel === opt.level
+                      ? 'border-emerald-500 bg-emerald-950/40 text-emerald-100 shadow'
+                      : 'border-neutral-800 bg-black/40 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <div className="font-bold text-[11px] text-crt-amber">{opt.title}</div>
+                  <div className="text-[10px] text-neutral-400 mt-1 leading-snug">{opt.subtitle}</div>
+                </button>
+              ))}
+            </div>
           </div>
 
           {errorMsg && (
@@ -201,7 +248,7 @@ export const IncidentFilingModal: React.FC = () => {
               type="submit"
               className="px-6 py-2.5 bg-crt-amber hover:bg-yellow-400 text-black font-bold rounded text-xs flex items-center gap-2 shadow-lg transition active:scale-95"
             >
-              <span>CONFIRM & SUBMIT CASE VERDICT</span>
+              <span>CONFIRM & SUBMIT CASE VERDICT ({confidenceLevel}% CONFIDENCE)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

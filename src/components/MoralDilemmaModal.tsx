@@ -67,10 +67,7 @@ export const MoralDilemmaModal: React.FC = () => {
 
                 <div className="p-2.5 bg-black/60 border border-neutral-800 rounded text-[11px] space-y-1 mb-4">
                   <div className="text-neutral-400">
-                    <span className="text-crt-green font-bold">EXPECTED GAIN:</span> Rescue watchman & secure arson accelerant canister.
-                  </div>
-                  <div className="text-neutral-400">
-                    <span className="text-red-400 font-bold">RISK / COST:</span> Suspect vehicle evades Route 9 roadblock.
+                    <span className="text-crt-green font-bold">EXPECTED OUTCOME:</span> {optionA.consequenceSummary}
                   </div>
                 </div>
               </div>
@@ -80,7 +77,7 @@ export const MoralDilemmaModal: React.FC = () => {
                 className="w-full py-2.5 bg-neutral-800 hover:bg-crt-amber hover:text-black active:scale-95 text-neutral-100 font-bold text-xs rounded border border-amber-800/80 transition flex items-center justify-center gap-2 shadow-sm"
               >
                 <Shield className="w-4 h-4" />
-                DISPATCH 108 TO SAWMILL
+                COMMIT TO {optionA.sector}
               </button>
             </div>
 
@@ -100,10 +97,7 @@ export const MoralDilemmaModal: React.FC = () => {
 
                 <div className="p-2.5 bg-black/60 border border-neutral-800 rounded text-[11px] space-y-1 mb-4">
                   <div className="text-neutral-400">
-                    <span className="text-crt-green font-bold">EXPECTED GAIN:</span> Box suspect vehicle; seize stolen sluice blueprints.
-                  </div>
-                  <div className="text-neutral-400">
-                    <span className="text-red-400 font-bold">RISK / COST:</span> Mill Creek office structure fully collapses.
+                    <span className="text-crt-green font-bold">EXPECTED OUTCOME:</span> {optionB.consequenceSummary}
                   </div>
                 </div>
               </div>
@@ -113,7 +107,7 @@ export const MoralDilemmaModal: React.FC = () => {
                 className="w-full py-2.5 bg-neutral-800 hover:bg-crt-amber hover:text-black active:scale-95 text-neutral-100 font-bold text-xs rounded border border-amber-800/80 transition flex items-center justify-center gap-2 shadow-sm"
               >
                 <Shield className="w-4 h-4" />
-                DISPATCH 108 TO ROUTE 9
+                COMMIT TO {optionB.sector}
               </button>
             </div>
           </div>

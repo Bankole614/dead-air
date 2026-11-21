@@ -22,6 +22,7 @@ export const RadioScanner: React.FC = () => {
     scannerFrequency,
     setScannerFrequency,
     addPinnedClue,
+    notebook,
     radioFeed,
     inGameTimeSeconds,
     activeCaseId,
@@ -63,13 +64,37 @@ export const RadioScanner: React.FC = () => {
           speaker: 'DISPATCH CENTRAL',
           text: 'All Sector 4 units: maintain visual awareness near public utilities. County curfew in effect.',
           time: '22:02',
+          ambientSourceId: undefined as string | undefined,
         },
+        ...(activeCaseId === 'case_6'
+          ? [
+              {
+                id: 'sheriff_c6_echo',
+                speaker: 'DISPATCHER HALE (CH-1 BROADCAST)',
+                text: 'ALL UNITS CODE-2 ADVISORY: Possible double gunshot reported at Bellweather Apartments, 44 Mercer Way. Repeat: two gunshots heard near third floor. Watch for caretaker Donovan Vance.',
+                time: '22:05',
+                ambientSourceId: 'bellweather_radio_echo',
+              },
+            ]
+          : []),
+        ...(activeCaseId === 'case_8'
+          ? [
+              {
+                id: 'sheriff_c8_echo',
+                speaker: 'COUNTY DISPATCH RELAY (CH-1)',
+                text: 'ALERT ALL PATROLS: Unconfirmed report of a double explosion—repeat, two blasts—at Route 9 Petrol Depot. Suspect vehicle white coupe departing eastbound.',
+                time: '22:06',
+                ambientSourceId: 'petrol9_radio_echo',
+              },
+            ]
+          : []),
       ];
       const dispatches = radioFeed.map(rf => ({
         id: rf.id,
         speaker: rf.unitName.toUpperCase(),
         text: rf.text,
         time: rf.timestamp,
+        ambientSourceId: rf.ambientSourceId,
       }));
       return [...baseSheriff, ...dispatches];
     }
@@ -82,12 +107,47 @@ export const RadioScanner: React.FC = () => {
             speaker: 'UNKNOWN [WALKIE 1]',
             text: '(Whispering over wind) "Ross, you on line? Keep that dispatcher tied up. We just reached the North Gate fence."',
             time: '22:06',
+            ambientSourceId: undefined,
           },
           {
             id: 'cb_02',
             speaker: 'UNKNOWN [WALKIE 2]',
             text: '"Roger that. 911 board is swamped with calls from Elm Street. The decoy worked. Move the vehicle now."',
             time: '22:12',
+            ambientSourceId: undefined,
+          },
+        ];
+      }
+      if (activeCaseId === 'case_6') {
+        return [
+          {
+            id: 'cb_c6_bakery',
+            speaker: 'VALLEY BAKERY VAN #4 (CB CH-19)',
+            text: '"Base, this is Truck 4 leaving Bellweather rear alley dock. Heavy steam blow-off from the machine shop next door scared the hell out of me—sounded like a cannon going off!"',
+            time: '22:08',
+            ambientSourceId: 'bellweather_bakery_diesel',
+          },
+        ];
+      }
+      if (activeCaseId === 'case_7') {
+        return [
+          {
+            id: 'cb_c7_tv',
+            speaker: 'WKBW LATE-NIGHT CRIME BULLETIN (BLEED OVER 27.185)',
+            text: '[TV DRAMA RE-RUN / NEWS AUDIO]: "...The masked intruder paused on the landing and shouted: \'Don\'t open the second door!\' before the alarm sounded..."',
+            time: '22:12',
+            ambientSourceId: 'wkbw_tv_broadcast_second_door',
+          },
+        ];
+      }
+      if (activeCaseId === 'case_8') {
+        return [
+          {
+            id: 'cb_c8_rail',
+            speaker: 'CONRAIL FREIGHT LOCOMOTIVE 802 (CB CH-19)',
+            text: '"Yardmaster, Heavy Freight 802 just rattled over the Route 9 Petrol crossing at 22:02. Sub-grade vibrated hard enough to crack the culvert pipe—smelled raw natural gas venting right before the single ignition flash!"',
+            time: '22:09',
+            ambientSourceId: 'conrail_freight_rumble',
           },
         ];
       }
@@ -97,6 +157,7 @@ export const RadioScanner: React.FC = () => {
           speaker: 'CB TRUCKER 44',
           text: 'Heads up westbound Route 9, bridge access is slow. Thick fog rolling off Blackwood Creek.',
           time: timeFormatted,
+          ambientSourceId: undefined,
         }
       ];
     }
@@ -324,14 +385,25 @@ export const RadioScanner: React.FC = () => {
 
                   <div className="flex items-center gap-2">
                     <span className="text-neutral-500">{t.time}</span>
-                    <button
-                      onClick={() => addPinnedClue(t.text, t.speaker, 'radio_scanner', t.time)}
-                      title="Pin intercepted audio to notebook dossier"
-                      className="p-1 hover:text-crt-amber text-neutral-500 rounded transition flex items-center gap-1 hover:bg-neutral-800 px-1.5"
-                    >
-                      <Pin className="w-3 h-3" />
-                      <span className="text-[9px]">PIN</span>
-                    </button>
+                    {(() => {
+                      const isPinned = notebook.pins.some(
+                        (p) => p.text.toLowerCase() === t.text.trim().toLowerCase()
+                      );
+                      return (
+                        <button
+                          onClick={() => addPinnedClue(t.text, t.speaker, 'radio_scanner', t.time, (t as any).ambientSourceId, 'hearsay_echo')}
+                          title="Pin intercepted audio to notebook dossier"
+                          className={`p-1 rounded transition flex items-center gap-1 px-1.5 ${
+                            isPinned
+                              ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-700/70 font-bold'
+                              : 'hover:text-crt-amber text-neutral-500 hover:bg-neutral-800'
+                          }`}
+                        >
+                          <Pin className="w-3 h-3" />
+                          <span className="text-[9px]">{isPinned ? '✓ PINNED' : 'PIN'}</span>
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
 

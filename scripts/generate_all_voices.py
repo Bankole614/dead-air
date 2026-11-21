@@ -47,6 +47,30 @@ CASES_DATA = {
             ("en-US-ChristopherNeural", "north_gate_valle_caught", "Turn that off. You cannot know that. All right. I am in Studio A. The transmitter is dead and the cart is in CUE. I left the cue monitor running beside the handset to make it sound like a radio in a cab. Ruth copied the blue master reel. I locked her in Booth B. Do not let them open the tape library.", "+8%"),
             ("en-GB-LibbyNeural", "booth_ruth_intro", "Dispatch? Please—I am locked inside Production Booth B at WNDR. The corridor outside is completely filled with thick smoke. Malcolm Vale locked this door from the outside ten minutes ago. He took the master reel from the tape library.", "+10%"),
         ]
+    },
+    "case6": {
+        "dir": os.path.join("public", "audio", "voices", "case6"),
+        "lines": [
+            ("en-US-JennyNeural", "shaw_intro", "911?! Please hurry! I'm in Apartment 3B at the Bellweather building—44 Mercer Way! A minute ago there was a massive bang like a gunshot right across the airshaft, and I heard a man screaming something like, Get Don out of here! It has to be Donovan Vance, our caretaker—he threatened the landlord yesterday!", "+10%"),
+            ("en-US-GuyNeural", "webb_intro", "Central Dispatch, this is Security Officer Marcus Webb at the 4th Street booth! I'm calling to confirm the shooting at Bellweather Apartments—44 Mercer Way! I heard TWO gunshots. I am 100 percent positive there were two distinct shots, and caretaker Donovan Vance is armed on the third floor!", "+5%"),
+            ("en-US-EricNeural", "vance_intro", "911! This is Donovan Vance—caretaker at Bellweather Apartments! Why are people screaming that police are coming to shoot me?! We just had a 300-PSI main steam manifold blow its cast-iron flange in the machine workshop next to the 3rd-floor airshaft! Before the valve burst, I screamed at my apprentice: GET DOWN! GET DOWN!", "+12%"),
+        ]
+    },
+    "case7": {
+        "dir": os.path.join("public", "audio", "voices", "case7"),
+        "lines": [
+            ("en-US-RogerNeural", "sterling_intro", "Operator! This is Judge Arthur Sterling at 18 Mercer Street! Someone has broken into my residence through the WESTERN entrance! I was asleep in my downstairs study and woke up the exact moment my antique grandfather clock struck the hour—and I heard a man in the hall shout: Don't open the second door! Now I smell smoke coming from my probate file room!", "+5%"),
+            ("en-US-ChristopherNeural", "prentice_intro", "911! I'm calling from my porch at 80 Mercer Street—eight-zero Mercer! I just saw Judge Sterling himself walking briskly away from the payphone booth outside the corner diner toward the EASTERN entrance of 80 Mercer! And crazier still, a minute ago I swear I heard a voice say Don't open the second door!", "+8%"),
+            ("en-US-JennyNeural", "cora_intro", "Dispatch! This is Cora, the housekeeper at 18 Mercer Street! The smoke alarm in the Judge's study just went off—there's a fire burning in his locked probate cabinet! Listen, you can hear the study's antique grandfather clock right beside me—it has a broken gear that makes a loud mechanical DOUBLE-CHIME before every strike, except the main strike hammer jammed at 8:00 PM tonight!", "+10%"),
+        ]
+    },
+    "case8": {
+        "dir": os.path.join("public", "audio", "voices", "case8"),
+        "lines": [
+            ("en-US-EricNeural", "tariq_intro", "911 Dispatch! I'm parked on the Route 9 overpass looking directly down at the Petrol Depot! Sixty seconds ago—right as a heavy Conrail freight train thundered over the rail crossing—there was a loud bang from the drainage culvert between the tracks and the pumps! I heard ONE explosion. Definitely one!", "+10%"),
+            ("en-US-JennyNeural", "brenda_intro", "911! This is Brenda at the Mile 14 Diner down the highway from Route 9 Petrol! I'm calling about the bombing at the petrol station—I am ABSOLUTELY CERTAIN there were TWO explosions! Boom-boom, two separate bombs! And that attendant Cole Mercer must have sped past eastbound in his white coupe!", "+8%"),
+            ("en-US-GuyNeural", "doyle_intro", "Central Dispatch, Guard Frank Doyle at the South Gatehouse! Yes, two explosions—I'm positive! An unconfirmed double explosion—repeat, two blasts—at Route 9 Petrol Depot with a white coupe departing eastbound! And I just grabbed attendant Cole Mercer climbing out of the drainage trench covered in grease with a pipe wrench in his hand!", "+5%"),
+        ]
     }
 }
 

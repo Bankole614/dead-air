@@ -11,6 +11,10 @@ export interface DispatchUnit {
 
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
 
+export type ProvenanceType = 'firsthand' | 'hearsay_echo' | 'interpretation';
+
+export type ConfidenceLevel = 50 | 75 | 95;
+
 export interface Effect {
   type: 'dispatch_lock' | 'unlock_pin' | 'set_flag' | 'alter_trust' | 'queue_call' | 'queue_event';
   payload: any;
@@ -23,6 +27,7 @@ export interface DialogueOption {
   requiresPin?: string[]; // IDs or keywords required in notebook pins
   requiresFlag?: { key: string; value: boolean };
   trustDelta?: number;
+  biasType?: 'leading_question' | 'neutral_inquiry' | 'challenge_theory';
   effects?: Effect[];
 }
 
@@ -34,6 +39,8 @@ export interface DialogueNode {
   audioCue?: 'ring' | 'click' | 'static' | 'hangup' | 'breath' | 'train' | 'door_knock' | 'siren' | 'rain';
   voiceUrl?: string; // audio file path, e.g. "/audio/voices/case1/gable_intro.mp3"
   backgroundClues?: string[]; // tags like ["distant_train", "dog_bark", "creaking_floor"]
+  ambientSourceId?: string; // shared broadcast or acoustic fingerprint ID for A/B comparison
+  forensicReveal?: string; // what A/B comparison or deep spectral scrub reveals about this line
   options?: DialogueOption[];
   next?: string; // auto-advance if no options
   delayMs?: number; // pause before showing
@@ -64,6 +71,8 @@ export interface ActiveCall {
     audioCue?: string;
     voiceUrl?: string;
     backgroundClues?: string[];
+    ambientSourceId?: string;
+    forensicReveal?: string;
   }>;
   holdStartedAt?: number; // game time seconds
   agitationLevel: number; // 0 to 100
@@ -80,6 +89,8 @@ export interface PinnedClue {
   userNotes?: string;
   timelineSlot?: string; // e.g. "22:00-22:15"
   characterId?: string; // e.g. "C1", "C2", "C3", "DISPATCH"
+  provenance?: ProvenanceType; // 'firsthand' | 'hearsay_echo' | 'interpretation'
+  ambientSourceId?: string; // shared broadcast or acoustic fingerprint ID
 }
 
 export interface CharacterCard {
@@ -101,12 +112,21 @@ export interface RadioTransmission {
   text: string;
   location?: string;
   clues?: string[];
+  ambientSourceId?: string;
 }
 
 export interface CaseDeductionConfig {
   suspectChoices: Array<{ id: string; label: string; isCorrect: boolean }>;
   targetChoices: Array<{ id: string; label: string; isCorrect: boolean }>;
   correctEvidenceKeywords: string[];
+}
+
+export interface PsychologicalMetric {
+  label: string;
+  concept: string;
+  assessment: 'EXCELLENT' | 'GOOD' | 'DETECTED' | 'POOR' | 'CALIBRATED' | 'OVERCONFIDENT' | 'CAUTIOUS';
+  positive: boolean;
+  detail: string;
 }
 
 export interface VerdictScore {
@@ -117,6 +137,9 @@ export interface VerdictScore {
   grade: 'S' | 'A' | 'B' | 'C' | 'F';
   feedback: string;
   submittedAt: string;
+  confidenceLevel?: ConfidenceLevel;
+  calibrationDelta?: number;
+  psychologicalProfile?: PsychologicalMetric[];
 }
 
 export interface CaseDef {
@@ -128,6 +151,12 @@ export interface CaseDef {
   timeWindow: string;
   synopsis: string;
   difficulty: 'STANDARD' | 'HARD' | 'CRITICAL';
+  supervisorBiasBrief?: {
+    supervisorName: string;
+    suspectFramed: string;
+    memoText: string;
+    biasTrapExplanation: string;
+  };
   initialUnits: Record<string, DispatchUnit>;
   characters: Record<string, CharacterCard>;
   calls: Record<string, CallDef>;
@@ -173,6 +202,20 @@ export interface ActiveDilemma {
 
 export type ConsoleMode = 'switchboard' | 'map' | 'evidence' | 'scanner';
 
+export interface WorkingTheory {
+  suspectId: string;
+  challenged: boolean;
+  counterPinIds: string[];
+}
+
+export interface QuickScratchpad {
+  address: string;
+  entrance: string;
+  suspectDir: string;
+  keySound: string;
+  verification: string;
+}
+
 export interface ShiftState {
   activeCaseId: string;
   completedCaseIds: string[];
@@ -188,6 +231,8 @@ export interface ShiftState {
     pins: PinnedClue[];
     freeNotes: string;
   };
+  workingTheory?: WorkingTheory;
+  quickScratchpad?: QuickScratchpad;
   characters: Record<string, CharacterCard>;
   radioFeed: RadioTransmission[];
   pendingRadioEvents: Array<{

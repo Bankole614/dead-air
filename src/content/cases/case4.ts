@@ -115,6 +115,8 @@ export const CASE_4: CaseDef = {
             'This is Clara Bell at the City Records Annex. The basement alarm has gone off and smoke is pushing under the lower west-stair door. Elias Reed went down to check the West Cage and he has not come back. There is that two-tone chime again—the faulty timer in the microfilm room. It repeats every thirty seconds. You can hear it through the lower corridor, but not from outside the building. Please send the fire brigade.',
           audioCue: 'breath',
           backgroundClues: ['fire_alarm_bell', 'two_tone_microfilm_chime', 'sub_basement_ventilation'],
+          ambientSourceId: 'microfilm_two_tone_chime',
+          forensicReveal: 'ACOUSTIC PROVENANCE MATCH: The repeating 30-second two-tone microfilm timer chime is physically confined to the sealed lower archive corridor and cannot be heard outside the building.',
           options: [
             {
               id: 'opt_stair_access',
@@ -256,6 +258,8 @@ export const CASE_4: CaseDef = {
             'Listen, I am outside the Records Annex by the east gate. Taxi driver. I saw smoke in the lower windows. Send your fire engine through the east loading ramp and keep them away from the west stair. (A two-tone chime repeats faintly behind the caller.) The West Cage has two deadbolts; they are both thrown. Nobody is in there. There is no reason to send anyone down that side.',
           audioCue: 'static',
           backgroundClues: ['two_tone_microfilm_chime', 'sub_basement_ventilation', 'metal_door_latch'],
+          ambientSourceId: 'microfilm_two_tone_chime',
+          forensicReveal: 'A/B LOCATION CONTRADICTION: The "East Gate taxi driver" recording carries the exact same internal microfilm room two-tone chime heard on Clara Bell\'s lower-corridor line, proving the caller is inside the sub-basement archive.',
           options: [
             {
               id: 'opt_caller_location',

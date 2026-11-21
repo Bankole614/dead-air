@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGameStore } from '../state/store';
-import { MapPin, Shield, ShieldAlert } from './icons';
+import { MapPin, Shield, ShieldAlert, Send } from './icons';
 
 interface MapNode {
   id: string;
@@ -13,16 +13,18 @@ interface MapNode {
 }
 
 const MAP_LOCATIONS: MapNode[] = [
-  { id: 'loc_elm', name: '114 Elm Street', type: 'incident', x: 28, y: 38, sector: 'SECTOR 1 [DOWNTOWN]', desc: 'Martha Gable residence (Noise complaint)' },
-  { id: 'loc_blackwood', name: '412 Blackwood Lane', type: 'incident', x: 42, y: 72, sector: 'SECTOR 4 [RESIDENTIAL]', desc: 'David Ross residence (Reported burglary decoy)' },
-  { id: 'loc_reservoir', name: 'North Municipal Reservoir', type: 'facility', x: 74, y: 22, sector: 'SECTOR 5 [UTILITIES]', desc: 'County water treatment & chemical pump station' },
-  { id: 'loc_tower', name: 'Mount Baldy Transmitter', type: 'facility', x: 82, y: 65, sector: 'SECTOR 6 [UPLINK]', desc: 'County microwave broadcast relay array' },
-  { id: 'loc_route_9', name: 'Route 9 Mile 40', type: 'incident', x: 18, y: 82, sector: 'SECTOR 3 [HIGHWAY]', desc: 'Hazardous transport corridor & mountain pass' },
-  
+  { id: 'loc_elm', name: '114 Elm Street', type: 'incident', x: 24, y: 34, sector: 'SECTOR 1 [DOWNTOWN]', desc: 'Martha Gable residence & City Records Annex block' },
+  { id: 'loc_bellweather', name: '44 Mercer Way (Bellweather)', type: 'incident', x: 35, y: 26, sector: 'SECTOR 1 [MERCER DISTRICT]', desc: 'Bellweather Apartments & Adjacent Steam Machine Workshop' },
+  { id: 'loc_mercer_18', name: '18 & 80 Mercer Street', type: 'incident', x: 40, y: 38, sector: 'SECTOR 1 [MERCER ROW]', desc: 'Judge Sterling Probate Residence (18) & East Porch (80)' },
+  { id: 'loc_blackwood', name: '412 Blackwood Lane', type: 'incident', x: 44, y: 74, sector: 'SECTOR 4 [RESIDENTIAL]', desc: 'David Ross residence & West Archive Corridor approach' },
+  { id: 'loc_reservoir', name: 'North Municipal Reservoir', type: 'facility', x: 74, y: 20, sector: 'SECTOR 5 [UTILITIES]', desc: 'County water treatment & chlorine manifold station' },
+  { id: 'loc_tower', name: 'WNDR / Mount Baldy Array', type: 'facility', x: 82, y: 64, sector: 'SECTOR 6 [BROADCAST]', desc: 'WNDR 98.6 Studio Building & Microwave Broadcast Relay' },
+  { id: 'loc_route_9', name: 'Route 9 Petrol & Mile 40', type: 'incident', x: 18, y: 80, sector: 'SECTOR 3 [HIGHWAY]', desc: 'Route 9 Petrol Depot, Conrail Rail Crossing & Mountain Pass' },
+
   // Tactical Roadblock Checkpoints
-  { id: 'cp_river_bridge', name: 'River Bridge Chokepoint', type: 'checkpoint', x: 48, y: 50, sector: 'CHOKEPOINT A', desc: 'Sole river crossing connecting Sector 4 to South Highway' },
+  { id: 'cp_river_bridge', name: 'River Bridge Chokepoint', type: 'checkpoint', x: 48, y: 52, sector: 'CHOKEPOINT A', desc: 'Sole river crossing connecting Sector 4 to South Highway' },
   { id: 'cp_ridge_road', name: 'Ridge Road Access', type: 'checkpoint', x: 62, y: 28, sector: 'CHOKEPOINT B', desc: 'Paved access road leading into North Reservoir' },
-  { id: 'cp_route_9', name: 'Route 9 Overpass', type: 'checkpoint', x: 25, y: 70, sector: 'CHOKEPOINT C', desc: 'County line highway border interception zone' },
+  { id: 'cp_route_9', name: 'Route 9 Overpass', type: 'checkpoint', x: 25, y: 66, sector: 'CHOKEPOINT C', desc: 'County line highway border & Petrol Depot overlook' },
 ];
 
 export const CountyMap: React.FC = () => {
@@ -30,9 +32,11 @@ export const CountyMap: React.FC = () => {
     activeUnits,
     activeRoadblocks,
     toggleRoadblock,
+    dispatchUnit,
   } = useGameStore();
 
-  const [selectedNode, setSelectedNode] = useState<MapNode | null>(MAP_LOCATIONS[0]);
+  const [selectedNode, setSelectedNode] = useState<MapNode | null>(MAP_LOCATIONS[1]);
+  const availableUnits = Object.values(activeUnits).filter((u) => u.status === 'available');
 
   return (
     <div className="flex-1 flex flex-col bg-[#070c0f] p-3 text-neutral-300 font-mono select-none overflow-hidden">
@@ -59,28 +63,28 @@ export const CountyMap: React.FC = () => {
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)" />
-          
+
           {/* County Road Arteries */}
           <path d="M 50 150 Q 150 200 250 200 T 450 100" fill="none" stroke="#059669" strokeWidth="2" strokeDasharray="4,2" />
           <path d="M 200 50 L 200 350" fill="none" stroke="#059669" strokeWidth="2" />
           <path d="M 100 280 L 380 280" fill="none" stroke="#059669" strokeWidth="1.5" />
-          
+
           {/* County River Vector Line */}
           <path d="M 220 0 Q 240 180 200 220 T 260 400" fill="none" stroke="#0284c7" strokeWidth="4" opacity="0.6" />
         </svg>
 
         {/* Sector Labels */}
         <div className="absolute top-2 left-2 text-[9px] text-emerald-700 font-mono tracking-widest pointer-events-none">
-          SECTOR 1: DOWNTOWN
+          SECTOR 1: DOWNTOWN & MERCER
         </div>
         <div className="absolute top-2 right-2 text-[9px] text-emerald-700 font-mono tracking-widest pointer-events-none">
           SECTOR 5: RESERVOIR
         </div>
         <div className="absolute bottom-2 left-2 text-[9px] text-emerald-700 font-mono tracking-widest pointer-events-none">
-          SECTOR 3: ROUTE 9 PASS
+          SECTOR 3: ROUTE 9 & PETROL DEPOT
         </div>
         <div className="absolute bottom-2 right-2 text-[9px] text-emerald-700 font-mono tracking-widest pointer-events-none">
-          SECTOR 4: BLACKWOOD
+          SECTOR 6: BROADCAST / BLACKWOOD
         </div>
 
         {/* Location Markers & Checkpoints */}
@@ -97,7 +101,6 @@ export const CountyMap: React.FC = () => {
                 style={{ left: `${loc.x}%`, top: `${loc.y}%` }}
                 className="absolute -translate-x-1/2 -translate-y-1/2 group focus:outline-none z-10"
               >
-                {/* Visual Marker Icon */}
                 <div className={`p-1.5 rounded-full border transition-all flex items-center justify-center ${
                   isRoadblockActive
                     ? 'border-red-500 bg-red-950/80 text-red-300 animate-bounce shadow-[0_0_12px_rgba(239,68,68,0.8)]'
@@ -116,7 +119,6 @@ export const CountyMap: React.FC = () => {
                   )}
                 </div>
 
-                {/* Tooltip Label */}
                 <div className={`mt-1 text-[9px] font-mono whitespace-nowrap px-1.5 py-0.5 rounded border pointer-events-none transition ${
                   isRoadblockActive
                     ? 'border-red-600 bg-black text-red-400 font-bold'
@@ -131,22 +133,21 @@ export const CountyMap: React.FC = () => {
           })}
 
           {/* Real-time Patrol Unit Blips */}
-          {Object.values(activeUnits).map((unit) => {
+          {Object.values(activeUnits).map((unit, idx) => {
             const isDispatched = unit.status === 'dispatched';
-            // Simulated position near center or assigned destination
             return (
               <div
                 key={unit.id}
                 className="absolute transition-all duration-1000 z-20 pointer-events-none"
                 style={{
-                  left: isDispatched ? '52%' : '32%',
-                  top: isDispatched ? '45%' : '40%',
+                  left: isDispatched ? `${50 + idx * 6}%` : `${30 + idx * 5}%`,
+                  top: isDispatched ? `${44 + idx * 4}%` : `${40 + idx * 4}%`,
                 }}
               >
                 <div className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-ping"></span>
                   <span className="text-[9px] font-bold text-blue-300 bg-black/80 px-1 rounded border border-blue-900">
-                    {unit.name.split(' ')[0]} {unit.status === 'dispatched' ? '→ EN ROUTE' : '● PATROL'}
+                    {unit.name.split(' ')[0]} {unit.status === 'dispatched' ? `→ ${unit.assignedLocation}` : '● PATROL'}
                   </span>
                 </div>
               </div>
@@ -155,7 +156,7 @@ export const CountyMap: React.FC = () => {
         </div>
       </div>
 
-      {/* Selected Location / Roadblock Tactical Panel */}
+      {/* Selected Location / Quick Dispatch or Roadblock Tactical Panel */}
       {selectedNode && (
         <div className="mt-3 p-3 bg-neutral-950 border border-neutral-800 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0">
           <div className="flex-1 min-w-0">
@@ -184,8 +185,18 @@ export const CountyMap: React.FC = () => {
               </span>
             </button>
           ) : (
-            <div className="text-[10px] text-neutral-500 italic shrink-0">
-              Select a checkpoint chokepoint to issue roadblock orders
+            <div className="flex items-center gap-2 shrink-0">
+              {availableUnits.length > 0 ? (
+                <button
+                  onClick={() => dispatchUnit(availableUnits[0].id, selectedNode.name, 900)}
+                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded text-xs flex items-center gap-1.5 shadow transition active:scale-95"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>DISPATCH {availableUnits[0].name.toUpperCase()} HERE</span>
+                </button>
+              ) : (
+                <span className="text-[10px] text-red-400 font-bold">ALL UNITS CURRENTLY DEPLOYED</span>
+              )}
             </div>
           )}
         </div>
@@ -193,4 +204,3 @@ export const CountyMap: React.FC = () => {
     </div>
   );
 };
-
