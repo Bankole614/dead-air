@@ -11,6 +11,8 @@ export interface DispatchUnit {
 
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
 
+export type GameMode = 'story' | 'standard' | 'hardcore';
+
 export type ProvenanceType = 'firsthand' | 'hearsay_echo' | 'interpretation';
 
 export type ConfidenceLevel = 50 | 75 | 95;

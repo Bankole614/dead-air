@@ -107,7 +107,9 @@ export const BadgesModal: React.FC<BadgesModalProps> = ({ onClose }) => {
                   {isUnlocked && (
                     <div className="mt-2 text-[10px] text-neutral-500 font-mono border-t border-neutral-800/80 pt-1 flex items-center justify-between">
                       <span>TIME: {unlockInfo.unlockedAt}</span>
-                      <span className="uppercase text-crt-amber">CASE: {unlockInfo.caseId.replace('_', ' 0')}</span>
+                      <span className="uppercase text-crt-amber">
+                        CASE {String(unlockInfo.caseId.replace('case_', '')).padStart(2, '0')}
+                      </span>
                     </div>
                   )}
                 </div>

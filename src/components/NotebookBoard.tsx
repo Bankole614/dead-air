@@ -26,6 +26,8 @@ export const NotebookBoard: React.FC = () => {
     notebook,
     characters,
     workingTheory,
+    settings,
+    flags,
     removePinnedClue,
     updateFreeNotes,
     assignPinProvenance,
@@ -36,18 +38,23 @@ export const NotebookBoard: React.FC = () => {
   } = useGameStore();
 
   const currentCase = getActiveCase();
+  const gameMode = settings.gameMode || 'standard';
   const [activeTab, setActiveTab] = useState<'evidence' | 'suspects' | 'audio'>('evidence');
   const [selectedCharacter, setSelectedCharacter] = useState<string>(Object.keys(characters)[0] || 'C1');
   const activeCharId = characters[selectedCharacter] ? selectedCharacter : (Object.keys(characters)[0] || '');
 
-  // Automatic Echo Chamber detection across pinned clues
+  // Automatic Echo Chamber detection across pinned clues (In Hardcore mode, only shown after A/B comparison or manual Hearsay stamp)
   const ambientCounts: Record<string, number> = {};
   notebook.pins.forEach((p) => {
     if (p.ambientSourceId) {
       ambientCounts[p.ambientSourceId] = (ambientCounts[p.ambientSourceId] || 0) + 1;
     }
   });
-  const sharedCarrier = Object.keys(ambientCounts).find((k) => ambientCounts[k] >= 2);
+  const rawSharedCarrier = Object.keys(ambientCounts).find((k) => ambientCounts[k] >= 2);
+  const sharedCarrier =
+    gameMode === 'hardcore' && !flags['ab_comparison_performed'] && !notebook.pins.some((p) => p.provenance === 'hearsay_echo')
+      ? undefined
+      : rawSharedCarrier;
 
   const cycleProvenance = (pinId: string, current?: ProvenanceType) => {
     const idx = current ? PROVENANCE_CYCLE.indexOf(current) : -1;
@@ -152,6 +159,11 @@ export const NotebookBoard: React.FC = () => {
               {notebook.pins.map((pin) => {
                 const prov = pin.provenance || 'firsthand';
                 const isCounter = workingTheory?.counterPinIds.includes(pin.id);
+                const isStoryMatch =
+                  gameMode === 'story' &&
+                  (currentCase.deduction?.correctEvidenceKeywords || []).some((kw) =>
+                    pin.text.toLowerCase().includes(kw.toLowerCase())
+                  );
 
                 return (
                   <div
@@ -162,6 +174,11 @@ export const NotebookBoard: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-crt-amber">[{pin.sourceSpeaker}]</span>
                         <span className="text-neutral-500">{pin.timestamp}</span>
+                        {isStoryMatch && (
+                          <span className="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-700 text-emerald-300 text-[10px] font-bold">
+                            ★ KEY CASE EVIDENCE
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -213,9 +230,9 @@ export const NotebookBoard: React.FC = () => {
 
       {/* TAB 3: SUSPECT DOSSIERS & SHIFT NOTES COMBINED */}
       {activeTab === 'suspects' && (
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden font-mono">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden font-mono">
           {/* Left: Character Selector & Dossier */}
-          <div className="flex-1 flex flex-col md:flex-row overflow-hidden border-b lg:border-b-0 lg:border-r border-neutral-800">
+          <div className="flex-1 flex flex-col md:flex-row lg:overflow-hidden border-b lg:border-b-0 lg:border-r border-neutral-800">
             <div className="w-full md:w-52 border-b md:border-b-0 md:border-r border-neutral-800 p-2.5 space-y-1.5 overflow-y-auto text-xs">
               <div className="text-[10px] text-neutral-500 font-bold px-1 mb-1">PERSONS OF INTEREST</div>
               {Object.values(characters).map((c) => (

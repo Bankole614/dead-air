@@ -213,7 +213,7 @@ export const CASE_2: CaseDef = {
             {
               id: 'opt_trooper_challenge',
               label: '⚠️ [CHALLENGE] "Trooper Vance, the motorist at Mile 41 is staring directly at your cruiser right now—and its red emergency beacon is actively spinning."',
-              requiresPin: ['red', 'beacon', 'flashing'],
+              requiresPin: ['red', 'dead'],
               next: 'trooper_exposed',
               trustDelta: -50,
             },

@@ -44,7 +44,7 @@ export const EndingReport: React.FC<EndingReportProps> = ({ onOpenCaseSelector, 
             <ShieldAlert className="w-8 h-8 text-crt-amber glow-amber" />
             <div>
               <h2 className="text-lg font-bold text-crt-amber glow-amber tracking-wider">
-                INCIDENT RESOLVED // CASE 0{currentCase.number}: {currentCase.title}
+                INCIDENT RESOLVED // CASE {String(currentCase.number).padStart(2, '0')}: {currentCase.title}
               </h2>
               <div className="text-xs text-neutral-400">
                 {currentCase.incidentCode} // OFFICIAL DISPATCH & COGNITIVE PSYCHOLOGY DEBRIEF
@@ -207,7 +207,7 @@ export const EndingReport: React.FC<EndingReportProps> = ({ onOpenCaseSelector, 
                 onClick={() => selectCase(nextCase.id)}
                 className="px-4 py-2 bg-crt-amber hover:bg-yellow-400 text-black font-bold rounded text-xs flex items-center gap-1.5 transition active:scale-95 shadow-md"
               >
-                <span>NEXT: CASE 0{nextCase.number}</span>
+                <span>NEXT: CASE {String(nextCase.number).padStart(2, '0')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}

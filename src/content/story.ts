@@ -274,8 +274,8 @@ export const CALLS_DATABASE: Record<string, CallDef> = {
         options: [
           {
             id: 'opt_ross_catch_contradiction',
-            label: '⚠️ [CHALLENGE] "Wait. You said you are in a windowless interior closet in pitch dark. How can you see a blue sedan under the maple tree across the street?"',
-            requiresPin: ['windowless', 'closet', 'blue sedan'],
+            label: '⚠️ [CHALLENGE] "Wait. You said you are in a dark interior closet with no windows. How can you see a blue sedan under the maple tree across the street?"',
+            requiresPin: ['closet', 'sedan'],
             next: 'ross_caught',
             trustDelta: -30,
           },

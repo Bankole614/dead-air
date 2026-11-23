@@ -23,19 +23,22 @@ export const RadioScanner: React.FC = () => {
     setScannerFrequency,
     addPinnedClue,
     notebook,
+    settings,
     radioFeed,
     inGameTimeSeconds,
     activeCaseId,
   } = useGameStore();
 
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
+  const gameMode = settings.gameMode || 'standard';
 
   const hours = Math.floor(inGameTimeSeconds / 3600);
   const minutes = Math.floor((inGameTimeSeconds % 3600) / 60);
   const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
-  // Find matching preset within 0.05 MHz tolerance
-  const matchedPreset = PRESETS.find(p => Math.abs(p.freq - scannerFrequency) < 0.04);
+  // Tighter carrier tolerance in Hardcore mode requiring rotary fine-tuning
+  const tolerance = gameMode === 'hardcore' ? 0.02 : 0.04;
+  const matchedPreset = PRESETS.find(p => Math.abs(p.freq - scannerFrequency) < tolerance);
   const isTunedIn = !!matchedPreset;
 
   const playTransmissionVoice = (id: string, speaker: string, text: string) => {
@@ -50,7 +53,9 @@ export const RadioScanner: React.FC = () => {
 
   const handleSelectPreset = (freq: number) => {
     sound.playRadioChirp();
-    setScannerFrequency(freq);
+    // In Hardcore mode, preset buttons jump near the carrier (-0.10 MHz) so the operator must fine-tune the rotary dial (+0.05 x2) to lock the signal!
+    const targetFreq = gameMode === 'hardcore' ? Number((freq - 0.1).toFixed(3)) : freq;
+    setScannerFrequency(targetFreq);
   };
 
   // Dynamic transmissions based on case & frequency
@@ -85,6 +90,28 @@ export const RadioScanner: React.FC = () => {
                 text: 'ALERT ALL PATROLS: Unconfirmed report of a double explosion—repeat, two blasts—at Route 9 Petrol Depot. Suspect vehicle white coupe departing eastbound.',
                 time: '22:06',
                 ambientSourceId: 'petrol9_radio_echo',
+              },
+            ]
+          : []),
+        ...(activeCaseId === 'case_9'
+          ? [
+              {
+                id: 'sheriff_c9_echo',
+                speaker: 'COUNTY DISPATCH RELAY (CH-1)',
+                text: 'CODE-2 RAIL ADVISORY: Unconfirmed report of a runaway freight train on Old Mill Spur approaching Crossing 4. Be on lookout for signalman Victor Krol.',
+                time: '22:05',
+                ambientSourceId: 'crossing4_radio_echo',
+              },
+            ]
+          : []),
+        ...(activeCaseId === 'case_10'
+          ? [
+              {
+                id: 'sheriff_c10_bolo',
+                speaker: 'CAPT. VERNON STAHL (ORIGINATING BOLO // 154.80)',
+                text: 'ALL UNITS BOLO FROM CAPT. STAHL: Former dispatcher Elena Rostova is at the Old Post Office payphone tapping Trunk Zero. (Auxiliary Unit 12 & 14 repeating: "Copy Capt. Stahl, repeating your Post Office report!")',
+                time: '23:45',
+                ambientSourceId: 'stahl_post_office_bolo_echo',
               },
             ]
           : []),
@@ -180,6 +207,28 @@ export const RadioScanner: React.FC = () => {
     }
 
     if (matchedPreset.freq === 462.57) {
+      if (activeCaseId === 'case_9') {
+        return [
+          {
+            id: 'rep_c9_lineman',
+            speaker: 'MUNICIPAL POWER BUCKET #2 // POLE 19 (462.57 MHz)',
+            text: '"Tower B, we have a heavy ice fault on the Crossing 4 overhead span—the power drop released the fail-safe crossing gate! LINEMAN 2, SHUT THE THIRD FEEDER! Repeat: SHUT THE THIRD FEEDER!"',
+            time: '22:02',
+            ambientSourceId: 'lineman_repeater_462_57',
+          },
+        ];
+      }
+      if (activeCaseId === 'case_10') {
+        return [
+          {
+            id: 'rep_c10_vault',
+            speaker: 'COURTHOUSE VAULT TELEMETRY // 462.57 MHz',
+            text: '...COURTHOUSE SUB-BASEMENT MASTER VAULT OVERRIDE KEY: BADGE #02 (CAPT. V. STAHL) ... BULK MAGNETIC DEGAUSSER COIL ACTIVE (15-SECOND PULSE CYCLE) ...',
+            time: '23:46',
+            ambientSourceId: 'courthouse_degausser_sump_signature',
+          },
+        ];
+      }
       return [
         {
           id: 'rep_01',
@@ -252,7 +301,12 @@ export const RadioScanner: React.FC = () => {
             {/* Channel Preset Buttons */}
             <div className="grid grid-cols-2 gap-1.5 mt-2.5">
               {PRESETS.map((preset) => {
-                const isSelected = Math.abs(preset.freq - scannerFrequency) < 0.04;
+                const isSelected = Math.abs(preset.freq - scannerFrequency) < tolerance;
+                const hasStoryClue =
+                  gameMode === 'story' &&
+                  ((preset.freq === 154.80 && ['case_6', 'case_8', 'case_9', 'case_10'].includes(activeCaseId)) ||
+                    (preset.freq === 27.185 && ['case_1', 'case_6', 'case_7', 'case_8'].includes(activeCaseId)) ||
+                    (preset.freq === 462.57 && ['case_9', 'case_10'].includes(activeCaseId)));
                 return (
                   <button
                     key={preset.freq}
@@ -264,11 +318,14 @@ export const RadioScanner: React.FC = () => {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{preset.label}</span>
+                      <span>
+                        {preset.label}
+                        {hasStoryClue && <span className="ml-1 text-[9px] text-emerald-400">★ CLUE</span>}
+                      </span>
                       <span className="text-[10px] text-neutral-500">{preset.freq.toFixed(2)} MHz</span>
                     </div>
                     <div className="text-[10px] font-normal truncate mt-0.5 opacity-80">
-                      {preset.name}
+                      {gameMode === 'hardcore' && !isSelected ? 'Band Jump (Fine-Tune Dial)' : preset.name}
                     </div>
                   </button>
                 );

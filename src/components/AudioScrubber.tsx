@@ -20,11 +20,13 @@ export const AudioScrubber: React.FC = () => {
     calls,
     radioFeed,
     notebook,
+    settings,
     recordABComparisonDiscovery,
     getActiveCase,
   } = useGameStore();
 
   const currentCase = getActiveCase();
+  const gameMode = settings.gameMode || 'standard';
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   // Build library of recorded audio tapes from calls + radio transmissions
@@ -33,9 +35,11 @@ export const AudioScrubber: React.FC = () => {
     const cDef = currentCase.calls[call.callDefId];
     call.history.forEach((h, idx) => {
       if (h.speaker === 'caller' || h.speaker === 'radio') {
+        const hasForensicTag = !!(h.ambientSourceId || h.forensicReveal);
+        const storyPrefix = gameMode === 'story' && hasForensicTag ? '★ [ANOMALY] ' : '';
         allTapes.push({
           id: `${call.callDefId}_${h.nodeId}_${idx}`,
-          label: `[${h.timestamp}] ${h.speakerName || cDef?.callerNameDisplay || 'Caller'}: "${h.text.slice(0, 52)}..."`,
+          label: `${storyPrefix}[${h.timestamp}] ${h.speakerName || cDef?.callerNameDisplay || 'Caller'}: "${h.text.slice(0, 48)}..."`,
           speaker: h.speakerName || 'Caller',
           text: h.text,
           timestamp: h.timestamp,
@@ -162,8 +166,14 @@ export const AudioScrubber: React.FC = () => {
     if (sharedAmbientId) {
       return {
         type: 'source_contamination' as const,
-        title: 'SHARED BROADCAST SOURCE DETECTED (CIRCULAR REPORTING)',
-        description: `Both [${deckA.speaker}] and [${deckB.speaker}] carry the exact same background signal (${sharedAmbientId.replace(/_/g, ' ')}). These witnesses are NOT independent—they are repeating the same broadcast.`,
+        title:
+          gameMode === 'hardcore'
+            ? 'SPECTRAL PHASE-LOCK // IDENTICAL CARRIER SIGNAL'
+            : 'SHARED BROADCAST SOURCE DETECTED (CIRCULAR REPORTING)',
+        description:
+          gameMode === 'hardcore'
+            ? `Trace A [${deckA.speaker}] and Trace B [${deckB.speaker}] exhibit 99.8% background carrier correlation [${sharedAmbientId}]. Evaluate whether witness statements originate from a single broadcast.`
+            : `Both [${deckA.speaker}] and [${deckB.speaker}] carry the exact same background signal (${sharedAmbientId.replace(/_/g, ' ')}). These witnesses are NOT independent—they are repeating the same broadcast.`,
         pinText: `A/B FORENSIC PROOF: ${deckA.speaker} and ${deckB.speaker} share background broadcast [${sharedAmbientId}]. Testimony is circular hearsay.`,
         ambientSourceId: sharedAmbientId,
       };
@@ -173,8 +183,14 @@ export const AudioScrubber: React.FC = () => {
       const revealText = [deckA.forensicReveal, deckB.forensicReveal].filter(Boolean).join(' // ');
       return {
         type: 'acoustic_contradiction' as const,
-        title: 'ACOUSTIC DISCREPANCY EXPOSED',
-        description: revealText,
+        title:
+          gameMode === 'hardcore'
+            ? 'A/B SPECTRAL WAVEFORM DELTA DETECTED'
+            : 'ACOUSTIC DISCREPANCY EXPOSED',
+        description:
+          gameMode === 'hardcore'
+            ? `Waveform delta between [${deckA.speaker}] (${deckA.backgroundClues.join(', ') || 'clean'}) and [${deckB.speaker}] (${deckB.backgroundClues.join(', ') || 'clean'}). Pin to log cross-tape contradiction.`
+            : revealText,
         pinText: `A/B FORENSIC PROOF: Comparing [${deckA.speaker}] vs [${deckB.speaker}] reveals: ${revealText}`,
         ambientSourceId: deckA.ambientSourceId || deckB.ambientSourceId,
       };

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ShiftState, UnitType, PinnedClue, DialogueOption, CaseDef, ActiveDilemma, ConsoleMode, ProvenanceType, ConfidenceLevel, PsychologicalMetric } from '../types/game';
+import { ShiftState, UnitType, PinnedClue, DialogueOption, CaseDef, ActiveDilemma, ConsoleMode, ProvenanceType, ConfidenceLevel, PsychologicalMetric, GameMode } from '../types/game';
 import { ALL_CASES } from '../content/cases';
 import { sound } from '../engine/sound';
 
@@ -8,18 +8,25 @@ const STORAGE_KEY = 'dead_air_save_v1';
 export interface GameSettings {
   crtScanlines: boolean;
   soundEnabled: boolean;
+  voiceEnabled: boolean;
   textSpeed: 'instant' | 'fast' | 'normal';
   assistMode: boolean; // highlights potential contradictions
+  gameMode: GameMode;
 }
 
 interface GameStore extends ShiftState {
   settings: GameSettings;
+  inMainMenu: boolean;
   typewriterActive: boolean;
   displayedText: string;
   isGameOver: boolean;
 
-  // Case actions
+  // Menu & Case actions
   selectCase: (caseId: string) => void;
+  startNewShift: (caseId: string, mode: GameMode) => void;
+  resumeShift: () => void;
+  returnToMainMenu: () => void;
+  factoryResetAllData: () => void;
   getActiveCase: () => CaseDef;
 
   // Actions
@@ -37,6 +44,8 @@ interface GameStore extends ShiftState {
   
   // Dispatch actions
   dispatchUnit: (unitId: string, location: string, durationGameSeconds?: number) => void;
+  openReportFiling: () => void;
+  dismissReportFiling: () => void;
   submitVerdict: (suspectId: string, targetId: string, pinnedEvidenceIds: string[], confidenceLevel?: ConfidenceLevel) => void;
   setScannerFrequency: (freq: number) => void;
   toggleRoadblock: (checkpointId: string) => void;
@@ -111,13 +120,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   hazardState: null,
   activeDilemma: null,
   consoleMode: 'switchboard',
+  inMainMenu: true,
   shiftCompleted: false,
   isGameOver: false,
   settings: {
     crtScanlines: true,
     soundEnabled: true,
+    voiceEnabled: true,
     textSpeed: 'normal',
     assistMode: false,
+    gameMode: 'standard',
   },
   typewriterActive: false,
   displayedText: '',
@@ -125,6 +137,76 @@ export const useGameStore = create<GameStore>((set, get) => ({
   getActiveCase: () => {
     const cId = get().activeCaseId || 'case_1';
     return ALL_CASES[cId] || ALL_CASES['case_1'];
+  },
+
+  startNewShift: (caseId: string, mode: GameMode) => {
+    const state = get();
+    state.updateSettings({
+      gameMode: mode,
+      assistMode: mode === 'story',
+    });
+    if (state.settings.soundEnabled) {
+      sound.startAmbientHum();
+    }
+    state.selectCase(caseId);
+    set({ inMainMenu: false });
+  },
+
+  resumeShift: () => {
+    const state = get();
+    sound.playLineClick();
+    if (state.settings.soundEnabled) {
+      sound.startAmbientHum();
+    }
+    set({ inMainMenu: false });
+  },
+
+  returnToMainMenu: () => {
+    sound.stopVoice();
+    sound.stopPhoneRing();
+    sound.playLineClick();
+    set({ inMainMenu: true });
+    get().saveGame();
+  },
+
+  factoryResetAllData: () => {
+    sound.stopVoice();
+    sound.stopPhoneRing();
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.warn('Failed to clear storage:', e);
+    }
+    const defaultCase = ALL_CASES['case_1'];
+    set({
+      activeCaseId: 'case_1',
+      completedCaseIds: [],
+      unlockedBadges: [],
+      inGameTimeSeconds: 22 * 3600,
+      isPaused: false,
+      flags: {},
+      activeUnits: { ...defaultCase.initialUnits },
+      callQueue: [...defaultCase.initialCallQueue],
+      activeCallId: null,
+      calls: {},
+      notebook: {
+        pins: [],
+        freeNotes: defaultCase.initialNotes,
+      },
+      workingTheory: { suspectId: '', challenged: false, counterPinIds: [] },
+      quickScratchpad: { address: '', entrance: '', suspectDir: '', keySound: '', verification: '' },
+      characters: { ...defaultCase.characters },
+      radioFeed: [],
+      pendingRadioEvents: [],
+      activeRoadblocks: [],
+      hazardState: null,
+      activeDilemma: null,
+      reportFilingActive: false,
+      verdictScore: undefined,
+      shiftCompleted: false,
+      consoleMode: 'switchboard',
+      inMainMenu: true,
+    });
   },
 
   selectCase: (caseId: string) => {
@@ -178,7 +260,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   tick: (deltaSeconds: number) => {
     const state = get();
-    if (state.isPaused || state.shiftCompleted) return;
+    if (state.inMainMenu || state.isPaused || state.shiftCompleted) return;
 
     const gameDelta = deltaSeconds * state.timeSpeed;
     const newGameTime = state.inGameTimeSeconds + gameDelta;
@@ -265,22 +347,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // Increase agitation for callers on hold
+    // Increase agitation for callers on hold (disabled in Story mode, faster in Hardcore mode)
     const updatedCalls = callsWereUpdated ? updatedActiveCalls : { ...state.calls };
     let callsChanged = callsWereUpdated;
-    for (const cId in updatedCalls) {
-      const call = updatedCalls[cId];
-      if (call.status === 'on_hold') {
-        const newAgitation = Math.min(100, call.agitationLevel + (gameDelta * 0.15));
-        if (newAgitation !== call.agitationLevel) {
-          updatedCalls[cId] = { ...call, agitationLevel: newAgitation };
-          callsChanged = true;
+    const mode = state.settings.gameMode || 'standard';
+    const agitationMult = mode === 'story' ? 0 : mode === 'hardcore' ? 0.35 : 0.15;
+    if (agitationMult > 0) {
+      for (const cId in updatedCalls) {
+        const call = updatedCalls[cId];
+        if (call.status === 'on_hold') {
+          const newAgitation = Math.min(100, call.agitationLevel + (gameDelta * agitationMult));
+          if (newAgitation >= 100 && mode === 'hardcore') {
+            // In Hardcore mode, callers held to 100% agitation slam the receiver down and must be re-queued!
+            sound.playHangupTone();
+            delete updatedCalls[cId];
+            if (!updatedQueue.includes(cId)) {
+              updatedQueue.push(cId);
+              queueChanged = true;
+            }
+            callsChanged = true;
+          } else if (newAgitation !== call.agitationLevel) {
+            updatedCalls[cId] = { ...call, agitationLevel: newAgitation };
+            callsChanged = true;
+          }
         }
       }
     }
 
-    // Hazard countdown handling
+    // Hazard countdown handling (disabled in Story mode; double hazards & call drop penalty in Hardcore)
     let currentHazard = state.hazardState;
+    let nextActiveCallId = state.activeCallId;
     if (currentHazard && currentHazard.active) {
       const remaining = currentHazard.timeRemaining - deltaSeconds;
       if (remaining <= 0) {
@@ -293,24 +389,59 @@ export const useGameStore = create<GameStore>((set, get) => ({
           unitId: 'SWITCHBOARD',
           unitName: 'STATION BREAKER',
           timestamp: timeFormatted,
-          text: 'CIRCUIT BREAKER OVERLOAD: Main bus tripped under unmitigated surge. Standby battery backup engaged.',
+          text: 'CIRCUIT BREAKER OVERLOAD: Main bus tripped under unmitigated surge! Active line dropped to hold on battery backup.',
         });
         radioTriggered = true;
         currentHazard = null;
+
+        // Drop active call to hold when breaker blows!
+        if (nextActiveCallId && updatedCalls[nextActiveCallId]) {
+          sound.stopVoice();
+          updatedCalls[nextActiveCallId] = {
+            ...updatedCalls[nextActiveCallId],
+            status: 'on_hold',
+            holdStartedAt: newGameTime,
+            agitationLevel: Math.min(100, updatedCalls[nextActiveCallId].agitationLevel + (mode === 'hardcore' ? 35 : 15)),
+          };
+          nextActiveCallId = null;
+          callsChanged = true;
+        }
       } else {
         currentHazard = { ...currentHazard, timeRemaining: remaining };
       }
-    } else if (!currentHazard && !state.flags['hazard_1_done'] && newGameTime >= 22 * 3600 + 360) {
+    } else if (
+      mode !== 'story' &&
+      !currentHazard &&
+      !state.flags['hazard_1_done'] &&
+      newGameTime >= 22 * 3600 + 360
+    ) {
       sound.playBreakerTrip();
+      const maxSeconds = mode === 'hardcore' ? 10 : 15;
       currentHazard = {
         active: true,
         type: 'power_surge',
         title: 'SUBSTATION TRANSFORMER 440V SURGE',
         description: 'High voltage fault detected on incoming switchboard trunk. Circuit breaker overheating!',
-        timeRemaining: 15,
-        maxTime: 15,
+        timeRemaining: maxSeconds,
+        maxTime: maxSeconds,
       };
       state.flags['hazard_1_done'] = true;
+    } else if (
+      mode === 'hardcore' &&
+      !currentHazard &&
+      !state.flags['hazard_2_done'] &&
+      newGameTime >= 22 * 3600 + 960
+    ) {
+      sound.playBreakerTrip();
+      currentHazard = {
+        active: true,
+        type: 'line_bleed',
+        title: 'HARDCORE RELAY CROSS-TALK OVERLOAD',
+        description: 'Secondary trunk surge threatening active audio lines! Reset breaker within 10s!',
+        timeRemaining: 10,
+        maxTime: 10,
+      };
+      state.flags['hazard_2_done'] = true;
     }
 
     // Dynamic Moral Dilemma trigger (around 22:14 in Case 1 only)
@@ -349,16 +480,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       };
     }
 
-    // Check shift completion / deduction filing phase
+    // Check shift completion / deduction filing phase (only auto-open once so player can dismiss to inspect [F3] A/B Audio first!)
     const allCallsDone = caseCallKeys.length > 0 && caseCallKeys.every(id => state.calls[id]?.status === 'completed');
     let filingActive: boolean = state.reportFilingActive;
-    if (allCallsDone && !state.shiftCompleted && !state.reportFilingActive) {
+    if (allCallsDone && !state.shiftCompleted && !state.reportFilingActive && !state.flags['filing_auto_opened']) {
       filingActive = true;
+      state.flags['filing_auto_opened'] = true;
       sound.playPinSound();
     }
 
     set({
       inGameTimeSeconds: newGameTime,
+      activeCallId: nextActiveCallId,
       activeUnits: unitsUpdated ? updatedUnits : state.activeUnits,
       callQueue: queueChanged ? updatedQueue : state.callQueue,
       calls: callsChanged ? updatedCalls : state.calls,
@@ -376,12 +509,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   fastForwardToNextCall: () => {
     const state = get();
-    // If there is already a call in the queue, answer it directly!
+    // 1. If there is already a call ringing in the queue, answer it directly!
     if (state.callQueue.length > 0) {
       state.answerCall(state.callQueue[0]);
       return;
     }
 
+    // 2. If there is a call waiting on hold, resume it!
+    const heldCallId = Object.keys(state.calls).find((id) => state.calls[id].status === 'on_hold');
+    if (heldCallId) {
+      state.resumeCall(heldCallId);
+      return;
+    }
+
+    // 3. Otherwise advance to the next unstarted call in the case
     const currentCase = state.getActiveCase();
     const caseCallKeys = Object.keys(currentCase.calls);
 
@@ -394,11 +535,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }
 
-    // All calls in case are done
-    set({ shiftCompleted: true });
+    // 4. All calls in case are completed -> trigger Form 911-B verdict filing
+    set({ reportFilingActive: true });
   },
 
   answerCall: (callId: string) => {
+    sound.stopVoice();
     sound.stopPhoneRing();
     sound.playLineClick();
     const state = get();
@@ -411,7 +553,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const minutes = Math.floor((state.inGameTimeSeconds % 3600) / 60);
     const timeFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
-    const newCall: typeof state.calls[string] = state.calls[callId] || {
+    // Automatically place any currently active unfinished call on hold so the player can always return to it!
+    const updatedCalls = { ...state.calls };
+    if (state.activeCallId && state.activeCallId !== callId && updatedCalls[state.activeCallId]) {
+      const prevCall = updatedCalls[state.activeCallId];
+      if (prevCall.status === 'active') {
+        updatedCalls[state.activeCallId] = {
+          ...prevCall,
+          status: 'on_hold',
+          holdStartedAt: state.inGameTimeSeconds,
+        };
+      }
+    }
+
+    const newCall: typeof state.calls[string] = updatedCalls[callId] || {
       callDefId: callId,
       status: 'active',
       currentNodeId: callDef.initialNode,
@@ -436,12 +591,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (initialNode.audioCue === 'static') {
       sound.playStaticBurst(0.6);
     }
-    // Play voice audio or speech synthesis for the incoming caller line
+    const latestLine = newCall.history[newCall.history.length - 1] || initialNode;
     sound.playVoiceOrSpeak(
-      initialNode.text,
-      initialNode.speaker,
-      initialNode.voiceUrl,
-      initialNode.speakerName
+      latestLine.text,
+      latestLine.speaker,
+      latestLine.voiceUrl,
+      latestLine.speakerName
     );
 
     // Remove from queue if present
@@ -452,11 +607,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeCallId: callId,
       callQueue: newQueue,
       calls: {
-        ...state.calls,
-        [callId]: { ...newCall, status: 'active' },
+        ...updatedCalls,
+        [callId]: {
+          ...newCall,
+          status: newCall.status === 'completed' ? 'completed' : 'active',
+        },
       },
-      displayedText: initialNode.text,
-      typewriterActive: state.settings.textSpeed !== 'instant',
+      displayedText: latestLine.text,
+      typewriterActive: !state.calls[callId] && state.settings.textSpeed !== 'instant',
     });
     get().saveGame();
   },
@@ -474,7 +632,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         ...state.calls,
         [callId]: {
           ...call,
-          status: 'on_hold',
+          status: call.status === 'completed' ? 'completed' : 'on_hold',
           holdStartedAt: state.inGameTimeSeconds,
         }
       }
@@ -483,18 +641,34 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   resumeCall: (callId: string) => {
+    sound.stopVoice();
     sound.playLineClick();
     const state = get();
     const call = state.calls[callId];
     if (!call) return;
 
+    // If another unfinished call is currently active, automatically place it on hold so we swap cleanly!
+    const updatedCalls = { ...state.calls };
+    if (state.activeCallId && state.activeCallId !== callId && updatedCalls[state.activeCallId]) {
+      const prevCall = updatedCalls[state.activeCallId];
+      if (prevCall.status === 'active') {
+        updatedCalls[state.activeCallId] = {
+          ...prevCall,
+          status: 'on_hold',
+          holdStartedAt: state.inGameTimeSeconds,
+        };
+      }
+    }
+
     set({
+      consoleMode: 'switchboard',
       activeCallId: callId,
+      typewriterActive: false,
       calls: {
-        ...state.calls,
+        ...updatedCalls,
         [callId]: {
           ...call,
-          status: 'active',
+          status: call.status === 'completed' ? 'completed' : 'active',
         }
       }
     });
@@ -566,13 +740,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       .replace(/^["'>\s]+|["'\s]+$/g, '')
       .trim();
 
+    const callIdAtStart = state.activeCallId;
     sound.playVoiceOrSpeak(
       cleanOptionText,
       'operator',
       undefined,
       'Operator 7',
       () => {
-        // When Operator finishes speaking, Caller speaks the next node
+        // Only let the caller speak if this call is STILL the active line (not placed on hold or switched)
+        if (get().activeCallId !== callIdAtStart) return;
         sound.playVoiceOrSpeak(
           nextNode.text,
           nextNode.speaker,
@@ -605,19 +781,48 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     ];
 
-    const isTerminal = !nextNode.options || nextNode.options.length === 0;
+    // Follow any auto-advancing chained `next` nodes that have no dialogue options (e.g. cases 1-5 completion or transition nodes)
+    let finalNode = nextNode;
+    let safetyHops = 0;
+    while (
+      (!finalNode.options || finalNode.options.length === 0) &&
+      finalNode.next &&
+      callDef.nodes[finalNode.next] &&
+      safetyHops < 4
+    ) {
+      const chainedNode = callDef.nodes[finalNode.next];
+      newHistory.push({
+        nodeId: chainedNode.id,
+        speaker: chainedNode.speaker,
+        speakerName: chainedNode.speakerName || 'Caller',
+        text: chainedNode.text,
+        timestamp: timeFormatted,
+        audioCue: chainedNode.audioCue,
+        voiceUrl: chainedNode.voiceUrl,
+        backgroundClues: chainedNode.backgroundClues,
+        ambientSourceId: chainedNode.ambientSourceId,
+        forensicReveal: chainedNode.forensicReveal,
+      });
+      finalNode = chainedNode;
+      safetyHops++;
+    }
+
+    const isTerminal = !finalNode.options || finalNode.options.length === 0;
+    if (isTerminal) {
+      sound.playHangupTone();
+    }
 
     set({
       activeUnits: updatedUnits,
       flags: updatedFlags,
-      displayedText: nextNode.text,
-      typewriterActive: state.settings.textSpeed !== 'instant',
+      displayedText: finalNode.text,
+      typewriterActive: !isTerminal && state.settings.textSpeed !== 'instant',
       calls: {
         ...state.calls,
         [state.activeCallId]: {
           ...activeCall,
-          currentNodeId: nextNode.id,
-          status: isTerminal && nextNode.audioCue === 'hangup' ? 'completed' : 'active',
+          currentNodeId: finalNode.id,
+          status: isTerminal ? 'completed' : 'active',
           history: newHistory,
         }
       }
@@ -627,11 +832,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   finishTypewriter: () => set({ typewriterActive: false }),
 
+  openReportFiling: () => {
+    sound.playPinSound();
+    set({ reportFilingActive: true });
+  },
+
+  dismissReportFiling: () => {
+    sound.playLineClick();
+    set({ reportFilingActive: false, consoleMode: 'evidence' });
+  },
+
   dispatchUnit: (unitId: string, location: string, durationGameSeconds = 1200) => {
     sound.playDispatchAlarm();
     const state = get();
     const unit = state.activeUnits[unitId];
     if (!unit || unit.status !== 'available') return;
+
+    // Scale unit busy duration by gameMode (Story: 5m fast recovery, Standard: 15m, Hardcore: 25m strict lock)
+    const mode = state.settings.gameMode || 'standard';
+    const modeScaledDuration =
+      mode === 'story' ? 300 : mode === 'hardcore' ? 1500 : Math.min(durationGameSeconds, 900);
 
     // Schedule realistic field radio SITREP feedback
     const hours = Math.floor(state.inGameTimeSeconds / 3600);
@@ -647,6 +867,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const isPetrol9 = locLower.includes('petrol') || locLower.includes('route 9') || locLower.includes('culvert');
     const isWndr = locLower.includes('wndr') || locLower.includes('studio') || locLower.includes('baldy');
     const isAnnex = locLower.includes('annex') || locLower.includes('cage') || locLower.includes('west');
+    const isCrossing4 = locLower.includes('crossing') || locLower.includes('mill') || locLower.includes('orchard');
+    const isCourthouse = locLower.includes('courthouse') || locLower.includes('vault') || locLower.includes('sub-basement');
 
     // Event 1: Arrival report (+15 game seconds)
     const arrivalTime = state.inGameTimeSeconds + 15;
@@ -654,7 +876,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Event 2: Investigation findings (+38 game seconds)
     const findingsTime = state.inGameTimeSeconds + 38;
-    const findingsText = isBellweather
+    const findingsText = isCourthouse
+      ? `${unit.name} to Central: Breached County Courthouse Sub-Basement Evidence Vault! Caught Internal Affairs Captain Vernon Stahl red-handed at the bulk magnetic degausser with the Judge Sterling and Bellweather master reels! Master tapes secured before erasure completed!`
+      : isCrossing4
+      ? `${unit.name} to Central: On scene at Old Mill Crossing 4! Confirming the rail spur is physically unbolted and decommissioned—zero train hazard! Gate dropped due to an iced overhead power feeder at Pole 19, and the 600Hz siren is Cho Ridge Orchard's stationary frost fan! Signalman Victor Krol and all bus passengers are safe!`
+      : isBellweather
       ? `${unit.name} to Central: On scene at Bellweather Apartments (44 Mercer Way)! No gunshots fired—confirming a 300-PSI cast-iron steam manifold ruptured in the adjacent machine workshop! Caretaker Donovan Vance is unarmed and assisting with boiler shutoff. Rear alley tire tracks belong to Valley Bakery Delivery Van #4!`
       : isMercer18
       ? `${unit.name} to Central: Inspected 18 Mercer Street! The Western Entrance deadbolt is locked from the INSIDE with Judge Sterling's brass key in the interior cylinder! Study grandfather clock strike hammer is mechanically jammed, and we found an arson delay candle inside the probate vault! Judge Sterling was spotted two blocks away at the diner payphone!`
@@ -710,7 +936,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           ...unit,
           status: 'dispatched',
           assignedLocation: location,
-          busyUntil: state.inGameTimeSeconds + durationGameSeconds,
+          busyUntil: state.inGameTimeSeconds + modeScaledDuration,
         }
       }
     });
@@ -928,15 +1154,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (targetCorrect) baseScore += 40;
     if (evidenceCorrect) baseScore += 20;
 
-    // Confidence Calibration calculation:
-    // High confidence (95%) when right gives +5 calibration bonus; when wrong gives -15 overconfidence penalty.
-    // Cautious confidence (50%) when wrong softens penalty (+10 epistemic humility); when right gives 0 delta.
+    // Confidence Calibration calculation scaled by gameMode:
+    // Story mode: No overconfidence penalties (+5 bonus when right at 95%).
+    // Standard mode: +5 bonus when right at 95%; -15 overconfidence penalty when wrong at 95%; +10 humility when wrong at 50%.
+    // Hardcore mode: +10 bonus when right at 95%; -25 severe overconfidence penalty when wrong at 95%; requires at least 2 matching evidence keywords or A/B proof for full evidence score.
+    const mode = state.settings.gameMode || 'standard';
     let calibrationDelta = 0;
     if (baseScore >= 80) {
-      if (confidenceLevel === 95) calibrationDelta = 5;
-      else if (confidenceLevel === 50) calibrationDelta = -5;
+      if (confidenceLevel === 95) calibrationDelta = mode === 'hardcore' ? 10 : 5;
+      else if (confidenceLevel === 50 && mode !== 'story') calibrationDelta = -5;
     } else {
-      if (confidenceLevel === 95) calibrationDelta = -15;
+      if (confidenceLevel === 95) calibrationDelta = mode === 'story' ? 0 : mode === 'hardcore' ? -25 : -15;
       else if (confidenceLevel === 50) calibrationDelta = 10;
     }
 
@@ -1109,10 +1337,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
     sound.playPinSound();
     set((state) => {
       const cleanText = text.trim();
-      // Prevent duplicate pins of the exact same text
-      if (state.notebook.pins.some((p) => p.text.toLowerCase() === cleanText.toLowerCase())) {
-        return state;
+      // Toggle behavior: if this clue or sound is already pinned, clicking it again unselects/unpins it!
+      const existingPin = state.notebook.pins.find((p) => p.text.toLowerCase() === cleanText.toLowerCase());
+      if (existingPin) {
+        return {
+          notebook: {
+            ...state.notebook,
+            pins: state.notebook.pins.filter((p) => p.id !== existingPin.id),
+          }
+        };
       }
+
+      // In Story mode, auto-classify hearsay provenance if ambientSourceId contains 'echo' or 'broadcast'
+      const autoProvenance: ProvenanceType | undefined =
+        provenance ||
+        (state.settings.gameMode === 'story' && ambientSourceId && (ambientSourceId.includes('echo') || ambientSourceId.includes('broadcast'))
+          ? 'hearsay_echo'
+          : state.settings.gameMode === 'story'
+          ? 'firsthand'
+          : undefined);
 
       const newPin: PinnedClue = {
         id: `pin_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -1121,7 +1364,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         callId,
         timestamp,
         ambientSourceId,
-        provenance,
+        provenance: autoProvenance,
       };
 
       return {
@@ -1261,12 +1504,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   updateSettings: (newSettings: Partial<GameSettings>) => {
     set((state) => {
-      const merged = { ...state.settings, ...newSettings };
+      const merged: GameSettings = {
+        ...state.settings,
+        ...newSettings,
+        ...(newSettings.gameMode !== undefined
+          ? { assistMode: newSettings.gameMode === 'story' ? true : newSettings.gameMode === 'hardcore' ? false : state.settings.assistMode }
+          : {}),
+      };
       if (newSettings.soundEnabled !== undefined) {
         sound.setMuted(!newSettings.soundEnabled);
       }
+      if (newSettings.voiceEnabled !== undefined) {
+        sound.setVoiceMuted(!newSettings.voiceEnabled);
+      }
       return { settings: merged };
     });
+    get().saveGame();
   },
 
   saveGame: () => {
@@ -1306,6 +1559,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const activeCaseId = parsed.activeCaseId || 'case_1';
       const fallbackCase = ALL_CASES[activeCaseId] || ALL_CASES['case_1'];
 
+      const mergedSettings: GameSettings = {
+        ...get().settings,
+        ...(parsed.settings || {}),
+      };
+      sound.setMuted(!mergedSettings.soundEnabled);
+      sound.setVoiceMuted(!mergedSettings.voiceEnabled);
+
       set({
         activeCaseId,
         completedCaseIds: parsed.completedCaseIds || [],
@@ -1317,7 +1577,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         calls: parsed.calls ?? {},
         notebook: parsed.notebook ?? { pins: [], freeNotes: fallbackCase.initialNotes },
         characters: parsed.characters ?? fallbackCase.characters,
-        settings: parsed.settings ?? get().settings,
+        settings: mergedSettings,
         shiftCompleted: parsed.shiftCompleted ?? false,
         reportFilingActive: parsed.reportFilingActive ?? false,
         verdictScore: parsed.verdictScore,

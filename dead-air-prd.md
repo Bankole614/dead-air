@@ -122,6 +122,8 @@ The game supports an anthology of hand-authored cases (`src/content/cases.ts`):
 | `case_6` | *The Last Call at Bellweather* | INC-1994-1148 | 22:00 - 23:00 | CRITICAL | Confirmation bias, phonemic mishearing ("Get Don out!" vs "Get down!"), and a 154.80 MHz radio echo chamber turn a steam valve rupture into a phantom double shooting. |
 | `case_7` | *The Clock That Wasn't There* | INC-1994-0132 | 22:00 - 23:00 | CRITICAL | Selective listening (a missing defective double-chime grandfather clock), a WKBW TV source-monitoring error, and simultaneous calls on 18 vs. 80 Mercer St expose a judge's staged arson alibi. |
 | `case_8` | *Echo Chamber at Petrol 9* | INC-1994-1019 | 22:00 - 23:00 | CRITICAL | False witness confidence and post-broadcast circular reporting frame a night attendant who actually stayed in the manifold trench to shut off the main fuel valve after a rail-culvert gas rupture. |
+| `case_9` | *The Phantom Siren at Crossing 4* | INC-1994-1125 | 22:00 - 23:00 | CRITICAL | Expectancy bias and zero-Doppler auditory illusion turn a stationary 600Hz orchard frost-klaxon and a 462.57 MHz lineman radio ("Shut the third feeder!") into a phantom train and wire-cutting saboteur. |
+| `case_10` | *Dead Air on Trunk Zero* | INC-1994-1130 | 23:45 - 00:00 | CRITICAL | Finale: Internal Affairs Capt. Vernon Stahl frames former dispatcher Elena Rostova via a circular 154.80 MHz BOLO while A/B audio comparison exposes a 15-second magnetic degausser pulse behind his own line inside the Courthouse Sub-Basement Vault. |
 
 ### 4.1 Incident Dossier Filing & Verdict Scoring
 At the conclusion of a case, the operator files an official **Incident Deduction Report**:

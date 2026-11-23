@@ -72,7 +72,7 @@ export const CaseSelectModal: React.FC<CaseSelectModalProps> = ({ onClose }) => 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2.5">
                     <span className="text-xs font-bold text-neutral-500 font-mono">
-                      CASE 0{c.number}
+                      CASE {String(c.number).padStart(2, '0')}
                     </span>
                     <h3 className="font-bold text-sm text-neutral-100 group-hover:text-crt-amber transition">
                       {c.title}

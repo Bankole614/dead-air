@@ -16,10 +16,12 @@ import { MoralDilemmaModal } from './components/MoralDilemmaModal';
 import { ConsoleModeBar } from './components/ConsoleModeBar';
 import { CountyMap } from './components/CountyMap';
 import { RadioScanner } from './components/RadioScanner';
+import { MainMenuScreen } from './components/MainMenuScreen';
 
 export const App: React.FC = () => {
   const {
     settings,
+    inMainMenu,
     shiftCompleted,
     reportFilingActive,
     tick,
@@ -70,7 +72,7 @@ export const App: React.FC = () => {
   // Global Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept typing in inputs or textareas
+      if (inMainMenu) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
         return;
       }
@@ -116,77 +118,90 @@ export const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typewriterActive, activeCallId, callQueue, calls, finishTypewriter, answerCall, fastForwardToNextCall, togglePause, hazardState, resetCircuitBreaker, setConsoleMode]);
+  }, [inMainMenu, typewriterActive, activeCallId, callQueue, calls, finishTypewriter, answerCall, fastForwardToNextCall, togglePause, hazardState, resetCircuitBreaker, setConsoleMode]);
 
   return (
-    <div className={`min-h-screen h-screen w-screen flex flex-col bg-crt-bg text-neutral-300 font-mono relative overflow-x-hidden ${
+    <div className={`min-h-[100dvh] h-[100dvh] w-screen flex flex-col bg-crt-bg text-neutral-300 font-mono relative overflow-x-hidden ${
       settings.crtScanlines ? 'crt-overlay' : ''
     }`}>
       {/* CRT Scanline Bar Animation */}
       {settings.crtScanlines && <div className="scanline-bar" />}
 
-      {/* Header Bar */}
-      <ConsoleHeader
-        onOpenSettings={() => setShowSettings(true)}
-        onOpenBriefing={() => setShowBriefing(true)}
-        onOpenCaseSelector={() => setShowCaseSelector(true)}
-        onOpenBadges={() => setShowBadges(true)}
-      />
-
-      {/* Chunky Retro Terminal Screen Switcher */}
-      <ConsoleModeBar />
-
-      {/* Workstation Hazard Alert & Breaker Reset Banner */}
-      <WorkstationHazardBanner />
-
-      {/* Main Terminal Screen Area with Adaptive Laptop Scrolling */}
-      <main className="flex-1 min-h-0 flex flex-col overflow-y-auto relative">
-        {/* F1: SWITCHBOARD & WIRE */}
-        {consoleMode === 'switchboard' && (
-          <div className="flex-1 flex flex-col">
-            <CallQueue />
-            <div className="flex-1 flex flex-col">
-              <LiveTranscript />
-            </div>
-          </div>
-        )}
-
-        {/* F2: TACTICAL MAP & DISPATCH */}
-        {consoleMode === 'map' && (
-          <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
-            <div className="w-full lg:w-3/5 min-h-[420px] lg:min-h-0 lg:h-full border-b lg:border-b-0 lg:border-r border-neutral-800 flex flex-col overflow-hidden shrink-0 lg:shrink">
-              <CountyMap />
-            </div>
-            <div className="w-full lg:w-2/5 min-h-[400px] lg:min-h-0 lg:h-full flex flex-col overflow-hidden shrink-0 lg:shrink">
-              <DispatchPanel />
-            </div>
-          </div>
-        )}
-
-        {/* F3: EVIDENCE & DOSSIERS */}
-        {consoleMode === 'evidence' && (
-          <div className="flex-1 min-h-[560px] flex flex-col">
-            <NotebookBoard />
-          </div>
-        )}
-
-        {/* F4: RADIO SCANNER & DECRYPTED WIRE */}
-        {consoleMode === 'scanner' && (
-          <div className="flex-1 min-h-[560px] flex flex-col">
-            <RadioScanner />
-          </div>
-        )}
-      </main>
-
-      {/* Incident Deduction Dossier Filing Screen */}
-      {reportFilingActive && <IncidentFilingModal />}
-
-      {/* Debrief / Ending Screen */}
-      {shiftCompleted && (
-        <EndingReport
-          onOpenCaseSelector={() => setShowCaseSelector(true)}
+      {inMainMenu ? (
+        <MainMenuScreen
+          onOpenManual={() => setShowBriefing(true)}
           onOpenBadges={() => setShowBadges(true)}
+          onOpenSettings={() => setShowSettings(true)}
         />
+      ) : (
+        <>
+          {/* Header Bar */}
+          <ConsoleHeader
+            onOpenSettings={() => setShowSettings(true)}
+            onOpenBriefing={() => setShowBriefing(true)}
+            onOpenCaseSelector={() => setShowCaseSelector(true)}
+            onOpenBadges={() => setShowBadges(true)}
+          />
+
+          {/* Chunky Retro Terminal Screen Switcher */}
+          <ConsoleModeBar />
+
+          {/* Workstation Hazard Alert & Breaker Reset Banner */}
+          <WorkstationHazardBanner />
+
+          {/* Main Terminal Screen Area with Adaptive Responsive Scrolling */}
+          <main className="flex-1 min-h-0 flex flex-col overflow-y-auto relative">
+            {/* F1: SWITCHBOARD & WIRE */}
+            {consoleMode === 'switchboard' && (
+              <div className="flex-1 flex flex-col min-h-0">
+                <CallQueue />
+                <div className="flex-1 flex flex-col min-h-0">
+                  <LiveTranscript />
+                </div>
+              </div>
+            )}
+
+            {/* F2: TACTICAL MAP & DISPATCH */}
+            {consoleMode === 'map' && (
+              <div className="flex-1 min-h-0 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden">
+                <div className="w-full lg:w-3/5 min-h-[360px] sm:min-h-[420px] lg:min-h-0 lg:h-full border-b lg:border-b-0 lg:border-r border-neutral-800 flex flex-col overflow-hidden shrink-0 lg:shrink">
+                  <CountyMap />
+                </div>
+                <div className="w-full lg:w-2/5 min-h-[380px] lg:min-h-0 lg:h-full flex flex-col overflow-hidden shrink-0 lg:shrink">
+                  <DispatchPanel />
+                </div>
+              </div>
+            )}
+
+            {/* F3: EVIDENCE & DOSSIERS */}
+            {consoleMode === 'evidence' && (
+              <div className="flex-1 min-h-0 flex flex-col">
+                <NotebookBoard />
+              </div>
+            )}
+
+            {/* F4: RADIO SCANNER & DECRYPTED WIRE */}
+            {consoleMode === 'scanner' && (
+              <div className="flex-1 min-h-0 flex flex-col">
+                <RadioScanner />
+              </div>
+            )}
+          </main>
+
+          {/* Incident Deduction Dossier Filing Screen */}
+          {reportFilingActive && <IncidentFilingModal />}
+
+          {/* Debrief / Ending Screen */}
+          {shiftCompleted && (
+            <EndingReport
+              onOpenCaseSelector={() => setShowCaseSelector(true)}
+              onOpenBadges={() => setShowBadges(true)}
+            />
+          )}
+
+          {/* High-Stakes Moral Dilemma Modal */}
+          <MoralDilemmaModal />
+        </>
       )}
 
       {/* Terminal Settings Modal */}
@@ -200,9 +215,6 @@ export const App: React.FC = () => {
 
       {/* Badges / Commendations Modal */}
       {showBadges && <BadgesModal onClose={() => setShowBadges(false)} />}
-
-      {/* High-Stakes Moral Dilemma Modal */}
-      <MoralDilemmaModal />
     </div>
   );
 };

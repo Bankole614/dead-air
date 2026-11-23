@@ -67,7 +67,7 @@ export const CASE_5: CaseDef = {
     },
   },
 
-  initialCallQueue: ['call_studio_alarm', 'call_north_gate', 'call_booth_distress'],
+  initialCallQueue: ['call_studio_alarm'],
 
   initialNotes:
     'OPERATOR DIRECTIVES:\n' +
@@ -279,7 +279,7 @@ export const CASE_5: CaseDef = {
             {
               id: 'opt_challenge',
               label: '⚠️ [CHALLENGE] “You are not outside listening to a radio. The transmitter is dead, and that loop is only audible in Studio A.”',
-              requiresPin: ['transmitter off-air', 'eight-second cart loop'],
+              requiresPin: ['off-air', 'cart'],
               next: 'node_caught',
               trustDelta: -40,
               effects: [

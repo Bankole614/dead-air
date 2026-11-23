@@ -63,7 +63,7 @@ export const CASE_4: CaseDef = {
     },
   },
 
-  initialCallQueue: ['call_archive_alarm', 'call_east_gate', 'call_west_cage'],
+  initialCallQueue: ['call_archive_alarm'],
 
   initialNotes:
     'OPERATOR DIRECTIVES:\n' +

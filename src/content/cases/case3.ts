@@ -214,7 +214,7 @@ export const CASE_3: CaseDef = {
             {
               id: 'opt_vance_challenge',
               label: '⚠️ [CHALLENGE] "Mr. Vance, you claim you are in the soundproof fourth-floor control room, but I can hear 40-knot howling wind and the first-floor lobby clock chiming in your headset."',
-              requiresPin: ['soundproof', 'wind', 'lobby'],
+              requiresPin: ['soundproof', 'wind'],
               next: 'vance_caught',
               trustDelta: -50,
               effects: [

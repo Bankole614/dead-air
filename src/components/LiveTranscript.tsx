@@ -15,11 +15,14 @@ export const LiveTranscript: React.FC = () => {
     addPinnedClue,
     finishTypewriter,
     fastForwardToNextCall,
+    openReportFiling,
     setConsoleMode,
     getActiveCase,
   } = useGameStore();
 
   const currentCase = getActiveCase();
+  const caseCallKeys = Object.keys(currentCase.calls);
+  const allCallsDone = caseCallKeys.length > 0 && caseCallKeys.every((id) => calls[id]?.status === 'completed');
   const scrollRef = useRef<HTMLDivElement>(null);
   const activeCall = activeCallId ? calls[activeCallId] : null;
   const activeCallDef = activeCallId ? currentCase.calls[activeCallId] : null;
@@ -100,11 +103,11 @@ export const LiveTranscript: React.FC = () => {
   const isOptionUnlocked = (opt: DialogueOption): boolean => {
     if (!opt.requiresPin || opt.requiresPin.length === 0) return true;
 
-    const pinsText = notebook.pins.map(p => p.text.toLowerCase()).join(' ');
+    const pinsText = notebook.pins.map(p => p.text.toLowerCase().replace(/-/g, ' ')).join(' ');
     return opt.requiresPin.every(keyword => {
-      const lowerReq = keyword.toLowerCase();
+      const lowerReq = keyword.toLowerCase().replace(/-/g, ' ');
       if (pinsText.includes(lowerReq)) return true;
-      const words = lowerReq.split(/[\s,]+/).filter(w => w.length > 2);
+      const words = lowerReq.split(/[\s,\-]+/).filter(w => w.length > 2);
       return words.length > 0 && words.every(w => pinsText.includes(w));
     });
   };
@@ -164,6 +167,15 @@ export const LiveTranscript: React.FC = () => {
           const isLinePinned = notebook.pins.some(
             (p) => p.text.toLowerCase() === entry.text.trim().toLowerCase()
           );
+          const gameMode = settings.gameMode || 'standard';
+          const isStoryKeyClue =
+            gameMode === 'story' &&
+            !isOperator &&
+            (!!entry.forensicReveal ||
+              !!entry.ambientSourceId ||
+              (currentCase.deduction?.correctEvidenceKeywords || []).some((kw) =>
+                entry.text.toLowerCase().includes(kw.toLowerCase())
+              ));
 
           if (isSystem) {
             return (
@@ -206,17 +218,25 @@ export const LiveTranscript: React.FC = () => {
                 </span>
 
                 {!isOperator && (
-                  <button
-                    onClick={() => addPinnedClue(entry.text, entry.speakerName || 'Caller', activeCall.callDefId, entry.timestamp, entry.ambientSourceId)}
-                    className={`px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 transition ${
-                      isLinePinned
-                        ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-700/70'
-                        : 'bg-neutral-800/80 hover:bg-crt-amber hover:text-black text-neutral-300'
-                    }`}
-                  >
-                    <Pin className="w-3 h-3" />
-                    <span>{isLinePinned ? '✓ PINNED' : 'PIN CLUE'}</span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    {isStoryKeyClue && !isLinePinned && (
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-700/70 text-emerald-300 text-[10px] font-bold animate-pulse">
+                        ★ KEY CLUE
+                      </span>
+                    )}
+                    <button
+                      onClick={() => addPinnedClue(entry.text, entry.speakerName || 'Caller', activeCall.callDefId, entry.timestamp, entry.ambientSourceId)}
+                      title={isLinePinned ? 'Click to unpin this clue' : 'Click to pin this clue to Evidence Board'}
+                      className={`px-2 py-0.5 rounded text-[11px] font-bold flex items-center gap-1 transition ${
+                        isLinePinned
+                          ? 'bg-emerald-950/80 hover:bg-red-950/80 text-emerald-400 hover:text-red-300 border border-emerald-700/70 hover:border-red-700'
+                          : 'bg-neutral-800/80 hover:bg-crt-amber hover:text-black text-neutral-300'
+                      }`}
+                    >
+                      <Pin className="w-3 h-3" />
+                      <span>{isLinePinned ? '✓ PINNED (UNPIN)' : 'PIN CLUE'}</span>
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -228,40 +248,83 @@ export const LiveTranscript: React.FC = () => {
                 )}
               </div>
 
-              {/* Clickable Background Acoustics */}
+              {/* Background Acoustics (Bound to GameMode: Explicit in Story/Standard, Unlabeled Signal in Hardcore) */}
               {entry.backgroundClues && entry.backgroundClues.length > 0 && (
                 <div className="mt-2.5 pt-2 border-t border-neutral-800/60 flex flex-wrap items-center gap-1.5 select-none">
                   <Headphones className="w-3.5 h-3.5 text-crt-amber" />
-                  <span className="text-[11px] text-neutral-400">SOUNDS HEARD:</span>
-                  {entry.backgroundClues.map((tag) => {
-                    const formattedClue = `ACOUSTIC CLUE: ${tag.replace(/_/g, ' ').toUpperCase()}`;
-                    const isTagPinned = notebook.pins.some(
-                      (p) => p.text.toLowerCase() === formattedClue.toLowerCase()
-                    );
-                    return (
-                      <button
-                        key={tag}
-                        onClick={() =>
-                          addPinnedClue(
-                            formattedClue,
-                            entry.speakerName || 'Acoustic Sensor',
-                            activeCall.callDefId,
-                            entry.timestamp,
-                            entry.ambientSourceId || tag,
-                            'firsthand'
-                          )
-                        }
-                        className={`px-2 py-0.5 rounded text-[11px] border transition flex items-center gap-1 ${
-                          isTagPinned
-                            ? 'bg-emerald-950/70 text-emerald-300 border-emerald-700 font-bold'
-                            : 'bg-neutral-800/80 text-crt-amber border-amber-900/40 hover:border-crt-amber'
-                        }`}
-                      >
-                        <Pin className="w-2.5 h-2.5" />
-                        <span>{tag.replace(/_/g, ' ')} {isTagPinned ? '✓' : ''}</span>
-                      </button>
-                    );
-                  })}
+                  {gameMode === 'hardcore' ? (
+                    <>
+                      <span className="text-[11px] text-neutral-500">AMBIENT TRACE:</span>
+                      {entry.backgroundClues.map((tag, idx) => {
+                        const formattedClue = `ACOUSTIC CLUE: ${tag.replace(/_/g, ' ').toUpperCase()}`;
+                        const isTagPinned = notebook.pins.some(
+                          (p) => p.text.toLowerCase() === formattedClue.toLowerCase()
+                        );
+                        return (
+                          <button
+                            key={tag}
+                            onClick={() =>
+                              addPinnedClue(
+                                formattedClue,
+                                entry.speakerName || 'Acoustic Sensor',
+                                activeCall.callDefId,
+                                entry.timestamp,
+                                entry.ambientSourceId || tag,
+                                'firsthand'
+                              )
+                            }
+                            title={isTagPinned ? 'Click again to unselect this sound' : 'Click to isolate & pin this background signal'}
+                            className={`px-2 py-0.5 rounded text-[11px] border transition flex items-center gap-1 ${
+                              isTagPinned
+                                ? 'bg-emerald-950/70 hover:bg-red-950/70 text-emerald-300 hover:text-red-300 border-emerald-700 hover:border-red-700 font-bold'
+                                : 'bg-neutral-900 text-neutral-400 border-neutral-700 hover:border-crt-amber hover:text-crt-amber'
+                            }`}
+                          >
+                            <Pin className="w-2.5 h-2.5" />
+                            <span>
+                              {isTagPinned
+                                ? `ISOLATED: ${tag.replace(/_/g, ' ')} ✕`
+                                : `[ISOLATE BACKGROUND SIGNAL #0${idx + 1}]`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[11px] text-neutral-400">SOUNDS HEARD:</span>
+                      {entry.backgroundClues.map((tag) => {
+                        const formattedClue = `ACOUSTIC CLUE: ${tag.replace(/_/g, ' ').toUpperCase()}`;
+                        const isTagPinned = notebook.pins.some(
+                          (p) => p.text.toLowerCase() === formattedClue.toLowerCase()
+                        );
+                        return (
+                          <button
+                            key={tag}
+                            onClick={() =>
+                              addPinnedClue(
+                                formattedClue,
+                                entry.speakerName || 'Acoustic Sensor',
+                                activeCall.callDefId,
+                                entry.timestamp,
+                                entry.ambientSourceId || tag,
+                                'firsthand'
+                              )
+                            }
+                            title={isTagPinned ? 'Click again to unselect this sound' : 'Click to pin this sound clue'}
+                            className={`px-2 py-0.5 rounded text-[11px] border transition flex items-center gap-1 ${
+                              isTagPinned
+                                ? 'bg-emerald-950/70 hover:bg-red-950/70 text-emerald-300 hover:text-red-300 border-emerald-700 hover:border-red-700 font-bold'
+                                : 'bg-neutral-800/80 text-crt-amber border-amber-900/40 hover:border-crt-amber'
+                            }`}
+                          >
+                            <Pin className="w-2.5 h-2.5" />
+                            <span>{tag.replace(/_/g, ' ')} {isTagPinned ? '✓ (✕)' : ''}</span>
+                          </button>
+                        );
+                      })}
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -281,15 +344,24 @@ export const LiveTranscript: React.FC = () => {
                 className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-crt-amber border border-amber-800/60 font-bold rounded text-xs flex items-center gap-1.5 transition"
               >
                 <Headphones className="w-3.5 h-3.5" />
-                <span>REVIEW EVIDENCE [F3]</span>
+                <span>REVIEW EVIDENCE &amp; A/B AUDIO [F3]</span>
               </button>
-              <button
-                onClick={fastForwardToNextCall}
-                className="px-4 py-2 bg-crt-amber hover:bg-yellow-400 text-black font-bold rounded text-xs flex items-center gap-1.5 shadow-md transition active:scale-95"
-              >
-                <FastForward className="w-3.5 h-3.5 fill-current" />
-                <span>NEXT CALL [SPACE]</span>
-              </button>
+              {allCallsDone ? (
+                <button
+                  onClick={openReportFiling}
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded text-xs flex items-center gap-1.5 shadow-md transition active:scale-95"
+                >
+                  <span>📋 FILE FORM 911-B VERDICT</span>
+                </button>
+              ) : (
+                <button
+                  onClick={fastForwardToNextCall}
+                  className="px-4 py-2 bg-crt-amber hover:bg-yellow-400 text-black font-bold rounded text-xs flex items-center gap-1.5 shadow-md transition active:scale-95"
+                >
+                  <FastForward className="w-3.5 h-3.5 fill-current" />
+                  <span>NEXT CALL [SPACE]</span>
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -317,15 +389,33 @@ export const LiveTranscript: React.FC = () => {
               <div className="space-y-2 overflow-y-auto pr-1 flex-1 min-h-0">
                 {currentNode.options.map((option) => {
                   const unlocked = isOptionUnlocked(option);
+                  const mode = settings.gameMode || 'standard';
+
+                  // In Hardcore (Blind Wire) mode, hide locked challenge options until unlocked so they don't spoil what to pin
+                  if (mode === 'hardcore' && !unlocked) {
+                    return null;
+                  }
+
+                  // In Hardcore mode, strip bracketed hint tags like [LEADING QUESTION], [NEUTRAL INQUIRY], ⚠️ [CHALLENGE...]
+                  const displayLabel =
+                    mode === 'hardcore'
+                      ? option.label
+                          .replace(/⚠️\s*/g, '')
+                          .replace(/^\[[^\]]+\]\s*/g, '')
+                          .trim()
+                      : option.label;
+
+                  const isChallengeOpt =
+                    mode !== 'hardcore' && (option.label.includes('[CHALLENGE') || option.label.includes('⚠️'));
 
                   return (
                     <button
                       key={option.id}
                       disabled={!unlocked}
                       onClick={() => selectDialogueOption(option)}
-                      className={`w-full text-left p-3 rounded-md text-sm font-mono transition-all flex items-start gap-2.5 border ${
+                      className={`w-full text-left p-3 rounded-md text-xs sm:text-sm font-mono transition-all flex items-start gap-2.5 border ${
                         unlocked
-                          ? option.label.includes('[CHALLENGE') || option.label.includes('⚠️')
+                          ? isChallengeOpt
                             ? 'border-amber-600/80 bg-amber-950/40 hover:bg-amber-900/60 text-amber-200'
                             : 'border-neutral-700/80 bg-neutral-800/70 hover:bg-neutral-700/80 text-neutral-200 hover:text-white'
                           : 'border-neutral-900 bg-black/50 text-neutral-600 cursor-not-allowed'
@@ -333,7 +423,18 @@ export const LiveTranscript: React.FC = () => {
                     >
                       <span className={`font-bold leading-snug ${unlocked ? 'text-crt-amber' : 'text-neutral-700'}`}>&gt;</span>
                       <div className="flex-1 min-w-0">
-                        <div className="leading-snug">{option.label}</div>
+                        <div className="leading-snug">{displayLabel}</div>
+                        {mode === 'story' && unlocked && option.biasType && (
+                          <div className="mt-1 text-[10px]">
+                            {option.biasType === 'leading_question' ? (
+                              <span className="text-amber-400">⚠️ GUIDED HINT: Leading question (may contaminate witness memory)</span>
+                            ) : option.biasType === 'challenge_theory' ? (
+                              <span className="text-emerald-400">★ GUIDED HINT: Audits source provenance / challenges bias</span>
+                            ) : (
+                              <span className="text-blue-300">✓ GUIDED HINT: Neutral investigative question</span>
+                            )}
+                          </div>
+                        )}
                         {!unlocked && option.requiresPin && (
                           <div className="text-xs text-red-400/90 mt-1 flex items-center gap-1.5">
                             <Lock className="w-3 h-3 shrink-0" />

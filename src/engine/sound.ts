@@ -4,10 +4,13 @@
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private isMuted: boolean = false;
+  private isVoiceMuted: boolean = false;
   private ambientGain: GainNode | null = null;
   private isAmbientPlaying: boolean = false;
   private ringInterval: number | null = null;
   private currentVoiceAudio: HTMLAudioElement | null = null;
+  private voiceSessionId: number = 0;
+  private activeSafetyTimer: number | null = null;
   public currentFilterType: 'normal' | 'low_cut' | 'high_cut' = 'normal';
   public currentPlaybackRate: number = 1.0;
 
@@ -64,12 +67,39 @@ class SoundEngine {
     return this.isMuted;
   }
 
+  public setVoiceMuted(voiceMuted: boolean) {
+    this.isVoiceMuted = voiceMuted;
+    if (voiceMuted) {
+      this.stopVoice();
+    }
+  }
+
+  public getVoiceMuted() {
+    return this.isVoiceMuted;
+  }
+
   public stopVoice() {
+    // Increment session ID so any in-flight callbacks, timers, or queued caller replies from a held/previous call are permanently cancelled
+    this.voiceSessionId++;
+
+    if (this.activeSafetyTimer !== null) {
+      clearTimeout(this.activeSafetyTimer);
+      this.activeSafetyTimer = null;
+    }
+
     if (this.currentVoiceAudio) {
-      this.currentVoiceAudio.pause();
-      this.currentVoiceAudio.currentTime = 0;
+      try {
+        this.currentVoiceAudio.onended = null;
+        this.currentVoiceAudio.onerror = null;
+        this.currentVoiceAudio.volume = 0;
+        this.currentVoiceAudio.pause();
+        this.currentVoiceAudio.currentTime = 0;
+      } catch (e) {
+        // ignore cleanup errors
+      }
       this.currentVoiceAudio = null;
     }
+
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
@@ -85,14 +115,24 @@ class SoundEngine {
     text: string,
     speaker: 'caller' | 'operator' | 'system' | 'radio',
     speakerName?: string,
-    onEnd?: () => void
+    onEnd?: () => void,
+    expectedSessionId?: number
   ) {
-    if (this.isMuted || typeof window === 'undefined' || !window.speechSynthesis) {
-      onEnd?.();
+    const sessionId = expectedSessionId ?? this.voiceSessionId;
+    if (sessionId !== this.voiceSessionId) {
+      return;
+    }
+
+    if (this.isMuted || this.isVoiceMuted || typeof window === 'undefined' || !window.speechSynthesis) {
+      if (sessionId === this.voiceSessionId) onEnd?.();
       return;
     }
 
     try {
+      if (this.activeSafetyTimer !== null) {
+        clearTimeout(this.activeSafetyTimer);
+        this.activeSafetyTimer = null;
+      }
       window.speechSynthesis.cancel();
 
       // Clean text of parenthetical stage directions like (Mask drops, shouting...), bracket tags, and quotes
@@ -104,7 +144,7 @@ class SoundEngine {
         .trim();
 
       if (!clean) {
-        onEnd?.();
+        if (sessionId === this.voiceSessionId) onEnd?.();
         return;
       }
 
@@ -131,7 +171,11 @@ class SoundEngine {
           name.includes('evelyn') ||
           name.includes('shaw') ||
           name.includes('cora') ||
-          name.includes('brenda')
+          name.includes('brenda') ||
+          name.includes('hannah') ||
+          name.includes('cho') ||
+          name.includes('elena') ||
+          name.includes('rostova')
         ) {
           utterance.pitch = 1.15;
           utterance.rate = 0.93;
@@ -153,27 +197,36 @@ class SoundEngine {
       }
 
       let ended = false;
-      let safetyTimer: number | null = null;
       const finish = () => {
         if (!ended) {
           ended = true;
-          if (safetyTimer) clearTimeout(safetyTimer);
-          onEnd?.();
+          if (this.activeSafetyTimer !== null) {
+            clearTimeout(this.activeSafetyTimer);
+            this.activeSafetyTimer = null;
+          }
+          // Only trigger onEnd if this voice session was NOT cancelled by hold/switch/stopVoice!
+          if (sessionId === this.voiceSessionId) {
+            onEnd?.();
+          }
         }
       };
 
       utterance.onend = finish;
-      utterance.onerror = finish;
+      utterance.onerror = () => {
+        // When speechSynthesis.cancel() is called on hold/switch, browsers fire onerror('interrupted' / 'canceled').
+        // Mark ended and only advance if session is still current.
+        finish();
+      };
       utterance.rate = Math.max(0.5, Math.min(2.0, utterance.rate * this.currentPlaybackRate));
 
       // Safety timeout in case browser drops speech onend event
       const maxDuration = Math.min(Math.max(1200, clean.length * 60), 4500);
-      safetyTimer = window.setTimeout(finish, maxDuration);
+      this.activeSafetyTimer = window.setTimeout(finish, maxDuration);
 
       window.speechSynthesis.speak(utterance);
     } catch (e) {
       console.warn('Speech synthesis failed:', e);
-      onEnd?.();
+      if (sessionId === this.voiceSessionId) onEnd?.();
     }
   }
 
@@ -185,12 +238,15 @@ class SoundEngine {
     speakerName?: string,
     onEnd?: () => void
   ) {
-    if (this.isMuted) {
+    this.initCtx();
+    // Stop any previous voice and start a fresh session ID
+    this.stopVoice();
+    const sessionId = this.voiceSessionId;
+
+    if (this.isMuted || this.isVoiceMuted) {
       onEnd?.();
       return;
     }
-    this.initCtx();
-    this.stopVoice();
 
     // 1. If a pre-recorded high-fidelity voice file exists, try playing it
     if (voiceUrl) {
@@ -204,24 +260,32 @@ class SoundEngine {
         const triggerEnd = () => {
           if (!finished) {
             finished = true;
-            this.currentVoiceAudio = null;
-            onEnd?.();
+            if (this.currentVoiceAudio === audio) {
+              this.currentVoiceAudio = null;
+            }
+            if (sessionId === this.voiceSessionId) {
+              onEnd?.();
+            }
           }
         };
 
         audio.onended = triggerEnd;
 
         audio.onerror = () => {
+          if (sessionId !== this.voiceSessionId) return;
           console.warn('Voice file load failed, falling back to synthesis for:', voiceUrl);
-          this.currentVoiceAudio = null;
-          this.speakText(text, speaker, speakerName, onEnd);
+          if (this.currentVoiceAudio === audio) {
+            this.currentVoiceAudio = null;
+          }
+          this.speakText(text, speaker, speakerName, onEnd, sessionId);
         };
 
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise.catch((e) => {
+            if (sessionId !== this.voiceSessionId) return;
             console.warn('Voice playback blocked, falling back to speech synthesis:', e);
-            this.speakText(text, speaker, speakerName, onEnd);
+            this.speakText(text, speaker, speakerName, onEnd, sessionId);
           });
         }
         return;
@@ -232,8 +296,8 @@ class SoundEngine {
 
     // 2. Fallback to browser speech synthesis for any line without an mp3 file
     if (text) {
-      this.speakText(text, speaker, speakerName, onEnd);
-    } else {
+      this.speakText(text, speaker, speakerName, onEnd, sessionId);
+    } else if (sessionId === this.voiceSessionId) {
       onEnd?.();
     }
   }

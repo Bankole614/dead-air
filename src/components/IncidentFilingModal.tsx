@@ -24,12 +24,15 @@ const CONFIDENCE_OPTIONS: Array<{ level: ConfidenceLevel; title: string; subtitl
 export const IncidentFilingModal: React.FC = () => {
   const {
     notebook,
+    settings,
     getActiveCase,
     submitVerdict,
+    dismissReportFiling,
   } = useGameStore();
 
   const currentCase = getActiveCase();
   const deduction = currentCase.deduction;
+  const gameMode = settings.gameMode || 'standard';
 
   // Form states
   const [selectedSuspect, setSelectedSuspect] = useState<string>(
@@ -76,13 +79,27 @@ export const IncidentFilingModal: React.FC = () => {
                 FORM 911-B // INCIDENT CLASSIFICATION & CONFIDENCE DOCKET
               </h2>
               <div className="text-xs text-neutral-400">
-                CASE 0{currentCase.number}: {currentCase.title} // SUBMIT DEDUCTION FOR VERIFICATION
+                CASE {String(currentCase.number).padStart(2, '0')}: {currentCase.title} // SUBMIT DEDUCTION FOR VERIFICATION
               </div>
             </div>
           </div>
-          <div className="text-right hidden sm:block">
-            <span className="text-[11px] px-2.5 py-1 rounded bg-amber-950/40 text-crt-amber border border-amber-900/40 font-bold">
-              VERDICT REQUIRED
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={dismissReportFiling}
+              className="px-3 py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 border border-neutral-600 text-crt-amber font-bold text-[11px] transition"
+              title="Close form temporarily to compare tapes in [F3] A/B Audio Lab or pin clues"
+            >
+              ← INSPECT EVIDENCE / A/B AUDIO FIRST
+            </button>
+            <span className={`hidden md:inline-block text-[11px] px-2.5 py-1 rounded border font-bold uppercase ${
+              gameMode === 'story'
+                ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/50'
+                : gameMode === 'hardcore'
+                ? 'bg-red-950/40 text-red-300 border-red-800/50'
+                : 'bg-amber-950/40 text-crt-amber border-amber-900/40'
+            }`}>
+              {gameMode} MODE
             </span>
           </div>
         </div>
@@ -174,6 +191,11 @@ export const IncidentFilingModal: React.FC = () => {
               <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
                 {notebook.pins.map((pin) => {
                   const isSelected = selectedPinIds.includes(pin.id);
+                  const isStoryMatch =
+                    gameMode === 'story' &&
+                    (deduction?.correctEvidenceKeywords || []).some((kw) =>
+                      pin.text.toLowerCase().includes(kw.toLowerCase())
+                    );
                   return (
                     <div
                       key={pin.id}
@@ -190,8 +212,11 @@ export const IncidentFilingModal: React.FC = () => {
                         {isSelected && '✓'}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <div className="truncate text-[11px] text-neutral-400">
-                          [{pin.sourceSpeaker}] @ {pin.timestamp} {pin.provenance ? `// ${pin.provenance.toUpperCase()}` : ''}
+                        <div className="truncate text-[11px] text-neutral-400 flex items-center gap-2">
+                          <span>[{pin.sourceSpeaker}] @ {pin.timestamp} {pin.provenance ? `// ${pin.provenance.toUpperCase()}` : ''}</span>
+                          {isStoryMatch && (
+                            <span className="text-emerald-400 font-bold text-[10px]">★ KEY CORROBORATING CLUE</span>
+                          )}
                         </div>
                         <div className="text-xs">{pin.text}</div>
                       </div>
@@ -240,15 +265,19 @@ export const IncidentFilingModal: React.FC = () => {
           )}
 
           {/* Submit Button */}
-          <div className="border-t border-neutral-800 pt-4 flex items-center justify-between">
-            <div className="text-[11px] text-neutral-500">
-              OFFICIAL POLICE LOG CLASSIFICATION // SUBMIT TO COUNTY SHERIFF
-            </div>
+          <div className="border-t border-neutral-800 pt-4 flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={dismissReportFiling}
+              className="px-3.5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 rounded text-xs font-bold transition"
+            >
+              ← REVIEW [F3] EVIDENCE &amp; A/B TAPES FIRST
+            </button>
             <button
               type="submit"
               className="px-6 py-2.5 bg-crt-amber hover:bg-yellow-400 text-black font-bold rounded text-xs flex items-center gap-2 shadow-lg transition active:scale-95"
             >
-              <span>CONFIRM & SUBMIT CASE VERDICT ({confidenceLevel}% CONFIDENCE)</span>
+              <span>CONFIRM &amp; SUBMIT CASE VERDICT ({confidenceLevel}% CONFIDENCE)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

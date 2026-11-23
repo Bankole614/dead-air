@@ -71,6 +71,22 @@ CASES_DATA = {
             ("en-US-JennyNeural", "brenda_intro", "911! This is Brenda at the Mile 14 Diner down the highway from Route 9 Petrol! I'm calling about the bombing at the petrol station—I am ABSOLUTELY CERTAIN there were TWO explosions! Boom-boom, two separate bombs! And that attendant Cole Mercer must have sped past eastbound in his white coupe!", "+8%"),
             ("en-US-GuyNeural", "doyle_intro", "Central Dispatch, Guard Frank Doyle at the South Gatehouse! Yes, two explosions—I'm positive! An unconfirmed double explosion—repeat, two blasts—at Route 9 Petrol Depot with a white coupe departing eastbound! And I just grabbed attendant Cole Mercer climbing out of the drainage trench covered in grease with a pipe wrench in his hand!", "+5%"),
         ]
+    },
+    "case9": {
+        "dir": os.path.join("public", "audio", "voices", "case9"),
+        "lines": [
+            ("en-US-GuyNeural", "nolan_intro", "911! This is Nolan Vance driving County Transit Coach 14! My alternator died right across the tracks at Old Mill Crossing 4 in pitch-black freezing fog! Ten seconds ago the wooden crossing barrier slammed down onto my roof! I can hear a weird wailing siren through the trees, and I just heard a man's voice up in the fog shout: Cut the third wire! It has to be that angry signalman Victor Krol!", "+10%"),
+            ("en-US-JennyNeural", "cho_intro", "911 Dispatch! This is Hannah Cho at Cho Ridge Orchard! You need to send every fire engine to Old Mill Crossing 4 right now—I am 100 percent positive a runaway train is hurtling down the Old Mill Spur toward that stalled bus, and Victor Krol sabotaged the crossing gates!", "+8%"),
+            ("en-US-EricNeural", "krol_intro", "Central Dispatch, this is Signalman Victor Krol at Relay Hut B! Why is Lieutenant Hale broadcasting my name over the sheriff band like a terrorist?! Listen to me: first, the Old Mill Spur tracks were physically unbolted and decommissioned four weeks ago—no train can physically enter Crossing 4! Second, the crossing gate dropped because an ice-coated overhead power line shorted out!", "+10%"),
+        ]
+    },
+    "case10": {
+        "dir": os.path.join("public", "audio", "voices", "case10"),
+        "lines": [
+            ("en-US-EricNeural", "gentry_intro", "911! This is Miles Gentry, night custodian at the County Courthouse! I'm whispering from the service phone outside the Sub-Basement Master Evidence Vault! Someone used an override key to lock themselves inside the tape vault ten minutes ago! Listen—every fifteen seconds you can hear the heavy magnetic bulk-degausser coil firing right alongside our broken basement sump-pump knock!", "+10%"),
+            ("en-US-JennyNeural", "rostova_intro", "Operator 7, don't hang up—this is Elena Rostova! I held your chair at Desk 7 before Captain Stahl fired me for refusing to delete Judge Sterling's dispatch logs! I'm sitting right here at Saint Anne's Hospital in front of two hospital security guards, yet I just heard Stahl go on 154.80 MHz claiming three witnesses confirmed Rostova is at the Old Post Office!", "+8%"),
+            ("en-US-RogerNeural", "stahl_intro", "Operator 7, this is Captain Vernon Stahl calling from my third-floor office at Police Headquarters! Disregard any prank calls from the County Courthouse—that building is completely empty tonight! We now have three separate radio reports confirming Elena Rostova is at the Old Post Office payphone! I am ordering you with 100 percent command certainty: send every available patrol unit to the Old Post Office!", "+0%"),
+        ]
     }
 }
 

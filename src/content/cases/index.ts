@@ -7,6 +7,8 @@ import { CASE_5 } from './case5';
 import { CASE_6 } from './case6';
 import { CASE_7 } from './case7';
 import { CASE_8 } from './case8';
+import { CASE_9 } from './case9';
+import { CASE_10 } from './case10';
 
 export const ALL_CASES: Record<string, CaseDef> = {
   case_1: CASE_1,
@@ -17,6 +19,8 @@ export const ALL_CASES: Record<string, CaseDef> = {
   case_6: CASE_6,
   case_7: CASE_7,
   case_8: CASE_8,
+  case_9: CASE_9,
+  case_10: CASE_10,
 };
 
 export const CASE_LIST: CaseDef[] = [
@@ -28,4 +32,6 @@ export const CASE_LIST: CaseDef[] = [
   CASE_6,
   CASE_7,
   CASE_8,
+  CASE_9,
+  CASE_10,
 ];

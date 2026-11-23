@@ -19,6 +19,8 @@ const MAP_LOCATIONS: MapNode[] = [
   { id: 'loc_blackwood', name: '412 Blackwood Lane', type: 'incident', x: 44, y: 74, sector: 'SECTOR 4 [RESIDENTIAL]', desc: 'David Ross residence & West Archive Corridor approach' },
   { id: 'loc_reservoir', name: 'North Municipal Reservoir', type: 'facility', x: 74, y: 20, sector: 'SECTOR 5 [UTILITIES]', desc: 'County water treatment & chlorine manifold station' },
   { id: 'loc_tower', name: 'WNDR / Mount Baldy Array', type: 'facility', x: 82, y: 64, sector: 'SECTOR 6 [BROADCAST]', desc: 'WNDR 98.6 Studio Building & Microwave Broadcast Relay' },
+  { id: 'loc_crossing_4', name: 'Old Mill Crossing 4', type: 'incident', x: 64, y: 78, sector: 'SECTOR 4 [OLD MILL SPUR]', desc: 'Decommissioned rail crossing, Pole 19 Feeder & Cho Ridge Orchard' },
+  { id: 'loc_courthouse', name: 'County Courthouse Vault', type: 'facility', x: 30, y: 48, sector: 'SECTOR 1 [CIVIC CENTER]', desc: 'Courthouse Sub-Basement Master 911 Evidence Tape Vault' },
   { id: 'loc_route_9', name: 'Route 9 Petrol & Mile 40', type: 'incident', x: 18, y: 80, sector: 'SECTOR 3 [HIGHWAY]', desc: 'Route 9 Petrol Depot, Conrail Rail Crossing & Mountain Pass' },
 
   // Tactical Roadblock Checkpoints
@@ -121,10 +123,10 @@ export const CountyMap: React.FC = () => {
 
                 <div className={`mt-1 text-[9px] font-mono whitespace-nowrap px-1.5 py-0.5 rounded border pointer-events-none transition ${
                   isRoadblockActive
-                    ? 'border-red-600 bg-black text-red-400 font-bold'
+                    ? 'border-red-600 bg-black text-red-400 font-bold block'
                     : isSelected
-                    ? 'border-crt-amber bg-black text-crt-amber font-bold'
-                    : 'border-neutral-800 bg-neutral-950/80 text-neutral-400 group-hover:text-white'
+                    ? 'border-crt-amber bg-black text-crt-amber font-bold block'
+                    : 'border-neutral-800 bg-neutral-950/80 text-neutral-400 group-hover:text-white hidden sm:block'
                 }`}>
                   {loc.name} {isRoadblockActive && '[LOCKED]'}
                 </div>

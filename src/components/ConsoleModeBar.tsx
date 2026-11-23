@@ -21,6 +21,7 @@ export const ConsoleModeBar: React.FC = () => {
   const MODES: Array<{
     id: ConsoleMode;
     key: string;
+    shortLabel: string;
     label: string;
     sublabel: string;
     icon: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -30,44 +31,45 @@ export const ConsoleModeBar: React.FC = () => {
     {
       id: 'switchboard',
       key: 'F1',
+      shortLabel: 'WIRE',
       label: 'SWITCHBOARD & WIRE',
-      sublabel: isCallActive ? 'LINE ACTIVE' : isCallIncoming ? 'RINGING TRUNK' : 'STANDBY',
+      sublabel: isCallActive ? 'LINE ACTIVE' : isCallIncoming ? 'RINGING' : 'STANDBY',
       icon: PhoneCall,
       alert: isCallIncoming,
-      badge: isCallIncoming ? `${callQueue.length} CALL` : isCallActive ? 'ON AIR' : undefined,
+      badge: isCallIncoming ? `${callQueue.length}` : isCallActive ? 'LIVE' : undefined,
     },
     {
       id: 'map',
       key: 'F2',
-      label: 'VECTOR MAP & DISPATCH',
-      sublabel: activeRoadblocks.length > 0 ? `${activeRoadblocks.length} ROADBLOCKS` : 'SECTORS 1-6',
+      shortLabel: 'MAP',
+      label: 'MAP & DISPATCH',
+      sublabel: activeRoadblocks.length > 0 ? `${activeRoadblocks.length} BLOCKS` : 'UNITS',
       icon: MapPin,
-      badge: activeRoadblocks.length > 0 ? `${activeRoadblocks.length} ACTIVE` : undefined,
+      badge: activeRoadblocks.length > 0 ? `${activeRoadblocks.length}` : undefined,
     },
     {
       id: 'evidence',
       key: 'F3',
-      label: 'EVIDENCE & DOSSIERS',
-      sublabel: `${pinCount} CLUES PINNED`,
+      shortLabel: 'CLUES',
+      label: 'EVIDENCE & AUDIO LAB',
+      sublabel: `${pinCount} PINNED`,
       icon: FolderArchive,
       badge: pinCount > 0 ? `${pinCount}` : undefined,
     },
     {
       id: 'scanner',
       key: 'F4',
+      shortLabel: 'RADIO',
       label: 'RADIO SCANNER',
-      sublabel: `${scannerFrequency.toFixed(3)} MHz`,
+      sublabel: `${scannerFrequency.toFixed(2)} MHz`,
       icon: Radio,
     },
   ];
 
   return (
-    <div className="w-full bg-neutral-950/95 border-b border-neutral-800 px-3 py-1.5 flex items-center justify-between gap-2 select-none z-30 font-mono">
-      <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto scrollbar-none py-0.5">
-        <span className="hidden lg:inline text-[10px] text-neutral-500 font-bold px-1 tracking-wider">
-          TERMINAL SCREEN:
-        </span>
-
+    <div className="w-full bg-neutral-950/95 border-b border-neutral-800 px-2 sm:px-3 py-1.5 flex items-center justify-between gap-2 select-none z-30 font-mono shrink-0">
+      {/* 4-column equal grid on mobile phones; horizontal flex on tablet/desktop */}
+      <div className="grid grid-cols-4 sm:flex items-center gap-1.5 w-full sm:w-auto">
         {MODES.map((m) => {
           const isActive = consoleMode === m.id;
           const Icon = m.icon;
@@ -76,7 +78,7 @@ export const ConsoleModeBar: React.FC = () => {
             <button
               key={m.id}
               onClick={() => setConsoleMode(m.id)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded transition text-left border relative group shrink-0 ${
+              className={`flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded transition text-left border relative group ${
                 isActive
                   ? 'bg-neutral-800 text-crt-amber border-crt-amber shadow-[0_0_12px_rgba(245,158,11,0.25)]'
                   : m.alert
@@ -84,9 +86,8 @@ export const ConsoleModeBar: React.FC = () => {
                   : 'bg-neutral-900/80 text-neutral-400 border-neutral-800 hover:text-neutral-200 hover:border-neutral-700'
               }`}
             >
-              {/* LED status light */}
               <span
-                className={`w-2 h-2 rounded-full shrink-0 ${
+                className={`hidden sm:inline-block w-2 h-2 rounded-full shrink-0 ${
                   isActive
                     ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]'
                     : m.alert
@@ -95,24 +96,22 @@ export const ConsoleModeBar: React.FC = () => {
                 }`}
               />
 
-              {/* Icon */}
               <Icon className="w-3.5 h-3.5 shrink-0" />
 
-              {/* Text */}
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-neutral-500 font-bold">[{m.key}]</span>
-                  <span className="text-xs font-bold tracking-wider">{m.label}</span>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="hidden md:inline text-[10px] text-neutral-500 font-bold">[{m.key}]</span>
+                  <span className="sm:hidden text-[11px] font-bold truncate">{m.shortLabel}</span>
+                  <span className="hidden sm:inline text-xs font-bold tracking-wider truncate">{m.label}</span>
                 </div>
-                <span className="text-[9px] text-neutral-500 group-hover:text-neutral-400 transition">
+                <span className="hidden md:inline text-[9px] text-neutral-500 group-hover:text-neutral-400 transition">
                   {m.sublabel}
                 </span>
               </div>
 
-              {/* Badge */}
               {m.badge && (
                 <span
-                  className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider ml-1 ${
+                  className={`text-[9px] px-1.5 py-0.2 rounded font-bold uppercase tracking-wider ${
                     m.alert
                       ? 'bg-red-800 text-white animate-bounce'
                       : isActive
@@ -128,17 +127,15 @@ export const ConsoleModeBar: React.FC = () => {
         })}
       </div>
 
-      {/* Quick Status / Hotkey Hint */}
+      {/* Hotkey Hint on Desktop */}
       <div className="hidden xl:flex items-center gap-3 text-[10px] text-neutral-500 shrink-0">
         <span className="flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 bg-neutral-900 border border-neutral-700 rounded text-neutral-300">F1-F4</kbd>
-          or
           <kbd className="px-1.5 py-0.5 bg-neutral-900 border border-neutral-700 rounded text-neutral-300">1-4</kbd>
-          SWITCH SCREENS
+          SCREENS
         </span>
         <span className="flex items-center gap-1">
           <kbd className="px-1.5 py-0.5 bg-neutral-900 border border-neutral-700 rounded text-neutral-300">SPACE</kbd>
-          TALK / ANSWER
+          ANSWER / ADVANCE
         </span>
       </div>
     </div>
