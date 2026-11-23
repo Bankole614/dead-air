@@ -1,96 +1,80 @@
 import asyncio
 import os
 import re
-import edge_tts
 
-# Complete voice lineup for Dead Air cases
+# Complete voice lineup for Dead Air cases 2-10
 CASES_DATA = {
-    "case2": {
-        "dir": os.path.join("public", "audio", "voices", "case2"),
-        "lines": [
-            ("en-US-JennyNeural", "jenkins_intro", "Dispatch?! Thank God! I spun out on Route 9 right past the quarry cut. My tires are buried in a snowdrift. There's a massive industrial tanker truck jackknifed sideways across the whole highway!", "+10%"),
-            ("en-US-JennyNeural", "jenkins_tanker_status", "I have a bruised shoulder, but I can walk. No smoke, but the tanker's lights are completely blacked out. Wait—there's a state trooper cruiser pulled up right behind the trailer, its roof emergency beacon is flashing bright red into the snow.", "+5%"),
-            ("en-US-JennyNeural", "jenkins_cruiser_seen", "No! Nobody came to me. The trooper cruiser has its roof emergency lights spinning red, but two men in dark parkas are prying open the tanker's rear valves! That doesn't look like standard police procedure!", "+12%"),
-            ("en-US-JennyNeural", "jenkins_hold_tight", "Okay... I'm ducking down below the dashboard. Please hurry. The blizzard is getting worse.", "-5%"),
-            ("en-US-GuyNeural", "trooper_intro", "Operator 7, this is Trooper Vance on frequency 4. Disregard any motorist chatter about Mile 40. I am physically at the quarry cut right now. The road is clear. A salt truck already salted the grade.", "-5%"),
-            ("en-US-GuyNeural", "trooper_deny_tanker", "Negative, negative. Just empty asphalt and drifting snow. We have a confirmed multi-vehicle pileup down in South Valley on County Road 12. Divert all available cruisers and hazmat to South Valley immediately.", "-2%"),
-            ("en-US-GuyNeural", "trooper_cruiser_excuse", "My squad car's alternator blew out in the cold. My battery is 100% dead. I have zero emergency lights running. That's why I'm using a hand-crank auxiliary patch. Send everything south to Road 12.", "+0%"),
-            ("en-US-GuyNeural", "trooper_exposed", "Who told you that?! Cut the transfer valve! The board is onto us!", "+15%"),
-            ("en-US-GuyNeural", "trooper_diverted_bad", "Copy that, 7. Out.", "-5%"),
-            ("en-US-EricNeural", "driver_intro", "Helpline... I'm the driver of tanker 88. Three guys in an old police cruiser forced me off the road into the snow. They took my uniform and keys! They're siphoning 10,000 gallons of industrial solvent!", "+12%"),
-            ("en-US-EricNeural", "driver_safe", "Thank God... I see police headlights piercing through the blizzard right now. You caught them in time!", "+5%"),
-        ]
-    },
-    "case3": {
-        "dir": os.path.join("public", "audio", "voices", "case3"),
-        "lines": [
-            ("en-US-RogerNeural", "vance_intro", "Good evening, 911 dispatch. Arthur Vance here. We had a minor circuit trip in the fourth-floor soundproof control studio. I need you to transmit the master carrier override code to unlock the broadcast relays.", "-5%"),
-            ("en-US-RogerNeural", "vance_claim_soundproof", "I told you, fourth-floor master control. Dead quiet in here, double acoustic insulation. We have six minutes before the midnight countdown. Transmit the code immediately.", "+0%"),
-            ("en-US-RogerNeural", "vance_caught", "Sniper on the water tower! They know we're on the roof! Drop the transmitter equipment—move!", "+15%"),
-            ("en-US-RogerNeural", "vance_hijack_success", "Code accepted. Thank you for your cooperation, Operator 7. Happy New Year.", "-10%"),
-        ]
-    },
-    "case4": {
-        "dir": os.path.join("public", "audio", "voices", "case4"),
-        "lines": [
-            ("en-US-JennyNeural", "archive_clara_intro", "This is Clara Bell at the City Records Annex. The basement alarm has gone off and smoke is pushing under the lower west-stair door. Elias Reed went down to check the West Cage and he has not come back.", "+5%"),
-            ("en-GB-SoniaNeural", "east_gate_mara_intro", "Listen, I am outside the Records Annex by the east gate. Taxi driver. I saw smoke in the lower windows. Send your fire engine through the east loading ramp and keep them away from the west stair. The West Cage has two deadbolts; they are both thrown. Nobody is in there.", "+5%"),
-            ("en-GB-SoniaNeural", "east_gate_mara_caught", "No. No, you cannot hear that from the gate. I am in the microfilm room. I came back for the red ledger after Elias found the altered entries. Elias was not supposed to be in the cage when I threw the bolts. Please—do not tell them I am still inside.", "+8%"),
-            ("en-US-GuyNeural", "west_cage_elias_intro", "This is Elias Reed. I am in the West Cage. There is smoke coming through the bottom of the door and I cannot shift either bolt from this side. Mara Voss came down for the red ledger. She locked me in. Please get someone to this door.", "+10%"),
-        ]
-    },
-    "case5": {
-        "dir": os.path.join("public", "audio", "voices", "case5"),
-        "lines": [
-            ("en-US-GuyNeural", "studio_harker_intro", "Paul Harker, WNDR engineering. There is smoke coming through the tape-library door and the corridor alarm has started. Ruth Adeyemi was in Booth B a few minutes ago. I cannot raise her now. The transmitter exciter tripped at twenty-three forty-one; we are off-air.", "+5%"),
-            ("en-US-ChristopherNeural", "north_gate_valle_intro", "Emergency dispatch? I am parked beside the WNDR north gate in my cab. I heard on 98.6 that they were having trouble, then I saw flames over by the antenna road. Send your fire engine straight up the north road to the transmitter annex.", "+0%"),
-            ("en-US-ChristopherNeural", "north_gate_valle_caught", "Turn that off. You cannot know that. All right. I am in Studio A. The transmitter is dead and the cart is in CUE. I left the cue monitor running beside the handset to make it sound like a radio in a cab. Ruth copied the blue master reel. I locked her in Booth B. Do not let them open the tape library.", "+8%"),
-            ("en-GB-LibbyNeural", "booth_ruth_intro", "Dispatch? Please—I am locked inside Production Booth B at WNDR. The corridor outside is completely filled with thick smoke. Malcolm Vale locked this door from the outside ten minutes ago. He took the master reel from the tape library.", "+10%"),
-        ]
-    },
     "case6": {
         "dir": os.path.join("public", "audio", "voices", "case6"),
         "lines": [
             ("en-US-JennyNeural", "shaw_intro", "911?! Please hurry! I'm in Apartment 3B at the Bellweather building—44 Mercer Way! A minute ago there was a massive bang like a gunshot right across the airshaft, and I heard a man screaming something like, Get Don out of here! It has to be Donovan Vance, our caretaker—he threatened the landlord yesterday!", "+10%"),
+            ("en-US-JennyNeural", "shaw_leading_contaminated", "Yes! Once you say it, I'm certain it was Donovan's voice! And I just looked out my kitchen window toward the rear alley—a man in coveralls just ran out the rear service door toward a van! He's getting away!", "+12%"),
+            ("en-US-JennyNeural", "shaw_neutral_details", "There was only ONE bang—a huge metallic crack that shook my radiator pipes! Right after it, the airshaft filled with this loud hissing white vapor, and I saw someone in the rear alley climbing into a delivery van with a heavy diesel engine. Please send police before someone gets killed!", "+8%"),
             ("en-US-GuyNeural", "webb_intro", "Central Dispatch, this is Security Officer Marcus Webb at the 4th Street booth! I'm calling to confirm the shooting at Bellweather Apartments—44 Mercer Way! I heard TWO gunshots. I am 100 percent positive there were two distinct shots, and caretaker Donovan Vance is armed on the third floor!", "+5%"),
-            ("en-US-EricNeural", "vance_intro", "911! This is Donovan Vance—caretaker at Bellweather Apartments! Why are people screaming that police are coming to shoot me?! We just had a 300-PSI main steam manifold blow its cast-iron flange in the machine workshop next to the 3rd-floor airshaft! Before the valve burst, I screamed at my apprentice: GET DOWN! GET DOWN!", "+12%"),
+            ("en-US-GuyNeural", "webb_accepted", "Glad to help, Dispatch! Like I heard on the wire, definitely a double gunshot on the third floor. Lock him up!", "+5%"),
+            ("en-US-GuyNeural", "webb_source_exposed", "Uh... well, that's my Regency scanner tuned to 154.80 megahertz! Look, I heard a distant thud around 22:00, and then when your dispatcher announced a possible double gunshot at Bellweather, watch for caretaker Donovan Vance at 22:05, I realized that must have been what I heard!", "+2%"),
+            ("en-US-GuyNeural", "webb_caught_echo", "I... well, when you put it like that, I only heard a single muffled boom before the radio broadcast came over the air. I honestly thought the broadcast meant two shots were confirmed, so my memory filled in the second bang. Sorry, Dispatch.", "-2%"),
+            ("en-US-EricNeural", "vance_intro", "911! This is Donovan Vance—caretaker at Bellweather Apartments! Why are people screaming that police are coming to shoot me?! We just had a 300-PSI main steam manifold blow its cast-iron flange in the machine workshop next to the third-floor airshaft! Before the valve burst, I screamed at my apprentice: GET DOWN! GET DOWN!", "+12%"),
+            ("en-US-EricNeural", "vance_delivery_explained", "That was the Valley Bakery driver! He drops off crates at the ground-floor commissary at 22:00 every night in a loud diesel van! When the steam flange blew above the alley, it sounded like a cannon and vented boiling cloud out the louvers, so he jumped in his van and pulled out!", "+8%"),
+            ("en-US-EricNeural", "vance_relieved", "Thank God somebody at that switchboard actually listens to the evidence instead of jumping at shadows. Main boiler feed is shut off—we'll wait by the front lobby for Engine 12.", "+2%"),
         ]
     },
     "case7": {
         "dir": os.path.join("public", "audio", "voices", "case7"),
         "lines": [
             ("en-US-RogerNeural", "sterling_intro", "Operator! This is Judge Arthur Sterling at 18 Mercer Street! Someone has broken into my residence through the WESTERN entrance! I was asleep in my downstairs study and woke up the exact moment my antique grandfather clock struck the hour—and I heard a man in the hall shout: Don't open the second door! Now I smell smoke coming from my probate file room!", "+5%"),
+            ("en-US-RogerNeural", "sterling_confirm_study", "Yes, 18 Mercer Street, the western entrance! I am crouched right beside the grandfather clock in my study on the house line! The clock chimed once for the hour, without a hitch, right as the intruder yelled Don't open the second door! Send fire and patrol units immediately!", "+8%"),
             ("en-US-ChristopherNeural", "prentice_intro", "911! I'm calling from my porch at 80 Mercer Street—eight-zero Mercer! I just saw Judge Sterling himself walking briskly away from the payphone booth outside the corner diner toward the EASTERN entrance of 80 Mercer! And crazier still, a minute ago I swear I heard a voice say Don't open the second door!", "+8%"),
+            ("en-US-ChristopherNeural", "prentice_tv_realization", "Wait a second... my living room TV is tuned to the WKBW Channel 7 late-night mystery movie, and the diner across the street by the payphone has the exact same channel playing on their counter set! That line—Don't open the second door!—was the commercial bumper they just played twice!", "+5%"),
             ("en-US-JennyNeural", "cora_intro", "Dispatch! This is Cora, the housekeeper at 18 Mercer Street! The smoke alarm in the Judge's study just went off—there's a fire burning in his locked probate cabinet! Listen, you can hear the study's antique grandfather clock right beside me—it has a broken gear that makes a loud mechanical DOUBLE-CHIME before every strike, except the main strike hammer jammed at 8:00 PM tonight!", "+10%"),
+            ("en-US-JennyNeural", "cora_western_locked", "The western entrance?! I'm looking right at it—the heavy deadbolt on the western entrance is bolted shut from the INSIDE, with the Judge's own brass key sitting in the inside lock! He walked out the front twenty minutes ago carrying a briefcase after setting a delay candle in the probate file cabinet!", "+12%"),
+            ("en-US-JennyNeural", "cora_resolved", "I'm heading out the front drive right now—I hear Engine 12's sirens turning onto Mercer Street! Thank you, Operator!", "+8%"),
         ]
     },
     "case8": {
         "dir": os.path.join("public", "audio", "voices", "case8"),
         "lines": [
             ("en-US-EricNeural", "tariq_intro", "911 Dispatch! I'm parked on the Route 9 overpass looking directly down at the Petrol Depot! Sixty seconds ago—right as a heavy Conrail freight train thundered over the rail crossing—there was a loud bang from the drainage culvert between the tracks and the pumps! I heard ONE explosion. Definitely one!", "+10%"),
+            ("en-US-EricNeural", "tariq_resists_leading", "Fleeing?! No! His white coupe is parked right under the canopy with nobody in it! I see a guy in a station jacket down in the valve pit wrenching a big red shutoff wheel with both hands! And like I told you, there was only ONE bang down by the train culvert, not the fuel tanks!", "+10%"),
+            ("en-US-EricNeural", "tariq_attendant_detail", "Nobody fled! The attendant's white coupe is still parked cleanly by the air pump, and I can see him in his reflective vest down in the concrete manifold trench cranking the emergency fuel cutoff wheel to isolate the storage tanks!", "+8%"),
             ("en-US-JennyNeural", "brenda_intro", "911! This is Brenda at the Mile 14 Diner down the highway from Route 9 Petrol! I'm calling about the bombing at the petrol station—I am ABSOLUTELY CERTAIN there were TWO explosions! Boom-boom, two separate bombs! And that attendant Cole Mercer must have sped past eastbound in his white coupe!", "+8%"),
+            ("en-US-JennyNeural", "brenda_accepted", "You bet! Everyone at the counter heard the dispatcher say it on our scanner radio too, so we know for a fact it was a double explosion!", "+8%"),
+            ("en-US-JennyNeural", "brenda_admits_radio", "Well... the truckers keep our counter radio tuned to the 154.80 megahertz sheriff relay! Look, our windows rattled once around 22:02, and then three seconds later the canyon echo bounced off the ridge—and when the radio announcer came on at 22:06 saying double explosion and a white coupe departing eastbound, I became 100 percent convinced!", "+4%"),
             ("en-US-GuyNeural", "doyle_intro", "Central Dispatch, Guard Frank Doyle at the South Gatehouse! Yes, two explosions—I'm positive! An unconfirmed double explosion—repeat, two blasts—at Route 9 Petrol Depot with a white coupe departing eastbound! And I just grabbed attendant Cole Mercer climbing out of the drainage trench covered in grease with a pipe wrench in his hand!", "+5%"),
+            ("en-US-GuyNeural", "doyle_stands_down", "Uh... wait a minute, I'm looking through my binoculars at the station canopy right now... Mercer's white coupe IS still parked right by the air pump! Tell Dispatch I shut the main 8-inch petrol isolation valve! The Conrail freight train cracked the municipal gas main under the culvert!", "+5%"),
         ]
     },
     "case9": {
         "dir": os.path.join("public", "audio", "voices", "case9"),
         "lines": [
             ("en-US-GuyNeural", "nolan_intro", "911! This is Nolan Vance driving County Transit Coach 14! My alternator died right across the tracks at Old Mill Crossing 4 in pitch-black freezing fog! Ten seconds ago the wooden crossing barrier slammed down onto my roof! I can hear a weird wailing siren through the trees, and I just heard a man's voice up in the fog shout: Cut the third wire! It has to be that angry signalman Victor Krol!", "+10%"),
+            ("en-US-GuyNeural", "nolan_leading_panic", "Krol?! If Krol is out there in the fog cutting wires, he's trying to cause a train wreck! Wait—why hasn't that wailing siren gotten any closer in the last two minutes? It's just droning at the exact same pitch from the apple orchard!", "+10%"),
+            ("en-US-GuyNeural", "nolan_neutral_observation", "Wait... now that I stop and listen, that wailing sound hasn't changed pitch or moved an inch! It's coming from the big frost-fan tower in the apple orchard next to the tracks! And overhead I see an orange utility bucket truck flashing through the fog by Pole 19!", "+6%"),
             ("en-US-JennyNeural", "cho_intro", "911 Dispatch! This is Hannah Cho at Cho Ridge Orchard! You need to send every fire engine to Old Mill Crossing 4 right now—I am 100 percent positive a runaway train is hurtling down the Old Mill Spur toward that stalled bus, and Victor Krol sabotaged the crossing gates!", "+8%"),
+            ("en-US-JennyNeural", "cho_accepted", "Yes! As soon as I heard your radio announcer say it on 154.80 megahertz while my orchard frost-siren was running, I knew it had to be true!", "+8%"),
+            ("en-US-JennyNeural", "cho_realization", "Oh... wait a second. Yes, our automated 600-Hertz orchard frost-alarm klaxon kicked on at 22:01 when the temperature dropped below 28 degrees! And I had my kitchen scanner tuned to 154.80 megahertz when your relay announced a possible train emergency at Crossing 4!", "+4%"),
             ("en-US-EricNeural", "krol_intro", "Central Dispatch, this is Signalman Victor Krol at Relay Hut B! Why is Lieutenant Hale broadcasting my name over the sheriff band like a terrorist?! Listen to me: first, the Old Mill Spur tracks were physically unbolted and decommissioned four weeks ago—no train can physically enter Crossing 4! Second, the crossing gate dropped because an ice-coated overhead power line shorted out!", "+10%"),
+            ("en-US-EricNeural", "krol_voice_explained", "That was the county power lineman up in the cherry-picker bucket at Pole 19! His crane loudspeaker is patched into the 462.57 megahertz repeater, and he yelled down to me: SHUT THE THIRD FEEDER! so we could de-energize the icy cable arching over the bus roof!", "+8%"),
+            ("en-US-EricNeural", "krol_resolved", "Third feeder is locked out and grounded! The bus passengers are safe in the heated relay hut waiting for Engine 12. Appreciate you checking the facts before sending a SWAT team after me, Operator 7.", "+4%"),
         ]
     },
     "case10": {
         "dir": os.path.join("public", "audio", "voices", "case10"),
         "lines": [
             ("en-US-EricNeural", "gentry_intro", "911! This is Miles Gentry, night custodian at the County Courthouse! I'm whispering from the service phone outside the Sub-Basement Master Evidence Vault! Someone used an override key to lock themselves inside the tape vault ten minutes ago! Listen—every fifteen seconds you can hear the heavy magnetic bulk-degausser coil firing right alongside our broken basement sump-pump knock!", "+10%"),
-            ("en-US-JennyNeural", "rostova_intro", "Operator 7, don't hang up—this is Elena Rostova! I held your chair at Desk 7 before Captain Stahl fired me for refusing to delete Judge Sterling's dispatch logs! I'm sitting right here at Saint Anne's Hospital in front of two hospital security guards, yet I just heard Stahl go on 154.80 MHz claiming three witnesses confirmed Rostova is at the Old Post Office!", "+8%"),
-            ("en-US-RogerNeural", "stahl_intro", "Operator 7, this is Captain Vernon Stahl calling from my third-floor office at Police Headquarters! Disregard any prank calls from the County Courthouse—that building is completely empty tonight! We now have three separate radio reports confirming Elena Rostova is at the Old Post Office payphone! I am ordering you with 100 percent command certainty: send every available patrol unit to the Old Post Office!", "+0%"),
+            ("en-US-EricNeural", "gentry_leading_doubt", "A woman?! Well, if your captain says it's a woman, maybe the air duct distorted it... wait, no, that cough I just heard through the steel door sounded like a gravelly older man smoking a cigar, and he's carrying a command-band walkie-talkie!", "+8%"),
+            ("en-US-EricNeural", "gentry_neutral_detail", "It was a deep, gravelly male voice—definitely not a woman! He smelled like cigar smoke when he walked past the freight elevator, and right before he fired up the magnetic tape degausser, I heard him key a sheriff's command radio to broadcast a BOLO about the Old Post Office!", "+8%"),
+            ("en-US-JennyNeural", "rostova_intro", "Operator 7, don't hang up—this is Elena Rostova! I held your chair at Desk 7 before Captain Stahl fired me for refusing to delete Judge Sterling's dispatch logs! I'm sitting right here at Saint Anne's Hospital in front of two hospital security guards, yet I just heard Stahl go on 154.80 megahertz claiming three witnesses confirmed Rostova is at the Old Post Office!", "+8%"),
+            ("en-US-JennyNeural", "rostova_ab_advice", "Use the Tektronix Dual-Tape A/B Comparator on F3! Captain Stahl always claims to be calling from his carpeted third-floor office at Police Headquarters—which is dead quiet. If he is actually inside the Courthouse Sub-Basement erasing the master 911 tapes, his microphone will pick up the 15-second magnetic degausser pulse and the basement sump-pump knock!", "+6%"),
+            ("en-US-RogerNeural", "stahl_intro", "Operator 7, this is Captain Vernon Stahl calling from my third-floor office at Police Headquarters! Disregard any prank calls from the County Courthouse—that building is completely empty tonight! We now have three separate radio reports confirming Elena Rostova is at the Old Post Office payphone! Send every available patrol unit to the Old Post Office!", "+0%"),
+            ("en-US-RogerNeural", "stahl_coverup_succeeds", "Good soldier, Operator 7. Always trust command authority over your own ears. Just let this last magnetic coil cycle finish and there won't be a single tape left in Blackwood County...", "-5%"),
+            ("en-US-RogerNeural", "stahl_caught_finale", "You ran a dual-deck spectral comparison on my command line?! Damn you, Operator 7! Wait—I hear Sheriff's Tactical boots coming down the Courthouse sub-basement stairs right now! Put down that dispatch mic!", "+12%"),
         ]
     }
 }
 
 async def generate_all():
+    import edge_tts
     for case_id, data in CASES_DATA.items():
         out_dir = data["dir"]
         os.makedirs(out_dir, exist_ok=True)
@@ -100,14 +84,19 @@ async def generate_all():
             clean_text = re.sub(r'\(.*?\)', '', text).strip()
             if not clean_text:
                 continue
-            if not os.path.exists(out_path):
+            if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
                 print(f"Generating {line_id} -> {out_path}")
-                comm = edge_tts.Communicate(clean_text, voice, rate=rate)
-                await comm.save(out_path)
+                for attempt in range(4):
+                    try:
+                        comm = edge_tts.Communicate(clean_text, voice, rate=rate)
+                        await comm.save(out_path)
+                        break
+                    except Exception as e:
+                        print(f"Attempt {attempt + 1} failed for {line_id}: {e}")
+                        await asyncio.sleep(2)
             else:
                 print(f"Skipping existing {out_path}")
-    print("All cases voiced successfully!")
+    print("All cases 6-10 voiced successfully!")
 
 if __name__ == "__main__":
     asyncio.run(generate_all())
-

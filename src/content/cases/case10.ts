@@ -88,6 +88,7 @@ export const CASE_10: CaseDef = {
       nodes: {
         gentry_intro: {
           id: 'gentry_intro',
+          voiceUrl: '/audio/voices/case10/gentry_intro.mp3',
           speaker: 'caller',
           speakerName: 'Miles Gentry',
           text: '911! This is Miles Gentry, night custodian at the County Courthouse! I\'m whispering from the service phone outside the Sub-Basement Master Evidence Vault! Someone used an override key to lock themselves inside the tape vault ten minutes ago! Listen—every fifteen seconds you can hear the heavy magnetic bulk-degausser coil firing (*THOOM-HUMMM*) right alongside our broken basement sump-pump knock! And through the louver vent, I heard a voice say something like: "Erase the Sterling and Bellweather reels!"',
@@ -112,6 +113,7 @@ export const CASE_10: CaseDef = {
         },
         gentry_leading_doubt: {
           id: 'gentry_leading_doubt',
+          voiceUrl: '/audio/voices/case10/gentry_leading_doubt.mp3',
           speaker: 'caller',
           speakerName: 'Miles Gentry',
           text: 'A woman?! Well, if your captain says it\'s a woman, maybe the air duct distorted it... wait, no, that cough I just heard through the steel door sounded like a gravelly older man smoking a cigar, and he\'s carrying a command-band walkie-talkie!',
@@ -129,6 +131,7 @@ export const CASE_10: CaseDef = {
         },
         gentry_neutral_detail: {
           id: 'gentry_neutral_detail',
+          voiceUrl: '/audio/voices/case10/gentry_neutral_detail.mp3',
           speaker: 'caller',
           speakerName: 'Miles Gentry',
           text: 'It was a deep, gravelly male voice—definitely not a woman! He smelled like cigar smoke when he walked past the freight elevator, and right before he fired up the magnetic tape degausser, I heard him key a sheriff\'s command radio to broadcast a BOLO about the Old Post Office! Please get units to the Courthouse basement before every master 911 reel in the archive is wiped blank!',
@@ -164,6 +167,7 @@ export const CASE_10: CaseDef = {
       nodes: {
         rostova_intro: {
           id: 'rostova_intro',
+          voiceUrl: '/audio/voices/case10/rostova_intro.mp3',
           speaker: 'caller',
           speakerName: 'Elena Rostova',
           text: 'Operator 7, don\'t hang up—this is Elena Rostova! I held your chair at Desk 7 before Capt. Stahl fired me for refusing to delete Judge Sterling\'s dispatch logs! I\'m sitting right here at St. Anne\'s Hospital in front of two hospital security guards, yet I just heard Stahl go on 154.80 MHz claiming "three witnesses confirmed Rostova is at the Old Post Office!" He\'s manufacturing an echo chamber to pull every cruiser away from the Courthouse!',
@@ -182,6 +186,7 @@ export const CASE_10: CaseDef = {
         },
         rostova_ab_advice: {
           id: 'rostova_ab_advice',
+          voiceUrl: '/audio/voices/case10/rostova_ab_advice.mp3',
           speaker: 'caller',
           speakerName: 'Elena Rostova',
           text: 'Use the Tektronix Dual-Tape A/B Comparator on [F3]! Capt. Stahl always claims to be calling from his carpeted 3rd-floor office at Police Headquarters—which is dead quiet. If he is actually inside the Courthouse Sub-Basement erasing the master 911 tapes, his microphone will pick up the 15-second magnetic degausser pulse and the basement sump-pump knock! Compare his call against the Courthouse line and expose him!',
@@ -216,6 +221,7 @@ export const CASE_10: CaseDef = {
       nodes: {
         stahl_intro: {
           id: 'stahl_intro',
+          voiceUrl: '/audio/voices/case10/stahl_intro.mp3',
           speaker: 'caller',
           speakerName: 'Capt. Vernon Stahl',
           text: 'Operator 7, this is Captain Vernon Stahl calling from my 3rd-floor office at Police Headquarters! Disregard any prank calls from the County Courthouse—that building is completely empty tonight! We now have three separate radio reports confirming Elena Rostova is at the Old Post Office payphone! I am ordering you with 100% command certainty: send every available patrol unit to the Old Post Office and leave the Courthouse sector vacant!',
@@ -244,6 +250,7 @@ export const CASE_10: CaseDef = {
         },
         stahl_coverup_succeeds: {
           id: 'stahl_coverup_succeeds',
+          voiceUrl: '/audio/voices/case10/stahl_coverup_succeeds.mp3',
           speaker: 'caller',
           speakerName: 'Capt. Vernon Stahl',
           text: 'Good soldier, Operator 7. Always trust command authority over your own ears. Just let this last magnetic coil cycle finish and there won\'t be a single tape left in Blackwood County...',
@@ -260,6 +267,7 @@ export const CASE_10: CaseDef = {
         },
         stahl_caught_finale: {
           id: 'stahl_caught_finale',
+          voiceUrl: '/audio/voices/case10/stahl_caught_finale.mp3',
           speaker: 'caller',
           speakerName: 'Capt. Vernon Stahl',
           text: '(Dead silence... followed by the heavy clank of a tape reel dropping to the concrete floor) ...You ran a dual-deck spectral comparison on my command line?! Damn you, Operator 7! Wait—I hear Sheriff\'s Tactical boots coming down the Courthouse sub-basement stairs right now! Put down that dispatch mic—!',

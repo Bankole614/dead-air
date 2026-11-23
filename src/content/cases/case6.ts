@@ -98,6 +98,7 @@ export const CASE_6: CaseDef = {
       nodes: {
         shaw_intro: {
           id: 'shaw_intro',
+          voiceUrl: '/audio/voices/case6/shaw_intro.mp3',
           speaker: 'caller',
           speakerName: 'Evelyn Shaw',
           text: '911?! Please hurry! I\'m in Apartment 3B at the Bellweather building—44 Mercer Way! A minute ago there was a massive bang like a gunshot right across the airshaft, and I heard a man screaming something like, "Get Don out of here!" It has to be Donovan Vance, our caretaker—he threatened the landlord yesterday!',
@@ -122,6 +123,7 @@ export const CASE_6: CaseDef = {
         },
         shaw_leading_contaminated: {
           id: 'shaw_leading_contaminated',
+          voiceUrl: '/audio/voices/case6/shaw_leading_contaminated.mp3',
           speaker: 'caller',
           speakerName: 'Evelyn Shaw',
           text: 'Yes! Once you say it, I\'m certain it was Donovan\'s voice! And I just looked out my kitchen window toward the rear alley—a man in coveralls just ran out the rear service door toward a van! He\'s getting away!',
@@ -139,6 +141,7 @@ export const CASE_6: CaseDef = {
         },
         shaw_neutral_details: {
           id: 'shaw_neutral_details',
+          voiceUrl: '/audio/voices/case6/shaw_neutral_details.mp3',
           speaker: 'caller',
           speakerName: 'Evelyn Shaw',
           text: 'There was only ONE bang—a huge metallic crack that shook my radiator pipes! Right after it, the airshaft filled with this loud hissing white vapor, and I saw someone in the rear alley climbing into a delivery van with a heavy diesel engine. Please send police before someone gets killed!',
@@ -175,6 +178,7 @@ export const CASE_6: CaseDef = {
       nodes: {
         webb_intro: {
           id: 'webb_intro',
+          voiceUrl: '/audio/voices/case6/webb_intro.mp3',
           speaker: 'caller',
           speakerName: 'Marcus Webb',
           text: 'Central Dispatch, this is Security Officer Marcus Webb at the 4th Street booth! I\'m calling to confirm the shooting at Bellweather Apartments—44 Mercer Way! I heard TWO gunshots. I am 100 percent positive there were two distinct shots, and caretaker Donovan Vance is armed on the third floor!',
@@ -209,6 +213,7 @@ export const CASE_6: CaseDef = {
         },
         webb_accepted: {
           id: 'webb_accepted',
+          voiceUrl: '/audio/voices/case6/webb_accepted.mp3',
           speaker: 'caller',
           speakerName: 'Marcus Webb',
           text: 'Glad to help, Dispatch! Like I heard on the wire, definitely a double gunshot on the third floor. Lock him up!',
@@ -225,6 +230,7 @@ export const CASE_6: CaseDef = {
         },
         webb_source_exposed: {
           id: 'webb_source_exposed',
+          voiceUrl: '/audio/voices/case6/webb_source_exposed.mp3',
           speaker: 'caller',
           speakerName: 'Marcus Webb',
           text: 'Uh... well, that\'s my Regency scanner tuned to 154.80 MHz! Look, I heard a distant thud around 22:00, and then when your dispatcher announced a "possible double gunshot at Bellweather, watch for caretaker Donovan Vance" at 22:05, I realized that must have been what I heard! A second neighbour down the block told me the same thing after hearing his radio!',
@@ -242,6 +248,7 @@ export const CASE_6: CaseDef = {
         },
         webb_caught_echo: {
           id: 'webb_caught_echo',
+          voiceUrl: '/audio/voices/case6/webb_caught_echo.mp3',
           speaker: 'caller',
           speakerName: 'Marcus Webb',
           text: 'I... well, when you put it like that, I only heard a single muffled boom before the radio broadcast came over the air. I honestly thought the broadcast meant two shots were confirmed, so my memory filled in the second bang. Sorry, Dispatch.',
@@ -275,6 +282,7 @@ export const CASE_6: CaseDef = {
       nodes: {
         vance_intro: {
           id: 'vance_intro',
+          voiceUrl: '/audio/voices/case6/vance_intro.mp3',
           speaker: 'caller',
           speakerName: 'Donovan Vance',
           text: '911! This is Donovan Vance—caretaker at Bellweather Apartments! Why are people screaming that police are coming to shoot me?! We just had a 300-PSI main steam manifold blow its cast-iron flange in the machine workshop next to the 3rd-floor airshaft! Before the valve burst, I screamed at my apprentice: "GET DOWN! GET DOWN!"',
@@ -302,6 +310,7 @@ export const CASE_6: CaseDef = {
         },
         vance_delivery_explained: {
           id: 'vance_delivery_explained',
+          voiceUrl: '/audio/voices/case6/vance_delivery_explained.mp3',
           speaker: 'caller',
           speakerName: 'Donovan Vance',
           text: 'That was the Valley Bakery driver! He drops off crates at the ground-floor commissary at 22:00 every night in a loud diesel van! When the steam flange blew above the alley, it sounded like a cannon and vented boiling cloud out the louvers, so he jumped in his van and pulled out! Check CB Channel 19 if you don\'t believe me!',
@@ -319,6 +328,7 @@ export const CASE_6: CaseDef = {
         },
         vance_relieved: {
           id: 'vance_relieved',
+          voiceUrl: '/audio/voices/case6/vance_relieved.mp3',
           speaker: 'caller',
           speakerName: 'Donovan Vance',
           text: 'Thank God somebody at that switchboard actually listens to the evidence instead of jumping at shadows. Main boiler feed is shut off—we\'ll wait by the front lobby for Engine 12.',

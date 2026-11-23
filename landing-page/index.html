@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>DEAD AIR // 1994 — A Dispatch Thriller You Play With Your Ears</title>
+<meta name="description" content="You're Operator 7 on a 1994 night-shift 911 switchboard. Two callers, one radio echo. Play free in your browser. Best with headphones." />
+<meta name="theme-color" content="#07090c" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="DEAD AIR // 1994 — Don't trust your ears" />
+<meta property="og:description" content="Operate a 1994 rural 911 switchboard. Compare tapes, expose radio echoes, solve 10 cases. Free in your browser." />
+<meta property="og:image" content="https://deadair.bankole.xyz/og-preview.png" />
+<meta property="og:image:width" content="1200" /><meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://deadair.bankole.xyz/og-preview.png" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307090c'/%3E%3Ctext x='16' y='22' font-size='16' text-anchor='middle' fill='%23f59e0b' font-family='monospace' font-weight='bold'%3E94%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#07090c;--panel:#0d1117;--line:#1f2937;--ink:#e5e7eb;--text:#d1d5db;--muted:#9ca3af;--amber:#f59e0b;--soft:#fbbf24;--green:#22c55e;--red:#ef4444;
+--mono:'Share Tech Mono',ui-monospace,monospace;--crt:'VT323','Share Tech Mono',monospace;--body:Inter,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{background:var(--bg);color:var(--text);font:400 16px/1.65 var(--body);-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+section{padding:88px 0;border-bottom:1px solid var(--line)}
+.eyebrow{font:13px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--amber)}
+h1,h2{font-family:var(--crt);font-weight:400;color:var(--ink);line-height:1;letter-spacing:.02em}
+h2{font-size:clamp(36px,5vw,52px);margin:10px 0 14px}
+h3{font:600 17px var(--body);color:var(--ink)}
+.lead{max-width:60ch;color:var(--muted);font-size:17px}
+.glow{text-shadow:0 0 8px rgba(245,158,11,.55),0 0 22px rgba(245,158,11,.25)}
+.btn{display:inline-flex;align-items:center;gap:10px;font:14px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:14px 22px;border-radius:4px;border:1px solid var(--line);color:var(--ink);background:var(--panel);cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--amber);color:var(--soft)}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:#111;font-weight:700;box-shadow:0 0 28px rgba(245,158,11,.3)}
+.btn.primary:hover{background:var(--soft);color:#111}
+:focus-visible{outline:2px solid var(--soft);outline-offset:3px}
+/* header */
+header{position:sticky;top:0;z-index:30;background:rgba(7,9,12,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{font:26px var(--crt);color:var(--amber);letter-spacing:.08em}
+nav{display:flex;gap:28px;font:13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+nav a:hover{color:var(--soft)}
+header .btn{padding:9px 16px;font-size:13px}
+@media(max-width:760px){nav{display:none}}
+/* hero */
+.hero{padding:64px 0 80px;background:radial-gradient(700px 360px at 70% 0,rgba(245,158,11,.09),transparent 70%)}
+.hero .wrap{display:grid;gap:48px;grid-template-columns:1fr}
+.hero .frame{aspect-ratio:1918/877}
+.frame img.hs{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+h1{font-size:clamp(52px,8vw,92px)}
+h1 em{font-style:normal;color:var(--amber)}
+.hero p.lead{margin:20px 0 28px;max-width:62ch}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.hint{font:13px var(--mono);color:var(--muted);margin-top:16px}
+.frame{position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#05070a;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.frame video,.frame canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.scan::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(0,0,0,0) 50%,rgba(0,0,0,.28) 50%);background-size:100% 3px}
+.tag{position:absolute;left:12px;top:10px;font:12px var(--mono);color:var(--green);z-index:2}
+/* comparator */
+.lab{margin-top:36px;display:grid;gap:24px;grid-template-columns:1.2fr 1fr}
+@media(max-width:900px){.lab{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px}
+.lab .frame{aspect-ratio:16/9}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.sbtn{font:13px var(--mono);text-align:left;padding:10px;border-radius:4px;border:1px solid var(--line);background:#0a0d12;color:var(--muted);cursor:pointer}
+.sbtn[aria-pressed=true]{border-color:var(--amber);color:var(--soft);background:rgba(245,158,11,.1)}
+.sbtn b{display:block;color:var(--ink);font-weight:400}
+.say{font:14px/1.7 var(--mono);color:var(--text);min-height:112px}
+.say .t{color:var(--green)}
+.lock{color:var(--red)}
+.wave{display:flex;gap:3px;align-items:center;height:28px;margin:14px 0}
+.wave i{flex:1;background:var(--line);height:4px;border-radius:2px;transition:height .1s}
+.playing .wave i{background:var(--amber);animation:b .9s ease-in-out infinite}
+.wave i:nth-child(3n){animation-delay:.15s!important}.wave i:nth-child(3n+1){animation-delay:.4s!important}
+@keyframes b{50%{height:26px}}
+/* screens */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:32px 0 16px}
+@media(max-width:700px){.tabs{grid-template-columns:repeat(2,1fr)}}
+.tab{font:13px var(--mono);text-align:left;padding:12px 14px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.tab b{display:block;color:var(--amber);font-weight:400;letter-spacing:.1em}
+.tab[aria-selected=true]{border-color:var(--amber);background:rgba(245,158,11,.1);color:var(--ink)}
+.panel{display:none;grid-template-columns:1fr 1.5fr;gap:32px;align-items:center}
+.panel.on{display:grid}
+@media(max-width:900px){.panel.on{grid-template-columns:1fr}}
+.panel ul{margin-top:14px;padding-left:18px;color:var(--muted)}
+.panel li{margin:6px 0}
+.shot{position:relative;aspect-ratio:1918/877;border:1px dashed #374151;border-radius:10px;background:#05070a;display:grid;place-items:center;text-align:center;font:13px var(--mono);color:var(--muted);overflow:hidden}
+.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* modes */
+.modes{display:inline-flex;border:1px solid var(--line);border-radius:6px;padding:4px;margin:24px 0;background:var(--panel)}
+.modes button{font:13px var(--mono);padding:9px 18px;border:0;border-radius:4px;background:none;color:var(--muted);cursor:pointer;letter-spacing:.08em;text-transform:uppercase}
+.modes button[aria-pressed=true]{background:var(--amber);color:#111;font-weight:700}
+.demo{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+@media(max-width:900px){.demo{grid-template-columns:1fr}}
+.opt{font:14px var(--mono);padding:10px 12px;border:1px solid var(--line);border-radius:4px;margin-top:8px;background:#0a0d12;color:var(--text)}
+.opt small{color:var(--amber)}
+.stat{display:flex;justify-content:space-between;font:14px var(--mono);padding:10px 0;border-bottom:1px solid var(--line);color:var(--muted)}
+.stat b{color:var(--soft);font-weight:400}
+/* biases */
+.grid5{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:36px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px}
+.card .k{font:12px var(--mono);letter-spacing:.14em;color:var(--amber);text-transform:uppercase;margin-bottom:8px}
+.card p{color:var(--muted);font-size:15px;margin-top:6px}
+/* tapes */
+.tapes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:36px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+details[open]{border-color:rgba(245,158,11,.5)}
+summary{list-style:none;cursor:pointer;padding:16px;display:block}
+summary::-webkit-details-marker{display:none}
+summary .n{display:flex;justify-content:space-between;font:12px var(--mono);color:var(--amber);letter-spacing:.1em;margin-bottom:6px}
+summary .n::after{content:"+";color:var(--muted)}
+details[open] summary .n::after{content:"–"}
+summary span.t{font:600 15px var(--body);color:var(--ink)}
+details p{padding:0 16px 16px;color:var(--muted);font-size:14px}
+details.fin{border-color:rgba(239,68,68,.45)}
+/* hood */
+.hood{background:#05070a}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:32px 0}
+.metrics div{border:1px solid var(--line);border-radius:8px;padding:16px;background:var(--panel)}
+.metrics b{display:block;font:400 34px var(--crt);color:var(--amber)}
+.metrics span{font:12px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.final{text-align:center;padding:110px 0}
+.final h2{font-size:clamp(44px,7vw,76px)}
+.final .cta{justify-content:center;margin-top:28px}
+footer{padding:28px 0;font:13px var(--mono);color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+footer a:hover{color:var(--soft)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a href="#top" class="logo glow">DEAD AIR</a>
+    <nav><a href="#listen">Listen</a><a href="#screens">The desk</a><a href="#tapes">10 tapes</a><a href="#hood">Under the hood</a></nav>
+    <a class="btn primary" href="https://deadair.bankole.xyz" target="_blank" rel="noopener">Play free ↗</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">1994 · Millbrook County · Night shift</div>
+      <h1 class="glow" style="margin-top:14px">Two callers.<br>One radio echo.<br><em>Don't trust your ears.</em></h1>
+      <p class="lead">It's 2:14 AM. You're Operator 7 on a humming 1994 switchboard. Callers lie, misremember, or repeat what they heard on the radio. Listen to what's behind their voices, compare the tapes, and decide who's telling the truth.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://deadair.bankole.xyz" target="_blank" rel="noopener">Start Shift 01 →</a>
+        <a class="btn" href="#listen">🎧 Hear a call</a>
+      </div>
+      <p class="hint">Free · runs in your browser · works offline · best with headphones</p>
+    </div>
+
+    <!-- Real footage goes in shots/hero.mp4. If it's missing, the live scope shows instead. -->
+    <div class="frame scan">
+      <canvas id="heroScope" aria-label="Animated oscilloscope"></canvas>
+      <img class="hs" src="shots/f1.png" alt="Dead Air switchboard: Martha Gable on Line 1 while two other callers wait on hold" onerror="this.remove()">
+      <video id="heroVid" autoplay muted loop playsinline poster="shots/f1.png" style="z-index:2"><source src="shots/hero.mp4" type="video/mp4"></video>
+      </div>
+  </div>
+</section>
+
+<!-- LISTEN / COMPARATOR -->
+<section id="listen">
+  <div class="wrap">
+    <div class="eyebrow">01 // Try it</div>
+    <h2>Pick up the line.</h2>
+    <p class="lead">This is the whole game in thirty seconds: a caller says one thing, the room tone says another. Put on headphones and answer.</p>
+
+    <div class="lab">
+      <div class="box" id="labBox">
+        <div class="frame scan"><canvas id="labScope" aria-label="Dual-trace oscilloscope"></canvas><span class="tag" id="labTag">● MONITORING TRACE A</span></div>
+        <div class="row" role="group" aria-label="Scope mode">
+          <button class="sbtn" data-m="line1" aria-pressed="true"><b>LINE 1</b>"Siren at the bridge"</button>
+          <button class="sbtn" data-m="line2" aria-pressed="false"><b>LINE 2</b>"Same siren, on TV"</button>
+          <button class="sbtn" data-m="lock" aria-pressed="false"><b>⚡ LOCK A/B</b>Correlate carrier</button>
+        </div>
+      </div>
+      <div class="box">
+        <button class="btn primary" id="answer" type="button">▶ Answer Line 1 (10 sec)</button>
+        <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <p class="say" id="say" aria-live="polite"><span class="t">[02:14:08 · LINE 1]</span> "I swear I heard a cruiser scream past Millbrook Bridge… wait, why is my neighbor's porch radio playing the exact same static?"</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENS -->
+<section id="screens">
+  <div class="wrap">
+    <div class="eyebrow">02 // The desk</div>
+    <h2>Four screens. No hand-holding.</h2>
+    <p class="lead">Switch with <kbd style="font:13px var(--mono);color:var(--soft)">F1</kbd>–<kbd style="font:13px var(--mono);color:var(--soft)">F4</kbd> or <kbd style="font:13px var(--mono);color:var(--soft)">1</kbd>–<kbd style="font:13px var(--mono);color:var(--soft)">4</kbd>, just like the game.</p>
+
+    <div class="tabs" role="tablist" aria-label="Console screens">
+      <button class="tab" role="tab" id="t1" aria-selected="true" aria-controls="p1"><b>[F1] SWITCHBOARD &amp; WIRE</b>Live lines</button>
+      <button class="tab" role="tab" id="t2" aria-selected="false" aria-controls="p2" tabindex="-1"><b>[F2] MAP &amp; DISPATCH</b>Units</button>
+      <button class="tab" role="tab" id="t3" aria-selected="false" aria-controls="p3" tabindex="-1"><b>[F3] EVIDENCE &amp; AUDIO LAB</b>A/B tapes</button>
+      <button class="tab" role="tab" id="t4" aria-selected="false" aria-controls="p4" tabindex="-1"><b>[F4] RADIO SCANNER</b>154.80 MHz</button>
+    </div>
+
+    <div class="box">
+      <div class="panel on" role="tabpanel" id="p1" aria-labelledby="t1">
+        <div><h3>Juggle callers without contaminating them.</h3>
+          <ul><li>Answer a new line and the active caller goes on hold, with a SWITCH BACK button and a live agitation percentage.</li><li>Leading questions taint testimony, so ask neutral ones.</li><li>Hit PIN CLUE on anything a caller says. Pinned clues carry over to the evidence lab.</li></ul></div>
+        <div class="shot"><img src="shots/f1.png" alt="Switchboard screen" onerror="this.remove()"><span>Screenshot slot<br>shots/f1.png</span></div>
+      </div>
+      <div class="panel" role="tabpanel" id="p2" aria-labelledby="t2">
+        <div><h3>Send units. Test alibis.</h3>
+          <ul><li>Dispatch cruisers, fire engines or a roadblock from the 1994 county map.</li><li>Field radio reports come back on a timer, and they can break a story.</li><li>Units are limited, so every dispatch costs you something.</li></ul></div>
+        <div class="shot"><img src="shots/f2.png" alt="County map screen" onerror="this.remove()"><span>Screenshot slot<br>shots/f2.png</span></div>
+      </div>
+      <div class="panel" role="tabpanel" id="p3" aria-labelledby="t3">
+        <div><h3>Stamp your evidence. Question your theory.</h3>
+          <ul><li>Mark each clue Firsthand, Hearsay Echo or Assumption.</li><li>Load two tapes into the dual-deck scope to find shared broadcast bleed.</li><li>Before you file, you must attach evidence against your own verdict.</li></ul></div>
+        <div class="shot"><img src="shots/f3.png" alt="Evidence board and A/B lab" onerror="this.remove()"><span>Screenshot slot<br>shots/f3.png</span></div>
+      </div>
+      <div class="panel" role="tabpanel" id="p4" aria-labelledby="t4">
+        <div><h3>Tune through the static.</h3>
+          <ul><li>Sheriff dispatch, CB channel 19, NOAA weather and a courthouse repeater.</li><li>Hardcore mode: you must fine-tune the dial by hand.</li><li>Intercepts drop straight into the A/B lab.</li></ul></div>
+        <div class="shot"><img src="shots/f4.png" alt="Rotary radio scanner" onerror="this.remove()"><span>Screenshot slot<br>shots/f4.png</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODES -->
+<section id="modes">
+  <div class="wrap">
+    <div class="eyebrow">03 // Protocols</div>
+    <h2>Same case. Three ways to hurt.</h2>
+    <p class="lead">Pick a protocol and watch the desk change.</p>
+    <div class="modes" role="group" aria-label="Protocol">
+      <button data-p="story" aria-pressed="false">Story</button><button data-p="standard" aria-pressed="true">Standard</button><button data-p="hardcore" aria-pressed="false">Hardcore</button>
+    </div>
+    <div class="demo">
+      <div class="box">
+        <div class="eyebrow" style="color:var(--muted)">What you see on F1</div>
+        <div class="opt" id="d1"></div><div class="opt" id="d2"></div>
+        <div class="opt" id="d3" style="color:var(--green)"></div>
+      </div>
+      <div class="box">
+        <div class="stat"><span>Dispatch cooldown</span><b id="s1"></b></div>
+        <div class="stat"><span>Radio lock</span><b id="s2"></b></div>
+        <div class="stat"><span>Wrong at 95% sure</span><b id="s3"></b></div>
+        <div class="stat" style="border:0"><span>Hold agitation</span><b id="s4"></b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BIASES -->
+<section id="psychology">
+  <div class="wrap">
+    <div class="eyebrow">04 // Why it works</div>
+    <h2>Built on five ways your brain gets it wrong.</h2>
+    <p class="lead">Most detective games ask you to spot the lie. Dead Air asks how you reached your conclusion, then grades that too.</p>
+    <div class="grid5">
+      <div class="card"><div class="k">Confirmation bias</div><h3>You'll want your first suspect to be right.</h3><p>Form 911-B won't let you file until you attach evidence that argues against yourself.</p></div>
+      <div class="card"><div class="k">Overconfidence</div><h3>Say how sure you are.</h3><p>Declare 50%, 75% or 95% before you file. Be wrong at 95% and it costs you.</p></div>
+      <div class="card"><div class="k">Working memory</div><h3>Too many lines ringing.</h3><p>Callers wait on hold, power surges trip the breaker, and you have to triage.</p></div>
+      <div class="card"><div class="k">Source monitoring</div><h3>Who actually saw it?</h3><p>Caller B may just be repeating the scanner Caller A had on in the kitchen.</p></div>
+      <div class="card"><div class="k">Selective listening</div><h3>You hear words, not the room.</h3><p>The hum, the flat-pitch siren and the missing Doppler shift were there the whole time.</p></div>
+      <div class="card" style="border-color:rgba(245,158,11,.4)"><div class="k">End of shift</div><h3>The Psychological Debrief</h3><p>A five-part breakdown of what you heard, what you assumed, and where your reasoning cracked.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- TAPES -->
+<section id="tapes">
+  <div class="wrap">
+    <div class="eyebrow">05 // Evidence locker</div>
+    <h2>10 shifts. One county cover-up.</h2>
+    <p class="lead">Tap a tape for the setup. No spoilers.</p>
+    <div class="tapes">
+      <details><summary><div class="n"><span>TAPE 01</span><span>OCT 14, 94</span></div><span class="t">The Reservoir Decoy</span></summary><p>A staged emergency pulls cruisers away from something else entirely.</p></details>
+      <details><summary><div class="n"><span>TAPE 02</span><span>NOV 02, 94</span></div><span class="t">Blackout at Mile 40</span></summary><p>A blizzard, a jackknifed truck, and a trooper whose story doesn't match the caller's.</p></details>
+      <details><summary><div class="n"><span>TAPE 03</span><span>DEC 31, 94</span></div><span class="t">The Midnight Frequency</span></summary><p>Fifteen minutes to New Year's. Someone has taken over the transmitter tower.</p></details>
+      <details><summary><div class="n"><span>TAPE 04</span><span>NOV 02, 94</span></div><span class="t">The West Cage</span></summary><p>An acoustic mismatch inside a locked county holding annex.</p></details>
+      <details><summary><div class="n"><span>TAPE 05</span><span>NOV 06, 94</span></div><span class="t">The Last Broadcast</span></summary><p>A late-night DJ is on air when the transmitter room goes dark.</p></details>
+      <details><summary><div class="n"><span>TAPE 06</span><span>NOV 04, 94</span></div><span class="t">Last Call at Bellweather</span></summary><p>Three callers agree on a double shooting. Do you trust what you think you heard?</p></details>
+      <details><summary><div class="n"><span>TAPE 07</span><span>NOV 11, 94</span></div><span class="t">The Clock That Wasn't There</span></summary><p>A judge describes an intruder and a chiming grandfather clock. Something about the chime is off.</p></details>
+      <details><summary><div class="n"><span>TAPE 08</span><span>NOV 18, 94</span></div><span class="t">Echo Chamber at Petrol 9</span></summary><p>One explosion, or two? Three witnesses, and not all of them saw it.</p></details>
+      <details><summary><div class="n"><span>TAPE 09</span><span>NOV 25, 94</span></div><span class="t">The Phantom Siren at Crossing 4</span></summary><p>A stalled bus, freezing fog, and a siren that doesn't behave like one.</p></details>
+      <details class="fin"><summary><div class="n" style="color:var(--red)"><span>TAPE 10</span><span>NOV 30, 94</span></div><span class="t">Dead Air on Trunk Zero</span></summary><p>Midnight finale. An Internal Affairs manhunt, a former dispatcher, and the night the annex burned.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- UNDER THE HOOD -->
+<section id="hood" class="hood">
+  <div class="wrap">
+    <div class="eyebrow">06 // Under the hood</div>
+    <h2>For the engineers.</h2>
+    <p class="lead">Dead Air is a React 18 + TypeScript + Zustand app with a hand-built Web Audio engine. Every sound effect is generated in code, and it installs as an offline PWA.</p>
+    <div class="metrics">
+      <div><b>493 KB</b><span>App bundle</span></div>
+      <div><b>0</b><span>Bundled SFX files</span></div>
+      <div><b>90+</b><span>Voice clips</span></div>
+      <div><b>10</b><span>Cases, one schema</span></div>
+    </div>
+    <p class="lead" style="margin-bottom:24px">The 4-page case study covers session-fenced audio, the A/B carrier-correlation engine, single-source difficulty modes, and four real bugs, with how each one was fixed.</p>
+    <div class="cta">
+      <a class="btn" href="./Dead_Air_Case_Study.pdf" target="_blank" rel="noopener">Read the case study (PDF) ↗</a>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--red)">● Incoming call · Line 1</div>
+    <h2 class="glow" style="margin-top:14px">Put on headphones.<br>Your shift starts now.</h2>
+    <p class="lead" style="margin:0 auto">No account. No download. Just 1994 and a ringing phone.</p>
+    <div class="cta"><a class="btn primary" href="https://deadair.bankole.xyz" target="_blank" rel="noopener">Answer Line 1 ↗</a></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><span>DEAD AIR // 1994 · Built by Emmanuel Bankole</span><span><a href="https://deadair.bankole.xyz" target="_blank" rel="noopener">Play</a> · <a href="./Dead_Air_Case_Study.pdf" target="_blank" rel="noopener">Case study</a> · <a href="https://emmanuel.bankole.xyz" target="_blank" rel="noopener">Portfolio</a></span></footer>
+
+<script>
+(function(){
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Oscilloscope (pauses offscreen) ---------- */
+function Scope(cv,getMode){
+  var ctx=cv.getContext('2d'),ph=0,vis=true,w=0,h=0;
+  function size(){var r=cv.getBoundingClientRect(),d=devicePixelRatio||1;w=r.width;h=r.height;cv.width=w*d;cv.height=h*d;ctx.setTransform(d,0,0,d,0,0)}
+  function trace(col,w2,yc,off,glow){
+    ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=w2;ctx.shadowColor=col;ctx.shadowBlur=glow;
+    for(var x=0;x<=w;x+=2){var t=x/w*Math.PI*6+ph+off,a=h*.2*(.65+.35*Math.sin(t*.37));
+      var y=h*yc+Math.sin(t)*a+Math.sin(t*2.7)*a*.28;x?ctx.lineTo(x,y):ctx.moveTo(x,y)}
+    ctx.stroke()}
+  function draw(){
+    if(!vis){return}
+    ctx.clearRect(0,0,w,h);ctx.fillStyle='#05070a';ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='rgba(148,163,184,.1)';ctx.lineWidth=1;ctx.beginPath();
+    for(var i=1;i<8;i++){ctx.moveTo(w/8*i,0);ctx.lineTo(w/8*i,h)}for(i=1;i<6;i++){ctx.moveTo(0,h/6*i);ctx.lineTo(w,h/6*i)}ctx.stroke();
+    var m=getMode();
+    if(m==='lock'){trace('#ef4444',2.6,.5,0,10);trace('#f59e0b',1.8,.5,.08,8)}
+    else{if(m!=='line2')trace('#22c55e',2,m==='both'?.4:.5,0,8);if(m==='line2'||m==='both')trace('#fbbf24',2,m==='both'?.62:.5,1.4,8)}
+    ctx.shadowBlur=0;if(!reduce)ph+=.045;requestAnimationFrame(draw)}
+  size();addEventListener('resize',size);
+  new IntersectionObserver(function(e){var v=e[0].isIntersecting;if(v&&!vis){vis=true;requestAnimationFrame(draw)}vis=v}).observe(cv);
+  draw();
+}
+var heroV=document.getElementById('heroVid');
+heroV.querySelector('source').addEventListener('error',function(){heroV.remove()});
+Scope(document.getElementById('heroScope'),function(){return 'both'});
+var mode='line1';Scope(document.getElementById('labScope'),function(){return mode});
+
+/* ---------- Comparator buttons ---------- */
+var lines={
+ line1:'<span class="t">[02:14:08 · LINE 1]</span> "I swear I heard a cruiser scream past Millbrook Bridge… wait, why is my neighbor\'s porch radio playing the exact same static?"',
+ line2:'<span style="color:var(--soft)">[02:14:19 · LINE 2]</span> "I didn\'t look outside, Officer. I heard the siren through the wall from the den TV. Sounded right on top of the bridge."',
+ lock:'<span class="lock">[A/B MATCH]</span> Both traces share the same 4.2 kHz broadcast carrier (WBNX 104.3 FM). Witness B is an echo of the radio, not a second eyewitness.'};
+var tags={line1:'● MONITORING TRACE A',line2:'● MONITORING TRACE B',lock:'⚠ PHASE-LOCKED CARRIER'};
+var say=document.getElementById('say');
+document.querySelectorAll('.sbtn').forEach(function(b){b.addEventListener('click',function(){
+  mode=b.dataset.m;say.innerHTML=lines[mode];document.getElementById('labTag').textContent=tags[mode];
+  document.querySelectorAll('.sbtn').forEach(function(x){x.setAttribute('aria-pressed',x===b)})})});
+
+/* ---------- Procedural audio (same idea as the game: no sound files) ---------- */
+var ac,busy=false;
+function tone(f,t,d,g,type){var o=ac.createOscillator(),v=ac.createGain();o.type=type||'sine';o.frequency.value=f;
+  v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(g,t+.03);v.gain.setValueAtTime(g,t+d-.04);v.gain.linearRampToValueAtTime(0,t+d);
+  o.connect(v);v.connect(ac.destination);o.start(t);o.stop(t+d+.05)}
+function noise(t,d,g,freq){var n=ac.sampleRate*d,b=ac.createBuffer(1,n,ac.sampleRate),a=b.getChannelData(0);
+  for(var i=0;i<n;i++)a[i]=Math.random()*2-1;
+  var s=ac.createBufferSource();s.buffer=b;var f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=freq;f.Q.value=.7;
+  var v=ac.createGain();v.gain.value=g;s.connect(f);f.connect(v);v.connect(ac.destination);s.start(t)}
+document.getElementById('answer').addEventListener('click',function(){
+  if(busy)return;busy=true;
+  ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume();
+  var t=ac.currentTime+.1,box=document.getElementById('labBox').parentElement.querySelector('.box:last-child');
+  box.classList.add('playing');mode='both';
+  for(var i=0;i<2;i++){tone(440,t+i*1.2,.8,.08);tone(480,t+i*1.2,.8,.08)}  // ring ring
+  var c=t+2.6;noise(c,.04,.4,2500);                                         // pickup click
+  tone(60,c,7.4,.1);tone(120,c,7.4,.03);noise(c,7.4,.012,3000);              // 60Hz hum + hiss
+  tone(700,c+3,3.4,.025,'sawtooth');                                         // flat-pitch siren: no Doppler
+  setTimeout(function(){say.innerHTML='<span class="t">[LINE 1]</span> "…hello? Hello? There\'s a siren outside the bridge, you have to send someone!"'},2600);
+  setTimeout(function(){say.innerHTML='<span class="t">[PIN?]</span> Hear that siren? <b style="color:var(--soft)">It never changes pitch.</b> A moving cruiser would. Something here isn\'t what the caller says.'},6200);
+  setTimeout(function(){box.classList.remove('playing');mode=document.querySelector('.sbtn[aria-pressed=true]').dataset.m;busy=false},10200)});
+
+/* ---------- Screen tabs (+ F1-F4 / 1-4 keys) ---------- */
+var tabs=[].slice.call(document.querySelectorAll('.tab')),panels=[].slice.call(document.querySelectorAll('.panel'));
+function pick(i,focus){tabs.forEach(function(t,j){t.setAttribute('aria-selected',i===j);t.tabIndex=i===j?0:-1;panels[j].classList.toggle('on',i===j)});if(focus)tabs[i].focus()}
+tabs.forEach(function(t,i){t.addEventListener('click',function(){pick(i)});
+  t.addEventListener('keydown',function(e){if(e.key==='ArrowRight')pick((i+1)%4,1);if(e.key==='ArrowLeft')pick((i+3)%4,1)})});
+addEventListener('keydown',function(e){
+  if(e.altKey||e.ctrlKey||e.metaKey||/INPUT|TEXTAREA/.test(e.target.tagName))return;
+  var m=/^F([1-4])$/.exec(e.key)||/^([1-4])$/.exec(e.key);
+  if(m){var s=document.getElementById('screens').getBoundingClientRect();
+    if(/^F/.test(e.key)||(s.top<innerHeight&&s.bottom>0)){e.preventDefault();pick(+m[1]-1)}}});
+
+/* ---------- Protocol demo ---------- */
+var P={
+ story:{o1:'[DISPATCH] "Stay inside, Mrs. Gable. I\'m dispatching a unit."',o2:'"The wind picks up trash in the alley frequently tonight."',o3:'Background: [60Hz TRANSFORMER HUM]',s1:'5 min',s2:'Auto-lock',s3:'0',s4:'Calm. No hang-ups'},
+ standard:{o1:'[DISPATCH] "Stay inside, Mrs. Gable. I\'m dispatching a unit."',o2:'"The wind picks up trash in the alley frequently tonight."',o3:'Background: [60Hz TRANSFORMER HUM]',s1:'15 min',s2:'Standard lock',s3:'−15',s4:'Callers hang up'},
+ hardcore:{o1:'"Stay inside, Mrs. Gable. I\'m dispatching a unit."',o2:'"The wind picks up trash in the alley frequently tonight."',o3:'Background: [▒▒▒▒▒▒▒▒▒▒▒▒]',s1:'25 min',s2:'Manual ±0.05 MHz',s3:'−25',s4:'Fast. Hangs up'}};
+var pb=[].slice.call(document.querySelectorAll('.modes button'));
+function setP(k){var d=P[k];pb.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.p===k)});
+  ['d1','d2','d3'].forEach(function(id,i){document.getElementById(id).textContent=d['o'+(i+1)]});
+  [1,2,3,4].forEach(function(i){document.getElementById('s'+i).textContent=d['s'+i]})}
+pb.forEach(function(b){b.addEventListener('click',function(){setP(b.dataset.p)})});setP('standard');
+})();
+</script>
+</body>
+</html>

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../state/store';
 import { CASE_LIST } from '../content/cases';
 import { BADGE_CATALOG } from '../content/badges';
 import { GameMode } from '../types/game';
-import { Radio, Play, FolderArchive, Award, HelpCircle, Settings, CheckCircle, ArrowRight, Shield, Headphones } from './icons';
+import { Radio, Play, FolderArchive, Award, HelpCircle, Settings, CheckCircle, ArrowRight, Shield, Headphones, Monitor } from './icons';
 
 interface MainMenuScreenProps {
   onOpenManual: () => void;
@@ -76,6 +76,23 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
   const [view, setView] = useState<'home' | 'setup'>('home');
   const [selectedCaseId, setSelectedCaseId] = useState<string>(activeCaseId || 'case_1');
   const [selectedMode, setSelectedMode] = useState<GameMode>(settings.gameMode || 'standard');
+  const [installPromptEvent, setInstallPromptEvent] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPromptEvent(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (!installPromptEvent) return;
+    installPromptEvent.prompt();
+    await installPromptEvent.userChoice;
+    setInstallPromptEvent(null);
+  };
 
   const currentCase = getActiveCase();
   const hasActiveProgress =
@@ -150,21 +167,23 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                   <span>ACTIVE INVESTIGATION MODE:</span>
                   <span className="text-crt-amber uppercase">{selectedMode} MODE</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {MODE_OPTIONS.map((m) => {
                     const active = selectedMode === m.id;
                     return (
                       <button
                         key={m.id}
                         onClick={() => handleModeSelect(m.id)}
-                        className={`p-2.5 rounded-lg border text-left transition ${
+                        className={`p-2.5 rounded-lg border text-left transition flex flex-col justify-between ${
                           active
                             ? 'border-crt-amber bg-amber-950/40 text-amber-100 shadow-md'
                             : 'border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-700'
                         }`}
                       >
                         <div className="text-[10px] font-bold text-crt-amber">{m.tag}</div>
-                        <div className="text-xs font-bold mt-0.5 truncate">{m.title}</div>
+                        <div className="text-xs font-bold mt-0.5 leading-snug whitespace-normal break-words">
+                          {m.title}
+                        </div>
                       </button>
                     );
                   })}
@@ -269,6 +288,22 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                 </span>
                 <span className="text-[10px] text-neutral-500">CONFIG</span>
               </button>
+
+              {/* One-Click Install PWA Button (Appears when browser supports PWA installation) */}
+              {installPromptEvent && (
+                <button
+                  onClick={handleInstallPWA}
+                  className="w-full p-3 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-700/80 text-emerald-300 font-bold text-xs flex items-center justify-between transition shadow-md"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Monitor className="w-4 h-4 text-emerald-400" />
+                    <span>INSTALL DEAD AIR APP (OFFLINE PWA)</span>
+                  </span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500 text-black font-bold">
+                    INSTALL
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         ) : (
@@ -280,7 +315,7 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                   PRE-SHIFT CONFIGURATION // SELECT MODE &amp; INCIDENT DOSSIER
                 </h2>
                 <p className="text-xs text-neutral-400">
-                  Choose your investigation mode and select one of the 8 emergency incident files below.
+                  Choose your investigation mode and select one of the 10 emergency incident files below.
                 </p>
               </div>
               <button
@@ -356,12 +391,12 @@ export const MainMenuScreen: React.FC<MainMenuScreenProps> = ({
                       }`}
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-[11px] font-bold text-crt-amber shrink-0">
+                        <div className="flex items-start justify-between gap-2 mb-1.5">
+                          <div className="flex items-start gap-2 min-w-0">
+                            <span className="text-[11px] font-bold text-crt-amber shrink-0 mt-0.5">
                               CASE {String(c.number).padStart(2, '0')}
                             </span>
-                            <h3 className="font-bold text-xs sm:text-sm text-white truncate">
+                            <h3 className="font-bold text-xs sm:text-sm text-white leading-snug whitespace-normal break-words">
                               {c.title}
                             </h3>
                           </div>

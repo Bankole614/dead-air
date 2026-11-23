@@ -1,0 +1,32 @@
+{
+  "name": "DEAD AIR // 1994 Emergency Switchboard Thriller",
+  "short_name": "Dead Air",
+  "description": "Operate a 1994 rural 911 switchboard. Run dual-deck A/B tape comparisons, challenge confirmation bias, and solve 10 critical incident files.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#07090c",
+  "theme_color": "#07090c",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/radio-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

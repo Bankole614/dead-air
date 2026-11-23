@@ -88,6 +88,7 @@ export const CASE_7: CaseDef = {
       nodes: {
         sterling_intro: {
           id: 'sterling_intro',
+          voiceUrl: '/audio/voices/case7/sterling_intro.mp3',
           speaker: 'caller',
           speakerName: 'Judge Arthur Sterling',
           text: 'Operator! This is Judge Arthur Sterling at 18 Mercer Street! Someone has broken into my residence through the WESTERN entrance! I was asleep in my downstairs study and woke up the exact moment my antique grandfather clock struck the hour—and I heard a man in the hall shout: "Don\'t open the second door!" Now I smell smoke coming from my probate file room!',
@@ -112,6 +113,7 @@ export const CASE_7: CaseDef = {
         },
         sterling_confirm_study: {
           id: 'sterling_confirm_study',
+          voiceUrl: '/audio/voices/case7/sterling_confirm_study.mp3',
           speaker: 'caller',
           speakerName: 'Judge Arthur Sterling',
           text: 'Yes, 18 Mercer Street, the western entrance! I am crouched right beside the grandfather clock in my study on the house line! The clock chimed once for the hour, without a hitch, right as the intruder yelled "Don\'t open the second door!" Send fire and patrol units immediately!',
@@ -147,6 +149,7 @@ export const CASE_7: CaseDef = {
       nodes: {
         prentice_intro: {
           id: 'prentice_intro',
+          voiceUrl: '/audio/voices/case7/prentice_intro.mp3',
           speaker: 'caller',
           speakerName: 'Gabe Prentice',
           text: '911! I\'m calling from my porch at 80 Mercer Street—eight-zero Mercer! I just saw Judge Sterling himself walking briskly away from the payphone booth outside the corner diner toward the EASTERN entrance of 80 Mercer! And crazier still, a minute ago I swear I heard a voice say "Don\'t open the second door!"',
@@ -171,6 +174,7 @@ export const CASE_7: CaseDef = {
         },
         prentice_tv_realization: {
           id: 'prentice_tv_realization',
+          voiceUrl: '/audio/voices/case7/prentice_tv_realization.mp3',
           speaker: 'caller',
           speakerName: 'Gabe Prentice',
           text: 'Wait a second... my living room TV is tuned to the WKBW Channel 7 late-night mystery movie, and the diner across the street by the payphone has the exact same channel playing on their counter set! That line—"Don\'t open the second door!"—was the commercial bumper they just played twice! I confused the TV broadcast with what I saw on the street—and if Sterling was at the diner payphone, he heard the exact same TV broadcast!',
@@ -206,6 +210,7 @@ export const CASE_7: CaseDef = {
       nodes: {
         cora_intro: {
           id: 'cora_intro',
+          voiceUrl: '/audio/voices/case7/cora_intro.mp3',
           speaker: 'caller',
           speakerName: 'Cora Sterling',
           text: 'Dispatch! This is Cora, the housekeeper at 18 Mercer Street! The smoke alarm in the Judge\'s study just went off—there\'s a fire burning in his locked probate cabinet! Listen, you can hear the study\'s antique grandfather clock right beside me—CLACK-CHIME, CLACK-CHIME! It has a broken gear that makes a loud mechanical DOUBLE-CHIME before every strike, except the main strike hammer jammed and stopped striking at 8:00 PM tonight!',
@@ -223,6 +228,7 @@ export const CASE_7: CaseDef = {
         },
         cora_western_locked: {
           id: 'cora_western_locked',
+          voiceUrl: '/audio/voices/case7/cora_western_locked.mp3',
           speaker: 'caller',
           speakerName: 'Cora Sterling',
           text: 'The western entrance?! I\'m looking right at it—the heavy deadbolt on the western entrance is bolted shut from the INSIDE, with the Judge\'s own brass key sitting in the inside lock! He walked out the front twenty minutes ago carrying a briefcase after setting a delay candle in the probate file cabinet!',
@@ -249,6 +255,7 @@ export const CASE_7: CaseDef = {
         },
         cora_resolved: {
           id: 'cora_resolved',
+          voiceUrl: '/audio/voices/case7/cora_resolved.mp3',
           speaker: 'caller',
           speakerName: 'Cora Sterling',
           text: 'I\'m heading out the front drive right now—I hear Engine 12\'s sirens turning onto Mercer Street! Thank you, Operator!',

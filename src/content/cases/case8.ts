@@ -98,6 +98,7 @@ export const CASE_8: CaseDef = {
       nodes: {
         tariq_intro: {
           id: 'tariq_intro',
+          voiceUrl: '/audio/voices/case8/tariq_intro.mp3',
           speaker: 'caller',
           speakerName: 'Tariq Hassan',
           text: '911 Dispatch! I\'m parked on the Route 9 overpass looking directly down at the Petrol Depot! Sixty seconds ago—right as a heavy Conrail freight train thundered over the rail crossing—there was a loud bang from the drainage culvert between the tracks and the pumps! I heard ONE explosion. Definitely one!',
@@ -122,6 +123,7 @@ export const CASE_8: CaseDef = {
         },
         tariq_resists_leading: {
           id: 'tariq_resists_leading',
+          voiceUrl: '/audio/voices/case8/tariq_resists_leading.mp3',
           speaker: 'caller',
           speakerName: 'Tariq Hassan',
           text: 'Fleeing?! No! His white coupe is parked right under the canopy with nobody in it! I see a guy in a station jacket down in the valve pit wrenching a big red shutoff wheel with both hands! And like I told you, there was only ONE bang down by the train culvert, not the fuel tanks!',
@@ -139,6 +141,7 @@ export const CASE_8: CaseDef = {
         },
         tariq_attendant_detail: {
           id: 'tariq_attendant_detail',
+          voiceUrl: '/audio/voices/case8/tariq_attendant_detail.mp3',
           speaker: 'caller',
           speakerName: 'Tariq Hassan',
           text: 'Nobody fled! The attendant\'s white coupe is still parked cleanly by the air pump, and I can see him in his reflective vest down in the concrete manifold trench cranking the emergency fuel cutoff wheel to isolate the storage tanks! Whatever blew up was a single gas flash in the rail culvert when the freight locomotive passed!',
@@ -174,6 +177,7 @@ export const CASE_8: CaseDef = {
       nodes: {
         brenda_intro: {
           id: 'brenda_intro',
+          voiceUrl: '/audio/voices/case8/brenda_intro.mp3',
           speaker: 'caller',
           speakerName: 'Brenda Walsh',
           text: '911! This is Brenda at the Mile 14 Diner down the highway from Route 9 Petrol! I\'m calling about the bombing at the petrol station—I am ABSOLUTELY CERTAIN there were TWO explosions! Boom-boom, two separate bombs! And that attendant Cole Mercer must have sped past eastbound in his white coupe!',
@@ -198,6 +202,7 @@ export const CASE_8: CaseDef = {
         },
         brenda_accepted: {
           id: 'brenda_accepted',
+          voiceUrl: '/audio/voices/case8/brenda_accepted.mp3',
           speaker: 'caller',
           speakerName: 'Brenda Walsh',
           text: 'You bet! Everyone at the counter heard the dispatcher say it on our scanner radio too, so we know for a fact it was a double explosion!',
@@ -214,6 +219,7 @@ export const CASE_8: CaseDef = {
         },
         brenda_admits_radio: {
           id: 'brenda_admits_radio',
+          voiceUrl: '/audio/voices/case8/brenda_admits_radio.mp3',
           speaker: 'caller',
           speakerName: 'Brenda Walsh',
           text: 'Well... the truckers keep our counter radio tuned to the 154.80 MHz sheriff relay! Look, our windows rattled once around 22:02, and then three seconds later the canyon echo bounced off the ridge—and when the radio announcer came on at 22:06 saying "unconfirmed report of a double explosion and a white coupe departing eastbound," I became 100% convinced I heard two bombs and saw a white blur on the road!',
@@ -249,6 +255,7 @@ export const CASE_8: CaseDef = {
       nodes: {
         doyle_intro: {
           id: 'doyle_intro',
+          voiceUrl: '/audio/voices/case8/doyle_intro.mp3',
           speaker: 'caller',
           speakerName: 'Guard Frank Doyle',
           text: 'Central Dispatch, Guard Frank Doyle at the South Gatehouse! Yes, two explosions—I\'m positive! An "unconfirmed double explosion—repeat, two blasts—at Route 9 Petrol Depot with a white coupe departing eastbound!" And I just grabbed attendant Cole Mercer climbing out of the drainage trench covered in grease with a pipe wrench in his hand!',
@@ -277,6 +284,7 @@ export const CASE_8: CaseDef = {
         },
         doyle_stands_down: {
           id: 'doyle_stands_down',
+          voiceUrl: '/audio/voices/case8/doyle_stands_down.mp3',
           speaker: 'caller',
           speakerName: 'Guard Frank Doyle (and Cole Mercer)',
           text: 'Uh... wait a minute, I\'m looking through my binoculars at the station canopy right now... Mercer\'s white coupe IS still parked right by the air pump! [Cole Mercer in background]: "Tell Dispatch I shut the main 8-inch petrol isolation valve! The Conrail freight train cracked the municipal gas main under the culvert—if I hadn\'t closed the trench valve, the whole storage farm would have gone up!"',

@@ -88,6 +88,7 @@ export const CASE_9: CaseDef = {
       nodes: {
         nolan_intro: {
           id: 'nolan_intro',
+          voiceUrl: '/audio/voices/case9/nolan_intro.mp3',
           speaker: 'caller',
           speakerName: 'Nolan Vance',
           text: '911! This is Nolan Vance driving County Transit Coach 14! My alternator died right across the tracks at Old Mill Crossing 4 in pitch-black freezing fog! Ten seconds ago the wooden crossing barrier slammed down onto my roof! I can hear a weird wailing siren through the trees, and I just heard a man\'s voice up in the fog shout: "Cut the third wire!" It has to be that angry signalman Victor Krol!',
@@ -112,6 +113,7 @@ export const CASE_9: CaseDef = {
         },
         nolan_leading_panic: {
           id: 'nolan_leading_panic',
+          voiceUrl: '/audio/voices/case9/nolan_leading_panic.mp3',
           speaker: 'caller',
           speakerName: 'Nolan Vance',
           text: 'Krol?! If Krol is out there in the fog cutting wires, he\'s trying to cause a train wreck! Wait—why hasn\'t that wailing siren gotten any closer in the last two minutes? It\'s just droning at the exact same pitch from the apple orchard!',
@@ -129,6 +131,7 @@ export const CASE_9: CaseDef = {
         },
         nolan_neutral_observation: {
           id: 'nolan_neutral_observation',
+          voiceUrl: '/audio/voices/case9/nolan_neutral_observation.mp3',
           speaker: 'caller',
           speakerName: 'Nolan Vance',
           text: 'Wait... now that I stop and listen, that wailing sound hasn\'t changed pitch or moved an inch! It\'s coming from the big frost-fan tower in the apple orchard next to the tracks! And overhead I see an orange utility bucket truck flashing through the fog by Pole 19! I\'m marching my passengers 100 yards back up the road right now!',
@@ -164,6 +167,7 @@ export const CASE_9: CaseDef = {
       nodes: {
         cho_intro: {
           id: 'cho_intro',
+          voiceUrl: '/audio/voices/case9/cho_intro.mp3',
           speaker: 'caller',
           speakerName: 'Hannah Cho',
           text: '911 Dispatch! This is Hannah Cho at Cho Ridge Orchard! You need to send every fire engine to Old Mill Crossing 4 right now—I am 100% positive a runaway train is hurtling down the Old Mill Spur toward that stalled bus, and Victor Krol sabotaged the crossing gates!',
@@ -188,6 +192,7 @@ export const CASE_9: CaseDef = {
         },
         cho_accepted: {
           id: 'cho_accepted',
+          voiceUrl: '/audio/voices/case9/cho_accepted.mp3',
           speaker: 'caller',
           speakerName: 'Hannah Cho',
           text: 'Yes! As soon as I heard your radio announcer say it on 154.80 MHz while my orchard frost-siren was running, I knew it had to be true!',
@@ -204,6 +209,7 @@ export const CASE_9: CaseDef = {
         },
         cho_realization: {
           id: 'cho_realization',
+          voiceUrl: '/audio/voices/case9/cho_realization.mp3',
           speaker: 'caller',
           speakerName: 'Hannah Cho',
           text: 'Oh... wait a second. Yes, our automated 600-Hertz orchard frost-alarm klaxon kicked on at 22:01 when the temperature dropped below 28 degrees! And I had my kitchen scanner tuned to 154.80 MHz when your relay announced a possible train emergency at Crossing 4! Come to think of it, didn\'t the county tear up the rails on the Old Mill switch last month?!',
@@ -239,6 +245,7 @@ export const CASE_9: CaseDef = {
       nodes: {
         krol_intro: {
           id: 'krol_intro',
+          voiceUrl: '/audio/voices/case9/krol_intro.mp3',
           speaker: 'caller',
           speakerName: 'Victor Krol',
           text: 'Central Dispatch, this is Signalman Victor Krol at Relay Hut B! Why is Lt. Hale broadcasting my name over the sheriff band like a terrorist?! Listen to me: first, the Old Mill Spur tracks were physically unbolted and decommissioned four weeks ago—no train can physically enter Crossing 4! Second, the crossing gate dropped because an ice-coated overhead power line shorted out, and railroad gates are counter-weighted to drop automatically whenever power fails!',
@@ -267,6 +274,7 @@ export const CASE_9: CaseDef = {
         },
         krol_voice_explained: {
           id: 'krol_voice_explained',
+          voiceUrl: '/audio/voices/case9/krol_voice_explained.mp3',
           speaker: 'caller',
           speakerName: 'Victor Krol',
           text: 'That was the county power lineman up in the cherry-picker bucket at Pole 19! His crane loudspeaker is patched into the 462.57 MHz repeater, and he yelled down to me: "SHUT THE THIRD FEEDER!" so we could de-energize the icy cable arching over the bus roof! In the fog, your panicked driver heard "Shut the third feeder!" and thought someone yelled "Cut the third wire!"',
@@ -284,6 +292,7 @@ export const CASE_9: CaseDef = {
         },
         krol_resolved: {
           id: 'krol_resolved',
+          voiceUrl: '/audio/voices/case9/krol_resolved.mp3',
           speaker: 'caller',
           speakerName: 'Victor Krol',
           text: 'Third feeder is locked out and grounded! The bus passengers are safe in the heated relay hut waiting for Engine 12. Appreciate you checking the facts before sending a SWAT team after me, Operator 7.',
